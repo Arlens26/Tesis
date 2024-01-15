@@ -1,4 +1,125 @@
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    /* grid-template-rows: repeat(3, minmax(10px, 1fr));*/
+    grid-template-rows: 45px 1fr 200px;
+    min-height: 100vh;
+    grid-template-areas: 
+        "header header sidebar"
+        "content content content"
+        "footer footer footer";
+    font-family: system-ui, 'Open Sans';
+  }
+
+  @media (min-width : 600px) {
+    .container {
+        grid-template-areas: 
+        "header header header"
+        "sidebar content content"
+        "footer footer footer";
+    }
+  }
 
   .container header {
-    background-color: aqua;
+    background: white;
+    grid-area: header;
+    display: flex;
+    /*grid-column: 1/-1;*/
+  }
+
+  .logo-img {
+    width: 160px;
+    height: 18.42px;
+  }
+
+  header .menu {
+    align-self: baseline;
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+  }
+
+  .logo-container {
+    margin-left: 50px; 
+    margin-top: 10px;
+  }
+
+  .menu-open {
+    grid-template-columns: 0 auto 1fr; 
+  }
+
+  .container .menu-list {
+    background: rgba(0, 0, 0, .7);
+    opacity: 0.95;
+    /*display: none;*/
+    /*padding: 32px;*/
+    grid-area: sidebar;
+  }
+
+  /*.menu-list {
+    background: #000;
+    display: none;
+    padding: 32px;
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    width: 200px;
+  }*/
+
+  .btn-menu {
+    align-items: center;
+    /*background: #09f;
+    border-radius: 9999px;*/
+    cursor: pointer;
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    align-self: flex-start;
+    padding: 4px;
+    position: absolute;
+    /*position: absolute;
+    right: 1008px;
+    top: 4px;*/
+    transition: all .3s ease;
+    width: 32px;
+    z-index: 9999;
+  }
+
+  .btn-menu:hover {
+    transform: scale(1.1);
+  }
+
+  /*.btn-menu ~ input:checked ~ .menu-list {
+    height: 100%;
+    display: block;
+  }*/
+
+  .container main {
+    background: yellow;
+    grid-area: content;
+    /*grid-column: span 2;*/
+  }
+
+  .container footer {
+    background: #D51B23;
+    grid-area: footer;
+    color: white;
+    display: flex;
+    /*flex-wrap: wrap;*/
+    /*gap: 4px;*/
+    justify-content: space-around;
+    /*grid-column: 1/-1;*/
+  }
+
+  footer .info {
+    align-self: baseline;
+  }
+
+  footer .logo {
+    align-self: center;
+  }
+
+  footer ul {
+    list-style: none;
+    padding: 0;
   }

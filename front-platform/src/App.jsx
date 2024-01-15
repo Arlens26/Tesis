@@ -1,8 +1,10 @@
 
 import './App.css';
 import MonacoEditorWrapper from './components/MonacoEditor';
-import { LogoUnivalleIcon, MenuIcon } from './components/Icons';
+import { MenuIcon } from './components/Icons';
 import { useId, useState } from 'react';
+import { FooterPage } from './pages/Footer.jsx';
+import { HeaderPage } from './pages/Header.jsx';
 
 function App() {
 
@@ -21,13 +23,7 @@ function App() {
 
   return (
       <section className={`container ${menuChecked ? 'menu-open' : ''}`}>
-        <header className='menu'>     
-          <nav>
-            <div className='logo-container'>
-              <img className='logo-img' src="src/images/logo-univalle.png" alt="logo_univalle" />
-            </div>
-          </nav>
-        </header>
+        <HeaderPage />
             <label className='btn-menu' htmlFor={menuCheckId}>
               <MenuIcon />
             </label>
@@ -44,35 +40,7 @@ function App() {
           <MonacoEditorWrapper code={code} language={language} theme={theme} size={size} />
           </div>
         </main>
-        <footer>
-          <div className='logo'>
-            <LogoUnivalleIcon />
-          </div>
-          <div className='info'>
-            <h5>
-              UNIVERSIDAD DEL VALLE
-            </h5>
-            <ul>
-              <li>Cali - Colombia</li>
-              <li>© 1994 - 2024</li>
-            </ul>
-          </div>
-          <div className='info'>
-            <h5>
-              Dirección:
-            </h5>
-            <ul>
-              <li>Ciudad Universitaria Meléndez</li>
-              <li>Calle 13 # 100-00</li>
-              <br></br>
-              <li>Sede San Fernando</li>
-              <li>Calle 4B N° 36-00</li>
-            </ul>
-          </div>
-          <div className='info'>
-            <h5>Redes Sociales</h5>
-          </div>
-        </footer>
+        <FooterPage />
       </section>
   )
 }

@@ -20,6 +20,19 @@
     }
   }
 
+  .login-form {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 20px;
+  }
+
+  .recovery-password {
+    color: red;
+    cursor: pointer;
+  }
+
   .container header {
     background: white;
     grid-area: header;
@@ -30,6 +43,14 @@
   .logo-img {
     width: 160px;
     height: 18.42px;
+  }
+
+  aside ul {
+    list-style-type: none;
+  }
+
+  aside a {
+    text-decoration: none;
   }
 
   header .menu {
@@ -48,7 +69,7 @@
     grid-template-columns: 0 auto 1fr; 
   }
 
-  .container .menu-list {
+  .menu-list {
     background: rgba(0, 0, 0, .7);
     opacity: 0.95;
     /*display: none;*/
@@ -89,19 +110,19 @@
     transform: scale(1.1);
   }
 
-  /*.btn-menu ~ input:checked ~ .menu-list {
+  .btn-menu ~ input:checked ~ .menu-list {
     height: 100%;
-    display: block;
-  }*/
+    display: none;
+  }
 
   .container main {
-    background: yellow;
+    background: rgb(235, 235, 238);
     grid-area: content;
     /*grid-column: span 2;*/
   }
 
   .container footer {
-    background: #D51B23;
+    background: #841F1C;
     grid-area: footer;
     color: white;
     display: flex;

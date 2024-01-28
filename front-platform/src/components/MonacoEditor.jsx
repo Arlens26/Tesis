@@ -23,8 +23,8 @@ const codeRef = useRef(code);
   return (
     <MonacoEditor
       ref={editorRef}
-      width="800px"
-      height="400px"
+      width="820px"
+      height="250px"
       language={language}
       theme={theme}
       value={code}

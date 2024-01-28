@@ -3,7 +3,7 @@ import { LogoUnivalleIcon } from "../components/Icons"
 export function FooterPage() {
     return (
       <>
-        <footer>
+        <footer className="bg-footer p-6">
           <div className='logo'>
             <LogoUnivalleIcon />
           </div>

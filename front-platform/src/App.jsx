@@ -6,6 +6,7 @@ import { useId, useState } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
 import { Link, Routes, Route } from 'react-router-dom';
+import responseCursos from './mocks/curso.json';
 
 function App() {
 
@@ -122,13 +123,18 @@ function App() {
     )
   }
    
-  function CreateCode() {
+  function CreateCode() { 
+    const [selectedTheme, setSelectedTheme] = useState(''); // Estado para rastrear el tema seleccionado
+
+    const handleChange = (e) => {
+      setSelectedTheme(e.target.value); // Actualiza el estado cuando cambia la selección
+    }; 
     return(
       <>
         <div className='flex flex-col gap-4 mb-4'>          
           <div className=''>   
-              <select id="countries" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option selected>Tema</option>
+              <select id="countries" value={selectedTheme} onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option disabled>Tema</option>
                 <option value="DK">Dark</option>
                 <option value="LT">Light</option>
               </select>         
@@ -139,7 +145,7 @@ function App() {
           </div>
           <div className='flex flex-col-2 gap-4'>
               <button className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' onClick={agregarComponente}>Agregar pregunta</button>
-              <button className='bg-primary opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' onClick={agregarComponente}>Eliminar pregunta</button>
+              <button className='bg-primary opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Eliminar pregunta</button>
           </div>
           {components.map((component, index) => (
             <div key={index}>
@@ -152,6 +158,59 @@ function App() {
       </>
     )
   }
+
+  function CourseList() {
+  const [accordionStates, setAccordionStates] = useState({});
+
+  const toggleAccordion = (id) => {
+    setAccordionStates((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id] || false, // Si el estado no existe, lo inicializa como false
+    }));
+  };
+
+  const cursos = responseCursos.curso;
+
+  return (
+    <>
+      {cursos.map((curso) => (
+        <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
+          <h2 id={`accordion-collapse-heading-${curso.id}`}>
+            <button
+              type="button"
+              className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
+              data-accordion-target={`#accordion-collapse-body-${curso.id}`}
+              aria-expanded={accordionStates[curso.id]}
+              onClick={() => toggleAccordion(curso.id)}
+              aria-controls={`accordion-collapse-body-${curso.id}`}
+            >
+              <span>{curso.name}</span>
+              <svg
+                data-accordion-icon
+                className={`w-3 h-3 rotate-${accordionStates[curso.id] ? '180' : '0'} shrink-0`}
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 6"
+              >
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
+              </svg>
+            </button>
+          </h2>
+          <div
+            id={`accordion-collapse-body-${curso.id}`}
+            className={`${accordionStates[curso.id] ? 'block' : 'hidden'}`}
+            aria-labelledby={`accordion-collapse-heading-${curso.id}`}
+          >
+            <div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+              <span>La cantidad de créditos es: {curso.creditos}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
 
   return (
       <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
@@ -169,6 +228,7 @@ function App() {
         </aside>
         <main className='bg-main p-6'>
           <Routes>
+            <Route path='/' element={<CourseList/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/code' element={<CreateCode/>}/>
           </Routes>

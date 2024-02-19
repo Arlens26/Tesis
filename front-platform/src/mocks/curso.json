@@ -1,0 +1,19 @@
+{
+    "curso" : [
+        {
+          "id": 1,
+          "name": "IPOO",
+          "creditos": 4
+        },
+        {
+          "id": 2,
+          "name": "Programación imperativa",
+          "creditos": 4
+        },
+        {
+          "id": 3,
+          "name": "Base de datos",
+          "creditos": 3
+        }
+      ]
+}

@@ -2,11 +2,11 @@
 import './App.css';
 import MonacoEditorWrapper from './components/MonacoEditor';
 import { LogoUnivalleIcon, MenuIcon } from './components/Icons';
-import { useId, useState } from 'react';
+import { useId, useState, useEffect } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
 import { Link, Routes, Route } from 'react-router-dom';
-import responseCursos from './mocks/curso.json';
+import { useCourses } from './hooks/useCourses.js';
 
 function App() {
 
@@ -159,8 +159,13 @@ function App() {
     )
   }
 
-  function CourseList() {
+  function CourseList() { 
+  const { courses, getCourses } = useCourses()
   const [accordionStates, setAccordionStates] = useState({});
+
+  useEffect(() => {
+    getCourses();
+  }, []);
 
   const toggleAccordion = (id) => {
     setAccordionStates((prevState) => ({
@@ -169,11 +174,13 @@ function App() {
     }));
   };
 
-  const cursos = responseCursos.curso;
+  if (!courses) {
+    return <p>Cargando cursos...</p>;
+  }
 
   return (
     <>
-      {cursos.map((curso) => (
+      {courses.map((curso) => (
         <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
           <h2 id={`accordion-collapse-heading-${curso.id}`}>
             <button

@@ -11,6 +11,7 @@ export function useCourses() {
     const mappedCourses = courses?.map(course => ({
       id: course.id,
       name: course.name,
+      description: course.description,
       creditos: course.creditos
     }))
 

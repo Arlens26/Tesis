@@ -219,6 +219,45 @@ function App() {
   );
 }
 
+function CreateCourse(){
+  
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const fields = Object.fromEntries(new window.FormData(event.target))
+    console.log(fields)
+
+      fetch(`http://localhost:8000/courses/all/courses/`, {
+        method: 'POST', 
+        headers: {
+          'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify(fields)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error al enviar los datos');
+        }
+        return response.json(); // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
+      })
+      .then(data => {
+        console.log('Datos enviados exitosamente', data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    
+  }
+
+  return (
+      <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
+        <input name='name' type="text" placeholder='Nombre del curso' />
+        <textarea name='description' rows="3" placeholder='Descripción' />
+        <input name='creditos' type="number" />
+        <button type='submit'>Guardar</button>
+      </form>
+  )
+}
+
   return (
       <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
         <HeaderPage />
@@ -231,6 +270,7 @@ function App() {
               <li><Link to="/">Inicio</Link></li>
               <li><Link to="/login">Login</Link></li>
               <li><Link to="/code">Code</Link></li>
+              <li><Link to="/course">Create Course</Link></li>
           </ul>
         </aside>
         <main className='bg-main p-6'>
@@ -238,6 +278,7 @@ function App() {
             <Route path='/' element={<CourseList/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/code' element={<CreateCode/>}/>
+            <Route path='/course' element={<CreateCourse/>}/>
           </Routes>
         </main>
         <FooterPage />

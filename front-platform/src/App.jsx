@@ -2,7 +2,7 @@
 import './App.css';
 import MonacoEditorWrapper from './components/MonacoEditor';
 import { LogoUnivalleIcon, MenuIcon } from './components/Icons';
-import { useId, useState, useEffect } from 'react';
+import { useId, useState } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
 import { Link, Routes, Route } from 'react-router-dom';
@@ -159,13 +159,9 @@ function App() {
     )
   }
 
-  function CourseList() { 
-  const { courses, getCourses } = useCourses()
+function CourseList() { 
+  const { courses } = useCourses()
   const [accordionStates, setAccordionStates] = useState({});
-
-  useEffect(() => {
-    getCourses();
-  }, []);
 
   const toggleAccordion = (id) => {
     setAccordionStates((prevState) => ({
@@ -219,33 +215,15 @@ function App() {
   );
 }
 
-function CreateCourse(){
-  
+function CourseForm() {
+
+  const { createCourses } = useCourses()
+
   const handleSubmit = (event) => {
     event.preventDefault()
     const fields = Object.fromEntries(new window.FormData(event.target))
+    createCourses(fields)
     console.log(fields)
-
-      fetch(`http://localhost:8000/courses/all/courses/`, {
-        method: 'POST', 
-        headers: {
-          'Content-Type' : 'application/json'
-        },
-        body : JSON.stringify(fields)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Error al enviar los datos');
-        }
-        return response.json(); // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
-      })
-      .then(data => {
-        console.log('Datos enviados exitosamente', data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-    
   }
 
   return (
@@ -270,7 +248,7 @@ function CreateCourse(){
               <li><Link to="/">Inicio</Link></li>
               <li><Link to="/login">Login</Link></li>
               <li><Link to="/code">Code</Link></li>
-              <li><Link to="/course">Create Course</Link></li>
+              <li><Link to="/course-create">Create Course</Link></li>
           </ul>
         </aside>
         <main className='bg-main p-6'>
@@ -278,7 +256,7 @@ function CreateCourse(){
             <Route path='/' element={<CourseList/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/code' element={<CreateCode/>}/>
-            <Route path='/course' element={<CreateCourse/>}/>
+            <Route path='/course-create' element={<CourseForm/>}/>
           </Routes>
         </main>
         <FooterPage />

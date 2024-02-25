@@ -5,7 +5,7 @@ import { LogoUnivalleIcon, MenuIcon } from './components/Icons';
 import { useId, useState } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
-import { Link, Routes, Route } from 'react-router-dom';
+import { Link, Routes, Route, useNavigate } from 'react-router-dom';
 import { useCourses } from './hooks/useCourses.js';
 
 function App() {
@@ -160,8 +160,12 @@ function App() {
   }
 
 function CourseList() { 
-  const { courses } = useCourses()
+  const { courses, deleteCourse } = useCourses()
   const [accordionStates, setAccordionStates] = useState({});
+
+  const navigate = useNavigate()
+  /*const params = useParams()
+  console.log(params.id)*/
 
   const toggleAccordion = (id) => {
     setAccordionStates((prevState) => ({
@@ -179,7 +183,7 @@ function CourseList() {
       {courses.map((curso) => (
         <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
           <h2 id={`accordion-collapse-heading-${curso.id}`}>
-            <button
+            <div
               type="button"
               className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
               data-accordion-target={`#accordion-collapse-body-${curso.id}`}
@@ -187,7 +191,20 @@ function CourseList() {
               onClick={() => toggleAccordion(curso.id)}
               aria-controls={`accordion-collapse-body-${curso.id}`}
             >
-              <span>{curso.name}</span>
+              <div className='flex items-start gap-2'>
+                <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                onClick={(e) => {
+                  // Detener la propagación del evento para que no afecte al botón del acordeón
+                  e.stopPropagation();
+                  // Aquí va la lógica para eliminar el curso
+                  deleteCourse(curso.id)
+                  navigate('/courses')
+                  //navigate(`/course/${curso.id}`)
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                </button>
+                <span>{curso.name}</span>
+              </div>
               <svg
                 data-accordion-icon
                 className={`w-3 h-3 rotate-${accordionStates[curso.id] ? '180' : '0'} shrink-0`}
@@ -198,7 +215,7 @@ function CourseList() {
               >
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
               </svg>
-            </button>
+            </div>
           </h2>
           <div
             id={`accordion-collapse-body-${curso.id}`}
@@ -248,15 +265,18 @@ function CourseForm() {
               <li><Link to="/">Inicio</Link></li>
               <li><Link to="/login">Login</Link></li>
               <li><Link to="/code">Code</Link></li>
+              <li><Link to="/courses">Courses</Link></li>
               <li><Link to="/course-create">Create Course</Link></li>
           </ul>
         </aside>
         <main className='bg-main p-6'>
           <Routes>
-            <Route path='/' element={<CourseList/>} />
+            <Route path='/' element={<main/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/code' element={<CreateCode/>}/>
-            <Route path='/course-create' element={<CourseForm/>}/>
+            <Route path='/courses' element={<CourseList/>} />
+            <Route path='/course-create' element={<CourseForm/>} />
+            <Route path='/course/:id' element={<CourseList/>} />
           </Routes>
         </main>
         <FooterPage />

@@ -52,5 +52,20 @@ export function useCourses() {
       });
     }
 
-    return { courses: mappedCourses, getCourses, createCourses }
+    const deleteCourse = (courseId) => {
+
+        fetch(`${COURSE_ENDPOINT}${courseId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if(response.ok){
+                console.log('Curso eliminado exitosamente')
+            }
+            if(!response.ok){
+                throw new Error('Error al eliminar curso')
+            }
+        })
+    }
+
+    return { courses: mappedCourses, getCourses, createCourses, deleteCourse }
   }

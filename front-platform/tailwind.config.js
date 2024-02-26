@@ -13,6 +13,7 @@ export default {
         'footer' : '#841F1C',
         'link' : '#cd1f32',
         'btn-create' : '#599876',
+        'btn-edit' : '#3D5AA2',
       }
     },
   },

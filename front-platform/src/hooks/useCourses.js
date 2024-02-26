@@ -29,6 +29,17 @@ export function useCourses() {
         })
     }
 
+    const getCourse = (courseId) => {
+
+        return fetch(`${COURSE_ENDPOINT}${courseId}`)
+        .then(response => {
+            if(!response.ok){
+                throw new Error('Curso no obtenido')
+            }
+            return response.json()
+        })
+    }
+
     const createCourses = (fields) => {
 
       fetch(COURSE_ENDPOINT, {
@@ -67,5 +78,24 @@ export function useCourses() {
         })
     }
 
-    return { courses: mappedCourses, getCourses, createCourses, deleteCourse }
+    const updateCourse = (courseId, fields) => {
+
+        return fetch(`${COURSE_ENDPOINT}${courseId}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify(fields)
+        })
+        .then(response => {
+            if(response.ok){
+                console.log('Curso actualizado exitosamente')
+            }
+            if(!response.ok){
+                throw new Error('Error al actualizar curso')
+            }
+        })
+    }
+
+    return { courses: mappedCourses, getCourses, getCourse, createCourses, deleteCourse, updateCourse }
   }

@@ -2,10 +2,10 @@
 import './App.css';
 import MonacoEditorWrapper from './components/MonacoEditor';
 import { LogoUnivalleIcon, MenuIcon } from './components/Icons';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
-import { Link, Routes, Route, useNavigate } from 'react-router-dom';
+import { Link, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useCourses } from './hooks/useCourses.js';
 
 function App() {
@@ -160,12 +160,10 @@ function App() {
   }
 
 function CourseList() { 
-  const { courses, deleteCourse } = useCourses()
+  const { courses, getCourse, deleteCourse } = useCourses()
   const [accordionStates, setAccordionStates] = useState({});
 
   const navigate = useNavigate()
-  /*const params = useParams()
-  console.log(params.id)*/
 
   const toggleAccordion = (id) => {
     setAccordionStates((prevState) => ({
@@ -174,8 +172,16 @@ function CourseList() {
     }));
   };
 
+  const handleEditCourse = (courseId) => {
+    getCourse(courseId)
+      .then(courseData => {
+        navigate(`/course/${courseId}`, {state: {courseData}})
+      })
+      .catch(error => console.log('Error al obtener cursos', error))
+  }
+
   if (!courses) {
-    return <p>Cargando cursos...</p>;
+    return <p>No hay cursos creados...</p>;
   }
 
   return (
@@ -192,13 +198,20 @@ function CourseList() {
               aria-controls={`accordion-collapse-body-${curso.id}`}
             >
               <div className='flex items-start gap-2'>
+                <button className='bg-btn-edit opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEditCourse(curso.id)
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-edit" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
+                </button>
                 <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
                 onClick={(e) => {
                   // Detener la propagación del evento para que no afecte al botón del acordeón
                   e.stopPropagation();
                   // Aquí va la lógica para eliminar el curso
                   deleteCourse(curso.id)
-                  navigate('/courses')
+                  navigate('/course-list')
                   //navigate(`/course/${curso.id}`)
                 }}>
                   <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
@@ -234,13 +247,50 @@ function CourseList() {
 
 function CourseForm() {
 
-  const { createCourses } = useCourses()
+  const { createCourses, updateCourse } = useCourses()
+  const {id} = useParams()
+  const paramsId = id
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const loadCourseData = () => {
+      if (location.state && location.state.courseData) {
+        const { name, description, creditos } = location.state.courseData;
+        document.querySelector('input[name="name"]').value = name;
+        document.querySelector('textarea[name="description"]').value = description;
+        document.querySelector('input[name="creditos"]').value = creditos;
+      }
+    };
+
+    loadCourseData();
+  }, [location.state]);
 
   const handleSubmit = (event) => {
+
     event.preventDefault()
     const fields = Object.fromEntries(new window.FormData(event.target))
-    createCourses(fields)
-    console.log(fields)
+    //console.log(fields)
+    //console.log(paramsId)
+
+    if(paramsId) {
+      updateCourse(paramsId, fields)
+        .then(() => {
+          console.log('Curso actualizado exitosamente');
+          navigate('/course-list')
+        })
+        .catch((error) => {
+          console.error('Error al actualizar curso:', error);
+        });
+    } else {
+      createCourses(fields)
+        .then(() => {
+          console.log('Curso creado exitosamente');
+        })
+        .catch((error) => {
+          console.error('Error al crear curso:', error);
+        });
+    }
   }
 
   return (
@@ -248,7 +298,7 @@ function CourseForm() {
         <input name='name' type="text" placeholder='Nombre del curso' />
         <textarea name='description' rows="3" placeholder='Descripción' />
         <input name='creditos' type="number" />
-        <button type='submit'>Guardar</button>
+        <button type='submit'>{paramsId ? 'Actualizar':'Guardar'}</button>
       </form>
   )
 }
@@ -265,8 +315,8 @@ function CourseForm() {
               <li><Link to="/">Inicio</Link></li>
               <li><Link to="/login">Login</Link></li>
               <li><Link to="/code">Code</Link></li>
-              <li><Link to="/courses">Courses</Link></li>
-              <li><Link to="/course-create">Create Course</Link></li>
+              <li><Link to="/course-list">Courses</Link></li>
+              <li><Link to="/course">Create Course</Link></li>
           </ul>
         </aside>
         <main className='bg-main p-6'>
@@ -274,9 +324,9 @@ function CourseForm() {
             <Route path='/' element={<main/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/code' element={<CreateCode/>}/>
-            <Route path='/courses' element={<CourseList/>} />
-            <Route path='/course-create' element={<CourseForm/>} />
-            <Route path='/course/:id' element={<CourseList/>} />
+            <Route path='/course-list' element={<CourseList/>} />
+            <Route path='/course' element={<CourseForm/>} />
+            <Route path='/course/:id' element={<CourseForm/>} />
           </Routes>
         </main>
         <FooterPage />

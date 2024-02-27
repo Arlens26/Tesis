@@ -180,74 +180,132 @@ function CourseList() {
       .catch(error => console.log('Error al obtener cursos', error))
   }
 
+  const handleCreateCourse = () => {
+    navigate('/course')
+  }
+
+  const handleDeleteCourse = (courseId) => {
+     deleteCourse(courseId)
+     .then(() => {
+       navigate('/course-list')
+      }
+     )
+     .catch(error => console.log('Error al eliminar curso', error))
+  }
+
   if (!courses) {
     return <p>No hay cursos creados...</p>;
   }
 
   return (
-    <>
-      {courses.map((curso) => (
-        <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
-          <h2 id={`accordion-collapse-heading-${curso.id}`}>
-            <div
-              type="button"
-              className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
-              data-accordion-target={`#accordion-collapse-body-${curso.id}`}
-              aria-expanded={accordionStates[curso.id]}
-              onClick={() => toggleAccordion(curso.id)}
-              aria-controls={`accordion-collapse-body-${curso.id}`}
-            >
-              <div className='flex items-start gap-2'>
-                <button className='bg-btn-edit opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEditCourse(curso.id)
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-edit" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
-                </button>
-                <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                onClick={(e) => {
-                  // Detener la propagación del evento para que no afecte al botón del acordeón
-                  e.stopPropagation();
-                  // Aquí va la lógica para eliminar el curso
-                  deleteCourse(curso.id)
-                  navigate('/course-list')
-                  //navigate(`/course/${curso.id}`)
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                </button>
-                <span>{curso.name}</span>
+    <section>
+      <div className='flex flex-col gap-2'>
+      <div className='flex justify-end items-center'> 
+        <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+        onClick={handleCreateCourse}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-plus h-6 w-6 mr-2" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 5l0 14" />
+                <path d="M5 12l14 0" />
+            </svg>
+            <span>Crear curso</span>
+        </button>
+      </div>
+        {courses.map((curso) => (
+              <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
+                <h2 id={`accordion-collapse-heading-${curso.id}`}>
+                  <div
+                    type="button"
+                    className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
+                    data-accordion-target={`#accordion-collapse-body-${curso.id}`}
+                    aria-expanded={accordionStates[curso.id]}
+                    onClick={() => toggleAccordion(curso.id)}
+                    aria-controls={`accordion-collapse-body-${curso.id}`}
+                  >
+                    <div className='flex items-start gap-2'>
+                      <button className='bg-btn-edit opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEditCourse(curso.id)
+                      }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-edit" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
+                      </button>
+                      <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                      onClick={(e) => {
+                        // Detener la propagación del evento para que no afecte al botón del acordeón
+                        e.stopPropagation();
+                        handleDeleteCourse(curso.id)
+                      }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                      </button>
+                      <span>{curso.name}</span>
+                    </div>
+                    <svg
+                      data-accordion-icon
+                      className={`w-3 h-3 ${accordionStates[curso.id] ? 'rotate-0' : 'rotate-180'} shrink-0`}
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 10 6"
+                    >
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
+                    </svg>
+                  </div>
+                </h2>
+                <div
+                  id={`accordion-collapse-body-${curso.id}`}
+                  className={`${accordionStates[curso.id] ? 'block' : 'hidden'}`}
+                  aria-labelledby={`accordion-collapse-heading-${curso.id}`}
+                >
+                  <div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+                    <span>La cantidad de créditos es: {curso.creditos}</span>
+                  </div>
+                  <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">
+                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">
+                                    Opciones
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Actividad
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Fecha
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Calificación
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Ejercicios
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                    <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-plus h-6 w-6 mr-2" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M12 5l0 14" />
+                            <path d="M5 12l14 0" />
+                        </svg>
+                        <span>Crear Actividad</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <svg
-                data-accordion-icon
-                className={`w-3 h-3 rotate-${accordionStates[curso.id] ? '180' : '0'} shrink-0`}
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 10 6"
-              >
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
-              </svg>
-            </div>
-          </h2>
-          <div
-            id={`accordion-collapse-body-${curso.id}`}
-            className={`${accordionStates[curso.id] ? 'block' : 'hidden'}`}
-            aria-labelledby={`accordion-collapse-heading-${curso.id}`}
-          >
-            <div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-              <span>La cantidad de créditos es: {curso.creditos}</span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </>
+          ))}
+      </div>
+    </section>
   );
 }
 
 function CourseForm() {
 
-  const { createCourses, updateCourse } = useCourses()
+  const { createCourse, updateCourse } = useCourses()
   const {id} = useParams()
   const paramsId = id
   const location = useLocation()
@@ -283,7 +341,7 @@ function CourseForm() {
           console.error('Error al actualizar curso:', error);
         });
     } else {
-      createCourses(fields)
+      createCourse(fields)
         .then(() => {
           console.log('Curso creado exitosamente');
         })
@@ -295,10 +353,13 @@ function CourseForm() {
 
   return (
       <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
-        <input name='name' type="text" placeholder='Nombre del curso' />
-        <textarea name='description' rows="3" placeholder='Descripción' />
-        <input name='creditos' type="number" />
-        <button type='submit'>{paramsId ? 'Actualizar':'Guardar'}</button>
+        <span>Creación cursos</span>
+        <hr />
+        <input type="text" placeholder='Nombre del curso' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <input type="text" placeholder='Código del curso' name='code' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <textarea placeholder='Descripción' name='description' rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <input name='creditos' type="number" placeholder='Créditos' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>{paramsId ? 'Actualizar':'Guardar'}</button>
       </form>
   )
 }

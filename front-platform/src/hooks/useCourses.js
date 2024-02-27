@@ -40,9 +40,9 @@ export function useCourses() {
         })
     }
 
-    const createCourses = (fields) => {
+    const createCourse = (fields) => {
 
-      fetch(COURSE_ENDPOINT, {
+      return fetch(COURSE_ENDPOINT, {
         method: 'POST', 
         headers: {
           'Content-Type' : 'application/json'
@@ -65,11 +65,12 @@ export function useCourses() {
 
     const deleteCourse = (courseId) => {
 
-        fetch(`${COURSE_ENDPOINT}${courseId}`, {
+        return fetch(`${COURSE_ENDPOINT}${courseId}`, {
             method: 'DELETE'
         })
         .then(response => {
             if(response.ok){
+                getCourses()
                 console.log('Curso eliminado exitosamente')
             }
             if(!response.ok){
@@ -97,5 +98,5 @@ export function useCourses() {
         })
     }
 
-    return { courses: mappedCourses, getCourses, getCourse, createCourses, deleteCourse, updateCourse }
+    return { courses: mappedCourses, getCourses, getCourse, createCourse, deleteCourse, updateCourse }
   }

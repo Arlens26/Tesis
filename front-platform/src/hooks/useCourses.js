@@ -13,8 +13,10 @@ export function useCourses() {
     const mappedCourses = courses?.map(course => ({
       id: course.id,
       name: course.name,
+      code: course.code,
       description: course.description,
-      creditos: course.creditos
+      credit: course.credit,
+      period: course.period
     }))
 
     useEffect(() => {

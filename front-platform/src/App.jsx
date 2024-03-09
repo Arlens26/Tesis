@@ -1,7 +1,7 @@
 
 import './App.css';
 import MonacoEditorWrapper from './components/MonacoEditor';
-import { LogoUnivalleIcon, MenuIcon } from './components/Icons';
+import { DeleteIcon, EditIcon, LogoUnivalleIcon, MenuIcon } from './components/Icons';
 import { useEffect, useId, useState } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
@@ -228,7 +228,7 @@ function CourseList() {
                         e.stopPropagation()
                         handleEditCourse(curso.id)
                       }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-edit" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></svg>
+                        <EditIcon />
                       </button>
                       <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
                       onClick={(e) => {
@@ -236,7 +236,7 @@ function CourseList() {
                         e.stopPropagation();
                         handleDeleteCourse(curso.id)
                       }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                        <DeleteIcon />
                       </button>
                       <span>{curso.name}</span>
                     </div>
@@ -311,6 +311,10 @@ function CourseForm() {
   const location = useLocation()
   const navigate = useNavigate()
 
+  const [raList, setRaList] = useState([])
+  const [percentage, setPercentage] = useState(0)
+  const [totalPercentage, setTotalPercentage] = useState(0)
+
   useEffect(() => {
     const loadCourseData = () => {
       if (location.state && location.state.courseData) {
@@ -358,6 +362,33 @@ function CourseForm() {
     }
   }
 
+  const handleAddRa = () => {
+    const nextNumber = raList.length + 1;
+    const raName = `R.A.${nextNumber}`;
+    if(percentage > 0 && totalPercentage + percentage <= 100){
+      setRaList([...raList, { name:raName, percentage:`${percentage}%`}])
+      setTotalPercentage(totalPercentage + percentage)
+      setPercentage(0)
+    }
+  }
+
+  const handleEditPercentage = (index, newPercentage) => {
+    const updateRaList = [...raList]
+    const diff = newPercentage - parseInt(updateRaList[index].percentage)
+    if(!isNaN(newPercentage) && totalPercentage + diff <= 100 && newPercentage >= 1 && newPercentage <= 100){
+      updateRaList[index].percentage = `${newPercentage}%`
+      setRaList(updateRaList)
+      setTotalPercentage(totalPercentage + diff)
+    }
+  }
+
+  const handleDeleteRa = (index) => {
+    const deletePercentage = parseInt(raList[index].percentage)
+    const updateRaList = raList.filter((_, i) => i !== index)
+    setRaList(updateRaList)
+    setTotalPercentage(totalPercentage - deletePercentage)
+  }
+
   return (
       <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
         <span>Creación cursos</span>
@@ -369,6 +400,79 @@ function CourseForm() {
         <input type="text" placeholder='Código del curso' name='code' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         <textarea placeholder='Descripción' name='description' rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         <input type="number" placeholder='Créditos' name='credit' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <div className="flex flex-col gap-2">
+          {!paramsId && (
+              <div> 
+                <span>Porcentaje de RA:</span>
+                <input
+                  type="number"
+                  placeholder="Porcentaje"
+                  min={0}
+                  max={100}
+                  value={percentage}
+                  onChange={(e) => setPercentage(parseInt(e.target.value))}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                />
+                <button type='button' onClick={handleAddRa} 
+                  disabled={totalPercentage === 100 || percentage === 1}
+                  className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Agregar RA</button>
+                
+              </div>
+             )
+          }
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                              <tr>
+                                  <th scope="col" className="px-6 py-3">
+                                      Nombre
+                                  </th>
+                                  <th scope="col" className="px-6 py-3">
+                                      Porcentaje
+                                  </th>
+                                  <th scope="col" className="px-6 py-3">
+                                      Acciones
+                                  </th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                            {raList.map((ra, index) => (
+                                <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                  <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                      {ra.name}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={100}
+                                    value={parseInt(ra.percentage)}
+                                    onChange={(e) => handleEditPercentage(index, parseInt(e.target.value))}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                  />
+                                  </td>
+                                  <td className="flex items-center gap-1">
+                                    <button type='button' 
+                                    onClick={ () => handleDeleteRa(index)}
+                                    className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'>
+                                      <DeleteIcon />
+                                    </button>
+                                  </td>
+                                </tr>
+                            ))}
+                            <tr key={`totalPercentageRa`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                      Total Porcentaje
+                                  </th>
+                                  <td className="px-6 py-4">
+                                      {`${totalPercentage}%`}
+                                  </td>
+                                  <td className="px-6 py-4">
+
+                                  </td>
+                                </tr>
+                          </tbody>
+          </table>
+        </div>
         <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>{paramsId ? 'Actualizar':'Guardar'}</button>
       </form>
   )

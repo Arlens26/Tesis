@@ -305,7 +305,7 @@ function CourseList() {
 
 function CourseForm() {
 
-  const { createCourse, updateCourse } = useCourses()
+  const { createScheduledCourse, updateCourse } = useCourses()
   const {id} = useParams()
   const paramsId = id
   const location = useLocation()
@@ -314,13 +314,20 @@ function CourseForm() {
   const [raList, setRaList] = useState([])
   const [percentage, setPercentage] = useState(0)
   const [totalPercentage, setTotalPercentage] = useState(0)
+ //const [availableNumbers, setAvailableNumbers] = useState([]);
+  const [numeros, setNumeros] = useState([]);
+  //const [deleteNumbers, setDeleteNumbers] = useState([]); ////
+  //const [count, setCount] = useState(1)
 
   useEffect(() => {
+   /* const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
+    setAvailableNumbers(numbers);*/
     const loadCourseData = () => {
       if (location.state && location.state.courseData) {
         const { name, code, description, credit, period } = location.state.courseData;
         document.querySelector('input[name="name"]').value = name;
         document.querySelector('input[name="code"]').value = code;
+        //document.querySelector('input[name="group"]').value = group;
         document.querySelector('textarea[name="description"]').value = description;
         document.querySelector('input[name="credit"]').value = credit;
         // Llenar el select con el único periodo académico y deshabilitarlo
@@ -341,6 +348,25 @@ function CourseForm() {
 
     event.preventDefault()
     const fields = Object.fromEntries(new window.FormData(event.target))
+    const formData = new FormData(event.target);
+
+    // Construir el JSON deseado
+    const scheduledCourseData = {
+      course: {
+        name: formData.get('name'),
+        code: formData.get('code'),
+        description: formData.get('description'),
+        credit: parseInt(formData.get('credit')),
+      },
+      academic_period: {
+        year: 2024, 
+        semester: 1, 
+      },
+      evaluation_version: {
+        date: '2024-03-08', 
+      },
+      group: formData.get('group'),
+    };
 
     if(paramsId) {
       updateCourse(paramsId, fields)
@@ -352,8 +378,9 @@ function CourseForm() {
           console.error('Error al actualizar curso:', error);
         });
     } else {
-      createCourse(fields)
+      createScheduledCourse(scheduledCourseData)
         .then(() => {
+          console.log(scheduledCourseData)
           console.log('Curso creado exitosamente');
         })
         .catch((error) => {
@@ -363,14 +390,77 @@ function CourseForm() {
   }
 
   const handleAddRa = () => {
-    const nextNumber = raList.length + 1;
-    const raName = `R.A.${nextNumber}`;
+    // Encontrar el número menor no presente en la lista
+    /*let nextNumber = findNextNumber();
+    console.log(nextNumber)*/
+    //const nextNumber = availableNumbers[0];
+    
     if(percentage > 0 && totalPercentage + percentage <= 100){
-      setRaList([...raList, { name:raName, percentage:`${percentage}%`}])
+      // Encontrar el número menor no presente en la lista
+      let nextNumber = 1;
+      console.log(nextNumber)
+      while (numeros.includes(nextNumber)) {
+        console.log(nextNumber)
+        console.log(numeros)
+        nextNumber++;
+        console.log(nextNumber)
+      }
+      // Agregar el siguiente número a la lista
+      const nuevosNumeros = [...numeros, nextNumber].sort((a, b) => a - b);
+      setNumeros(nuevosNumeros);
+      console.log(nuevosNumeros)
+      console.log(numeros)
+
+      const raName = `R.A.${nextNumber}`;
+      setRaList([...raList, { id:nextNumber, name:raName, percentage:`${percentage}%`}])    
+      raList.sort((a, b) => a - b);
       setTotalPercentage(totalPercentage + percentage)
       setPercentage(0)
-    }
+      //setAvailableNumbers(availableNumbers.slice(1)); 
+      console.log(raList)
+      //console.log(availableNumbers)
+    }    
   }
+
+  /*const findNextNumber = () => {
+    //let nextNumber = 1;
+    let nextNumber = count
+    console.log(nextNumber)
+    console.log(availableNumbers)
+    if(isNaN(deleteNumbers) && deleteNumbers.includes(nextNumber)){
+      //const deleteNumber = deleteNumbers.includes(nextNumber) ////
+      //deleteNumbers.forEach(number => console.log(number));  ////
+      const elementToRemove = nextNumber; // El elemento que deseas eliminar
+      const list = deleteNumbers.filter(item => item !== elementToRemove);
+      setDeleteNumbers(list)
+      console.log(list)
+      const listAvailable = availableNumbers.push(nextNumber).sort((a, b) => a - b);
+      setAvailableNumbers(listAvailable)
+      console.log(listAvailable) ////
+    }
+    /*while (availableNumbers.includes(nextNumber)) {
+      nextNumber = nextNumber + 1;
+        console.log(nextNumber)
+    }*/
+    /*const numbers = Array.from({length:10}, (_, i) => i + 1)
+    console.log(numbers)
+    for (let i = 0; i < numbers.length; i++) {
+      if (!availableNumbers.includes(nextNumber)) {
+        return nextNumber
+          //break; // Si nextNumber no está en availableNumbers, sal del bucle
+      }
+      nextNumber++; // Incrementa nextNumber si está presente en availableNumbers
+      console.log(nextNumber)
+    }*/
+    /*console.log(nextNumber)
+    // Agregar el siguiente número a la lista
+    const newNumbers = [...availableNumbers, nextNumber].sort((a, b) => a - b);
+    setAvailableNumbers(newNumbers);
+    console.log(newNumbers)
+    console.log(availableNumbers)
+    setCount(nextNumber + 1); // Incrementa count para el siguiente número
+    return nextNumber;
+  }*/
 
   const handleEditPercentage = (index, newPercentage) => {
     const updateRaList = [...raList]
@@ -383,10 +473,39 @@ function CourseForm() {
   }
 
   const handleDeleteRa = (index) => {
+    console.log(index)
+    //const deletedRa = raList[index];
+    //const nuevosNumeros = [...numeros]; //////////////////////
+    //nuevosNumeros.splice(index, 1); /////////////////////
+    //setNumeros(nuevosNumeros); ///////////////////////////
+    //console.log(nuevosNumeros) /////////////////////////
+    /*const newNumbers = [...availableNumbers];
+    const deleteNumber = newNumbers.splice(index, 1)[0]; ////
+    console.log(deleteNumber)
+    console.log(newNumbers)
+    setAvailableNumbers(newNumbers);
+    setDeleteNumbers(prevDeleteNumbers => [...prevDeleteNumbers, deleteNumber]) ////
+    console.log(availableNumbers)*/
     const deletePercentage = parseInt(raList[index].percentage)
+    const deleteNumber = raList[index].id
     const updateRaList = raList.filter((_, i) => i !== index)
     setRaList(updateRaList)
     setTotalPercentage(totalPercentage - deletePercentage)
+    // Eliminar el número asociado al elemento eliminado
+    const nuevosNumeros = numeros.filter(numero => numero !== deleteNumber);
+    setNumeros(nuevosNumeros);
+
+    //setCount(1)
+    // Recalcular los números disponibles en orden ascendente
+    /*const deletedNumber = parseInt(raList[index].name.split('.')[1]);
+    const updatedAvailableNumbers = [...availableNumbers, deletedNumber].sort((a, b) => a - b);
+    setAvailableNumbers(updatedAvailableNumbers);*/
+    //availableNumbers.splice(index, 1);
+    /*const deletedNumber = parseInt(deletedRa.name.split('.')[1]);
+    console.log(deletedNumber)
+    setAvailableNumbers([...availableNumbers, deletedNumber]);
+    const updatedAvailableNumbers = [...availableNumbers, deletedNumber];
+    setAvailableNumbers(updatedAvailableNumbers.sort((a, b) => a - b));*/
   }
 
   return (
@@ -398,6 +517,7 @@ function CourseForm() {
         </select> 
         <input type="text" placeholder='Nombre del curso' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         <input type="text" placeholder='Código del curso' name='code' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <input type="text" placeholder='Grupo' name='group' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         <textarea placeholder='Descripción' name='description' rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         <input type="number" placeholder='Créditos' name='credit' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         <div className="flex flex-col gap-2">
@@ -424,7 +544,10 @@ function CourseForm() {
                           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                               <tr>
                                   <th scope="col" className="px-6 py-3">
-                                      Nombre
+                                      Código
+                                  </th>
+                                  <th scope="col" className="px-6 py-3">
+                                      Descripción
                                   </th>
                                   <th scope="col" className="px-6 py-3">
                                       Porcentaje
@@ -435,10 +558,13 @@ function CourseForm() {
                               </tr>
                           </thead>
                           <tbody>
-                            {raList.map((ra, index) => (
+                            {raList.sort((a, b) => a.id - b.id).map((ra, index) => (
                                 <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                   <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                       {ra.name}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <input type="text" placeholder={`Descripción ${ra.name}`} name='description_learning' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                   </td>
                                   <td className="px-6 py-4">
                                   <input
@@ -463,6 +589,9 @@ function CourseForm() {
                                   <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                       Total Porcentaje
                                   </th>
+                                  <td className="px-6 py-4">
+
+                                  </td>
                                   <td className="px-6 py-4">
                                       {`${totalPercentage}%`}
                                   </td>

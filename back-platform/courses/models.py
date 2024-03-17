@@ -58,11 +58,11 @@ class ScheduledCourse(models.Model):
         db_table = 'scheduled_course'
 
 class LearningOutCome(models.Model):
-    name = models.CharField(max_length=50)
+    code = models.CharField(max_length=50)
     description = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.name
+        return self.code
     
     class Meta:
         ordering = ['id']
@@ -73,7 +73,7 @@ class LearningOutCome(models.Model):
 class Percentage(models.Model):
     learning_outcome = models.ForeignKey(LearningOutCome, on_delete=models.CASCADE, related_name='percentage_outcomes')
     initial_date = models.DateField()
-    end_date = models.DateField(null=True)
+    end_date = models.DateField(null=True, blank=True)
     percentage = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):

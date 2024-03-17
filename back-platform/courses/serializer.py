@@ -5,7 +5,7 @@ class CourseSerializer(serializers.ModelSerializer):
     #period = serializers.StringRelatedField()
     class Meta:
         model = Course
-        fields = ['name', 'code', 'description', 'credit']
+        fields = '__all__'
 
 class AcademicPeriodSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,7 +20,7 @@ class EvaluationVersionSerializer(serializers.ModelSerializer):
 class ScheduledCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduledCourse
-        fields = ['course', 'period', 'evaluation_version', 'group']
+        fields = '__all__'
 
 class LearningOutComeSerializer(serializers.ModelSerializer):
     class Meta:

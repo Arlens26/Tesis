@@ -2,8 +2,10 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 #from rest_framework.views import APIView
 from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer
-from .models import Course, AcademicPeriod, EvaluationVersion, LearningOutCome, Percentage
+from .models import Course, AcademicPeriod, EvaluationVersion, LearningOutCome, Percentage, EvaluationVersionDetail
 #from django.http import JsonResponse
+from datetime import datetime
+from decimal import Decimal
 
 # Create your views here.
 class CourseView(viewsets.ModelViewSet):
@@ -34,6 +36,7 @@ class CreateScheduledCourseView(viewsets.ViewSet):
         course_data = request.data.get('course')
         academic_period_data = request.data.get('academic_period')
         evaluation_version_data = request.data.get('evaluation_version')
+        learning_outcome_data = request.data.get('learning_outcome')
         group = request.data.get('group')
 
         # Crear instancias de Course, AcademicPeriod, y EvaluationVersion
@@ -58,6 +61,42 @@ class CreateScheduledCourseView(viewsets.ViewSet):
             # Validar y guardar el ScheduledCourse
             if scheduled_course_serializer.is_valid():
                 scheduled_course_serializer.save()
+
+                for outcome_data in learning_outcome_data:
+                    outcome_serializer = LearningOutComeSerializer(data=outcome_data)
+                    if outcome_serializer.is_valid():
+                        outcome_instance = outcome_serializer.save()
+
+                        percentage_value = Decimal(outcome_data['percentage'].replace('%', ''))
+                        
+                        percentage_serializer = PercentageSerializer(data={
+                            'initial_date': datetime.now().date(),
+                            'end_date': None,
+                            'percentage': percentage_value,
+                            'learning_outcome_id': outcome_instance.pk
+                        })
+                        #print("percentage serializer:", percentage_serializer)
+                        #print("percentage_value:", percentage_value)
+                        print('Outcome id:',outcome_instance.pk)
+                        
+                        #percentage_instance = Percentage.objects.create(
+                         #   learning_outcome=outcome_instance.pk,
+                          #  initial_date=datetime.now().date(),
+                          #  percentage=outcome_data['percentage'].replace('%', '')
+                        #)
+                        if percentage_serializer.is_valid():
+                            percentage_instance = percentage_serializer.save()
+                            print(percentage_instance.pk)
+                            evaluation_version_detail_instance = EvaluationVersionDetail.objects.create(
+                                learning_outcome=outcome_instance,
+                                percentage=percentage_instance,
+                                evaluation_version=evaluation_version_instance
+                            )
+                            print("percentage_serializer data:", percentage_serializer.validated_data)
+                            print("evaluation_version_detail_instance:", evaluation_version_detail_instance)
+                        else:
+                            print("Error in percentage_serializer validation:", percentage_serializer.errors)
+
                 return Response({'message': 'Scheduled course created successfully'}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': scheduled_course_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

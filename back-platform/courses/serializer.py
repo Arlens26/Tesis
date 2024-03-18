@@ -28,9 +28,11 @@ class LearningOutComeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PercentageSerializer(serializers.ModelSerializer):
+    learning_outcome_id = serializers.PrimaryKeyRelatedField(queryset=LearningOutCome.objects.all(), source='learning_outcome')
+
     class Meta:
         model = Percentage
-        fields = '__all__'
+        fields = ['id','initial_date', 'end_date', 'percentage', 'learning_outcome_id']
 
 class EvaluationVersionDetailSerializer(serializers.ModelSerializer):
     class Meta:

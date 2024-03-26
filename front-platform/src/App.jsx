@@ -315,9 +315,7 @@ function CourseForm() {
   const [percentage, setPercentage] = useState(0)
   const [totalPercentage, setTotalPercentage] = useState(0)
  //const [availableNumbers, setAvailableNumbers] = useState([]);
-  const [numeros, setNumeros] = useState([]);
-  //const [deleteNumbers, setDeleteNumbers] = useState([]); ////
-  //const [count, setCount] = useState(1)
+  const [numbers, setNumbers] = useState([]);
 
   useEffect(() => {
    /* const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -350,6 +348,14 @@ function CourseForm() {
     const fields = Object.fromEntries(new window.FormData(event.target))
     const formData = new FormData(event.target);
 
+    const buildLearningOutcomesList = () => {
+      return raList.map(ra => ({
+        code: ra.code, 
+        description: ra.description,
+        percentage: ra.percentage
+      }));
+    };
+
     // Construir el JSON deseado
     const scheduledCourseData = {
       course: {
@@ -366,6 +372,7 @@ function CourseForm() {
         date: '2024-03-08', 
       },
       group: formData.get('group'),
+      learning_outcome: buildLearningOutcomesList()
     };
 
     if(paramsId) {
@@ -390,77 +397,42 @@ function CourseForm() {
   }
 
   const handleAddRa = () => {
-    // Encontrar el número menor no presente en la lista
-    /*let nextNumber = findNextNumber();
-    console.log(nextNumber)*/
-    //const nextNumber = availableNumbers[0];
     
     if(percentage > 0 && totalPercentage + percentage <= 100){
       // Encontrar el número menor no presente en la lista
       let nextNumber = 1;
-      console.log(nextNumber)
-      while (numeros.includes(nextNumber)) {
-        console.log(nextNumber)
-        console.log(numeros)
+      //console.log(nextNumber)
+      while (numbers.includes(nextNumber)) {
+        //console.log(nextNumber)
+        //console.log(numbers)
         nextNumber++;
-        console.log(nextNumber)
+        //console.log(nextNumber)
       }
       // Agregar el siguiente número a la lista
-      const nuevosNumeros = [...numeros, nextNumber].sort((a, b) => a - b);
-      setNumeros(nuevosNumeros);
-      console.log(nuevosNumeros)
-      console.log(numeros)
+      const nuevosNumeros = [...numbers, nextNumber].sort((a, b) => a - b);
+      setNumbers(nuevosNumeros);
+      //console.log(nuevosNumeros)
+      //console.log(numbers)
 
-      const raName = `R.A.${nextNumber}`;
-      setRaList([...raList, { id:nextNumber, name:raName, percentage:`${percentage}%`}])    
+      const raCode = `R.A.${nextNumber}`;
+      setRaList([...raList, { id:nextNumber, code:raCode, description:'', percentage:`${percentage}%`}])    
       raList.sort((a, b) => a - b);
       setTotalPercentage(totalPercentage + percentage)
       setPercentage(0)
-      //setAvailableNumbers(availableNumbers.slice(1)); 
       console.log(raList)
-      //console.log(availableNumbers)
     }    
   }
 
-  /*const findNextNumber = () => {
-    //let nextNumber = 1;
-    let nextNumber = count
-    console.log(nextNumber)
-    console.log(availableNumbers)
-    if(isNaN(deleteNumbers) && deleteNumbers.includes(nextNumber)){
-      //const deleteNumber = deleteNumbers.includes(nextNumber) ////
-      //deleteNumbers.forEach(number => console.log(number));  ////
-      const elementToRemove = nextNumber; // El elemento que deseas eliminar
-      const list = deleteNumbers.filter(item => item !== elementToRemove);
-      setDeleteNumbers(list)
-      console.log(list)
-      const listAvailable = availableNumbers.push(nextNumber).sort((a, b) => a - b);
-      setAvailableNumbers(listAvailable)
-      console.log(listAvailable) ////
+  const handleEditDescription = (index, newDescription) => {
+    const updateRaList = [...raList]
+    console.log(index)
+    console.log(newDescription)
+    if(newDescription !== undefined && newDescription.trim() !== ''){
+      updateRaList[index].description = newDescription
+      setRaList(updateRaList)
+      console.log(updateRaList)
     }
-    /*while (availableNumbers.includes(nextNumber)) {
-      nextNumber = nextNumber + 1;
-        console.log(nextNumber)
-    }*/
-    /*const numbers = Array.from({length:10}, (_, i) => i + 1)
-    console.log(numbers)
-    for (let i = 0; i < numbers.length; i++) {
-      if (!availableNumbers.includes(nextNumber)) {
-        return nextNumber
-          //break; // Si nextNumber no está en availableNumbers, sal del bucle
-      }
-      nextNumber++; // Incrementa nextNumber si está presente en availableNumbers
-      console.log(nextNumber)
-    }*/
-    /*console.log(nextNumber)
-    // Agregar el siguiente número a la lista
-    const newNumbers = [...availableNumbers, nextNumber].sort((a, b) => a - b);
-    setAvailableNumbers(newNumbers);
-    console.log(newNumbers)
-    console.log(availableNumbers)
-    setCount(nextNumber + 1); // Incrementa count para el siguiente número
-    return nextNumber;
-  }*/
+  }
 
   const handleEditPercentage = (index, newPercentage) => {
     const updateRaList = [...raList]
@@ -473,39 +445,15 @@ function CourseForm() {
   }
 
   const handleDeleteRa = (index) => {
-    console.log(index)
-    //const deletedRa = raList[index];
-    //const nuevosNumeros = [...numeros]; //////////////////////
-    //nuevosNumeros.splice(index, 1); /////////////////////
-    //setNumeros(nuevosNumeros); ///////////////////////////
-    //console.log(nuevosNumeros) /////////////////////////
-    /*const newNumbers = [...availableNumbers];
-    const deleteNumber = newNumbers.splice(index, 1)[0]; ////
-    console.log(deleteNumber)
-    console.log(newNumbers)
-    setAvailableNumbers(newNumbers);
-    setDeleteNumbers(prevDeleteNumbers => [...prevDeleteNumbers, deleteNumber]) ////
-    console.log(availableNumbers)*/
+    //console.log(index)
     const deletePercentage = parseInt(raList[index].percentage)
     const deleteNumber = raList[index].id
     const updateRaList = raList.filter((_, i) => i !== index)
     setRaList(updateRaList)
     setTotalPercentage(totalPercentage - deletePercentage)
     // Eliminar el número asociado al elemento eliminado
-    const nuevosNumeros = numeros.filter(numero => numero !== deleteNumber);
-    setNumeros(nuevosNumeros);
-
-    //setCount(1)
-    // Recalcular los números disponibles en orden ascendente
-    /*const deletedNumber = parseInt(raList[index].name.split('.')[1]);
-    const updatedAvailableNumbers = [...availableNumbers, deletedNumber].sort((a, b) => a - b);
-    setAvailableNumbers(updatedAvailableNumbers);*/
-    //availableNumbers.splice(index, 1);
-    /*const deletedNumber = parseInt(deletedRa.name.split('.')[1]);
-    console.log(deletedNumber)
-    setAvailableNumbers([...availableNumbers, deletedNumber]);
-    const updatedAvailableNumbers = [...availableNumbers, deletedNumber];
-    setAvailableNumbers(updatedAvailableNumbers.sort((a, b) => a - b));*/
+    const newNumbers = numbers.filter(number => number !== deleteNumber);
+    setNumbers(newNumbers);
   }
 
   return (
@@ -560,14 +508,20 @@ function CourseForm() {
                           <tbody>
                             {raList.sort((a, b) => a.id - b.id).map((ra, index) => (
                                 <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                  <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      {ra.name}
+                                  <td name='code_ra' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                      {ra.code}
                                   </td>
                                   <td className="px-6 py-4">
-                                    <input type="text" placeholder={`Descripción ${ra.name}`} name='description_learning' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                    <input 
+                                      name='description_learning'  
+                                      type="text" 
+                                      placeholder={`Descripción ${ra.code}`} 
+                                      onChange={(e) => handleEditDescription(index, e.target.value)}
+                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                   </td>
                                   <td className="px-6 py-4">
                                   <input
+                                    name='percentage'
                                     type="number"
                                     min={1}
                                     max={100}

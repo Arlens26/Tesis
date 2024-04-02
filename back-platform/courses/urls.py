@@ -9,6 +9,7 @@ router.register(r'evaluation-version', views.EvaluationVersionView, 'evaluation-
 router.register(r'create-scheduled-course', views.CreateScheduledCourseView, 'create-scheduled-course')
 router.register(r'learning-outcome', views.LearningOutComeView, 'learning-outcome')
 router.register(r'percentage', views.PercentageView, 'percentage')
+router.register(r'scheduled-course-detail', views.ScheduledCourseVersionDetailView, 'scheduled-course-detail')
 
 urlpatterns = [
     path('all/', include(router.urls))

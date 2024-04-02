@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage
+from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail
 
 class CourseSerializer(serializers.ModelSerializer):
     #period = serializers.StringRelatedField()
@@ -36,5 +36,18 @@ class PercentageSerializer(serializers.ModelSerializer):
 
 class EvaluationVersionDetailSerializer(serializers.ModelSerializer):
     class Meta:
-        model = EvaluationVersionSerializer
+        model = EvaluationVersionDetail
         fields = '__all__'
+
+#class ScheduledCourseDetailSerializer(serializers.ModelSerializer):
+  #  evaluation_details = serializers.SerializerMethodField()
+
+   # class Meta:
+   #     model = ScheduledCourse
+   #     fields = ['id', 'course', 'period', 'evaluation_version', 'group', 'evaluation_details']
+
+   # def get_evaluation_details(self, obj):
+    #    evaluation_version_id = obj.evaluation_version_id
+    #    evaluation_details = EvaluationVersionDetail.objects.filter(evaluation_version_id=evaluation_version_id)
+     #   serializer = EvaluationVersionDetailSerializer(instance=evaluation_details, many=True)
+     #   return serializer.data

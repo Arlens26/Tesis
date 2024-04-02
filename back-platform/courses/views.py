@@ -1,11 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 #from rest_framework.views import APIView
-from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer
-from .models import Course, AcademicPeriod, EvaluationVersion, LearningOutCome, Percentage, EvaluationVersionDetail
+from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer, EvaluationVersionDetailSerializer
+from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail
 #from django.http import JsonResponse
 from datetime import datetime
 from decimal import Decimal
+from rest_framework.decorators import action
 
 # Create your views here.
 class CourseView(viewsets.ModelViewSet):
@@ -107,3 +108,29 @@ class CreateScheduledCourseView(viewsets.ViewSet):
             errors.update(academic_period_serializer.errors)
             errors.update(evaluation_version_serializer.errors)
             return Response({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class ScheduledCourseVersionDetailView(viewsets.ViewSet):
+    serializer_class = ScheduledCourseSerializer
+
+    @action(detail=False, methods=['get'])
+    def get_details_by_evaluation_version(self, request):
+        evaluation_version_id = request.query_params.get('evaluation_version_id', None)
+
+        if evaluation_version_id is None:
+            return Response({'error': 'evaluation_version_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            scheduled_courses = ScheduledCourse.objects.filter(evaluation_version__id=evaluation_version_id)
+            evaluation_version_details = EvaluationVersionDetail.objects.filter(evaluation_version__id=evaluation_version_id)
+
+            serialized_scheduled_courses = ScheduledCourseSerializer(scheduled_courses, many=True).data
+            serialized_evaluation_version_details = EvaluationVersionDetailSerializer(evaluation_version_details, many=True).data
+
+            response_data = {
+                'scheduled_courses': serialized_scheduled_courses,
+                'evaluation_version_details': serialized_evaluation_version_details
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

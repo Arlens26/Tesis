@@ -193,6 +193,13 @@ function CourseList() {
      .catch(error => console.log('Error al eliminar curso', error))
   }
 
+  const handleCreateEvaluationVersion = (courseId) =>{
+    const selectedCourse = courses.find(course => course.id === courseId);
+    console.log(selectedCourse)
+    navigate('/evaluation-version-course/', {state: { course: selectedCourse}})
+    //navigate('/evaluation-version-course/', {state: { courseId }});
+  }
+
   if (!courses) {
     return <p>No hay cursos creados...</p>;
   }
@@ -260,39 +267,19 @@ function CourseList() {
                   <div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                     <span>La cantidad de créditos es: {curso.credit}</span>
                   </div>
-                  <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">
-                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                            <tr>
-                                <th scope="col" className="px-6 py-3">
-                                    Opciones
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Actividad
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Fecha
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Calificación
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Ejercicios
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                        </tbody>
-                    </table>
-                    <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-                    >
+                  <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">             
+                    <button 
+                      className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                      onClick={(e) =>{
+                        e.stopPropagation();
+                        handleCreateEvaluationVersion(curso.id)
+                        }}>
                         <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-plus h-6 w-6 mr-2" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M12 5l0 14" />
                             <path d="M5 12l14 0" />
                         </svg>
-                        <span>Crear Actividad</span>
+                        <span>Evaluación versión</span>
                     </button>
                   </div>
                 </div>
@@ -305,37 +292,31 @@ function CourseList() {
 
 function CourseForm() {
 
-  const { createScheduledCourse, updateCourse } = useCourses()
+  const { createCourse, updateCourse } = useCourses()
   const {id} = useParams()
   const paramsId = id
   const location = useLocation()
   const navigate = useNavigate()
-
-  const [raList, setRaList] = useState([])
-  const [percentage, setPercentage] = useState(0)
-  const [totalPercentage, setTotalPercentage] = useState(0)
- //const [availableNumbers, setAvailableNumbers] = useState([]);
-  const [numbers, setNumbers] = useState([]);
 
   useEffect(() => {
    /* const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
     setAvailableNumbers(numbers);*/
     const loadCourseData = () => {
       if (location.state && location.state.courseData) {
-        const { name, code, description, credit, period } = location.state.courseData;
+        const { name, code, description, credit } = location.state.courseData;
         document.querySelector('input[name="name"]').value = name;
         document.querySelector('input[name="code"]').value = code;
         //document.querySelector('input[name="group"]').value = group;
         document.querySelector('textarea[name="description"]').value = description;
         document.querySelector('input[name="credit"]').value = credit;
         // Llenar el select con el único periodo académico y deshabilitarlo
-        const select = document.querySelector('select[name="period_id"]');
+        /*const select = document.querySelector('select[name="period_id"]');
         const option = document.createElement('option');
         option.textContent = period;
         option.value = period; // Asigna el mismo valor que el texto del periodo
         option.selected = true; // Selección por defecto
         //select.disabled = true; // Deshabilita el select
-        select.appendChild(option);
+        select.appendChild(option);*/
       }
     };
 
@@ -346,19 +327,11 @@ function CourseForm() {
 
     event.preventDefault()
     const fields = Object.fromEntries(new window.FormData(event.target))
-    const formData = new FormData(event.target);
-
-    const buildLearningOutcomesList = () => {
-      return raList.map(ra => ({
-        code: ra.code, 
-        description: ra.description,
-        percentage: ra.percentage
-      }));
-    };
+    //const formData = new FormData(event.target);
 
     // Construir el JSON deseado
-    const scheduledCourseData = {
-      course: {
+    //const scheduledCourseData = {
+   /*   course: {
         name: formData.get('name'),
         code: formData.get('code'),
         description: formData.get('description'),
@@ -372,8 +345,7 @@ function CourseForm() {
         date: '2024-03-08', 
       },
       group: formData.get('group'),
-      learning_outcome: buildLearningOutcomesList()
-    };
+    };*/
 
     if(paramsId) {
       updateCourse(paramsId, fields)
@@ -384,7 +356,17 @@ function CourseForm() {
         .catch((error) => {
           console.error('Error al actualizar curso:', error);
         });
-    } else {
+    } else{
+      createCourse(fields)
+        .then(() => {
+          console.log('Curso creado exitosamente');
+          navigate('/course-list')
+        })
+        .catch((error) => {
+          console.error('Error al crear curso:', error);
+        });
+    }
+    /*else {
       createScheduledCourse(scheduledCourseData)
         .then(() => {
           console.log(scheduledCourseData)
@@ -393,7 +375,73 @@ function CourseForm() {
         .catch((error) => {
           console.error('Error al crear curso:', error);
         });
-    }
+    }*/
+  }
+
+  return (
+      <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
+        <span>{paramsId ? 'Actualizar curso':'Crear curso'}</span>
+        
+        <input type="text" placeholder='Nombre del curso' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <input type="text" placeholder='Código del curso' name='code' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <textarea placeholder='Descripción' name='description' rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        <input type="number" placeholder='Créditos' name='credit' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+        
+        <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>{paramsId ? 'Actualizar':'Guardar'}</button>
+      </form>
+  )
+}
+
+function EvaluationVersionCourseForm() {
+  const location = useLocation()
+
+  // Extraer el curso del estado de ubicación
+  useEffect(() => {
+     const loadCourseData = () => {
+       if (location.state && location.state.course) {
+         const { name } = location.state.course;
+         document.querySelector('input[name="name"]').value = name;
+       }
+     };
+ 
+     loadCourseData();
+   }, [location.state]);
+
+  const [raList, setRaList] = useState([])
+  const [percentage, setPercentage] = useState(0)
+  const [totalPercentage, setTotalPercentage] = useState(0)
+  const [numbers, setNumbers] = useState([]);
+
+  const buildLearningOutcomesList = () => {
+    return raList.map(ra => ({
+      code: ra.code, 
+      description: ra.description,
+      percentage: ra.percentage
+    }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    //const fields = Object.fromEntries(new window.FormData(event.target))
+    //const formData = new FormData(event.target);
+
+    // Construir el JSON deseado
+    const evaluationVersionData = {
+      course: {
+        id: location.state.course.id,
+      },
+      /*academic_period: {
+        year: 2024, 
+        semester: 1, 
+      },*/
+      /*evaluation_version: {
+        course_id: location.state.course.id,
+        date: '2024-03-08', 
+      },*/
+      //group: formData.get('group'),
+      learning_outcome: buildLearningOutcomesList()
+    };
+    console.log(evaluationVersionData)
   }
 
   const handleAddRa = () => {
@@ -457,19 +505,14 @@ function CourseForm() {
   }
 
   return (
-      <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
-        <span>Creación cursos</span>
-        <hr />
-        <select id="countries" name='period_id' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+    <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
+        <span>Creación evaluación versión curso</span>
+        {/*<select id="countries" name='period_id' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option disabled>Periodo académico</option>
         </select> 
-        <input type="text" placeholder='Nombre del curso' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <input type="text" placeholder='Código del curso' name='code' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <input type="text" placeholder='Grupo' name='group' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <textarea placeholder='Descripción' name='description' rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <input type="number" placeholder='Créditos' name='credit' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+  <input type="text" placeholder='Grupo' name='group' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">*/}
+        <input type="text" placeholder='' name='name' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         <div className="flex flex-col gap-2">
-          {!paramsId && (
               <div> 
                 <span>Porcentaje de RA:</span>
                 <input
@@ -486,8 +529,6 @@ function CourseForm() {
                   className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Agregar RA</button>
                 
               </div>
-             )
-          }
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                               <tr>
@@ -555,9 +596,9 @@ function CourseForm() {
                                 </tr>
                           </tbody>
           </table>
+          <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
         </div>
-        <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>{paramsId ? 'Actualizar':'Guardar'}</button>
-      </form>
+    </form>
   )
 }
 
@@ -585,6 +626,7 @@ function CourseForm() {
             <Route path='/course-list' element={<CourseList/>} />
             <Route path='/course' element={<CourseForm/>} />
             <Route path='/course/:id' element={<CourseForm/>} />
+            <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
           </Routes>
         </main>
         <FooterPage />

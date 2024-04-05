@@ -2,6 +2,19 @@ from django.db import models
 from datetime import datetime
 
 # Create your models here.
+class Professor(models.Model):
+    name = models.CharField(max_length=50)
+    email = models.EmailField(max_length=30)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'professor'
+        verbose_name_plural = 'professor'
+        db_table = 'professor'
+
 class Course(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20)
@@ -31,7 +44,8 @@ class AcademicPeriod(models.Model):
         db_table = 'academic_period'
 
 class EvaluationVersion(models.Model):
-    date = models.DateField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='scheduled_courses')
+    date = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return str(self.date)
@@ -43,9 +57,9 @@ class EvaluationVersion(models.Model):
         db_table = 'evaluation_version'
 
 class ScheduledCourse(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='scheduled_courses')
     period = models.ForeignKey(AcademicPeriod, on_delete=models.CASCADE, related_name='scheduled_academic_periods')
     evaluation_version = models.ForeignKey(EvaluationVersion, on_delete=models.CASCADE, related_name='scheduled_evaluation_versions')
+    professor = models.ForeignKey(Professor, on_delete=models.CASCADE, related_name='professors')
     group = models.CharField(max_length=20)
 
     def __str__(self):

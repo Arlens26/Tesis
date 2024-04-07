@@ -29,6 +29,55 @@ class PercentageView(viewsets.ModelViewSet):
     serializer_class = PercentageSerializer
     queryset = Percentage.objects.all()
 
+class CreateEvaluationVersionCourseView(viewsets.ViewSet):
+    serializer_class = EvaluationVersionSerializer
+
+    def create(self, request):
+        course_data = request.data.get('course')
+        learning_outcome_data = request.data.get('learning_outcome')
+
+        # Crear instancia de evaluation version
+        evaluation_version_serializer = EvaluationVersionSerializer(data={
+            'course': course_data['id']
+        })
+
+        # Validar y guardar la instancia evaluation version, learning outcome y percentage
+        if evaluation_version_serializer.is_valid():
+            evaluation_version_instance = evaluation_version_serializer.save()
+
+            for outcome_data in learning_outcome_data:
+                        outcome_serializer = LearningOutComeSerializer(data=outcome_data)
+                        if outcome_serializer.is_valid():
+                            outcome_instance = outcome_serializer.save()
+
+                            percentage_value = Decimal(outcome_data['percentage'].replace('%', ''))
+                            
+                            percentage_serializer = PercentageSerializer(data={
+                                'initial_date': datetime.now().date(),
+                                'end_date': None,
+                                'percentage': percentage_value,
+                                'learning_outcome_id': outcome_instance.pk
+                            })
+
+                            print('Outcome id:',outcome_instance.pk)
+                            
+                            if percentage_serializer.is_valid():
+                                percentage_instance = percentage_serializer.save()
+                                print(percentage_instance.pk)
+                                evaluation_version_detail_instance = EvaluationVersionDetail.objects.create(
+                                    learning_outcome=outcome_instance,
+                                    percentage=percentage_instance,
+                                    evaluation_version=evaluation_version_instance
+                                )
+                                print("percentage_serializer data:", percentage_serializer.validated_data)
+                                print("evaluation_version_detail_instance:", evaluation_version_detail_instance)
+                            else:
+                                print("Error in percentage_serializer validation:", percentage_serializer.errors)
+                        
+            return Response({'message': 'Evaluation version course created successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': evaluation_version_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 class CreateScheduledCourseView(viewsets.ViewSet):
     serializer_class = ScheduledCourseSerializer
 

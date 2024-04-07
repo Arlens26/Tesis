@@ -1,11 +1,14 @@
 
 import './App.css';
 import MonacoEditorWrapper from './components/MonacoEditor';
-import { DeleteIcon, EditIcon, LogoUnivalleIcon, MenuIcon } from './components/Icons';
-import { useEffect, useId, useState } from 'react';
+import { LogoUnivalleIcon, MenuIcon } from './components/Icons';
+import { useId, useState } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
-import { Link, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Link, Routes, Route } from 'react-router-dom';
+import { CourseList } from './components/CourseList.jsx';
+import { CourseForm } from './components/CourseForm.jsx';
+import { EvaluationVersionCourseForm } from './components/EvaluationVersionCourseForm.jsx';
 import { useCourses } from './hooks/useCourses.js';
 
 function App() {
@@ -17,6 +20,7 @@ function App() {
   const size = 30
   const menuCheckId = useId();
 
+  const { courses, getCourse, deleteCourse } = useCourses();
   const [menuChecked, setMenuChecked] = useState(true);
 
   const handleMenuToggle = () => {
@@ -159,449 +163,6 @@ function App() {
     )
   }
 
-function CourseList() { 
-  const { courses, getCourse, deleteCourse } = useCourses()
-  const [accordionStates, setAccordionStates] = useState({});
-
-  const navigate = useNavigate()
-
-  const toggleAccordion = (id) => {
-    setAccordionStates((prevState) => ({
-      ...prevState,
-      [id]: !prevState[id] || false, // Si el estado no existe, lo inicializa como false
-    }));
-  };
-
-  const handleEditCourse = (courseId) => {
-    getCourse(courseId)
-      .then(courseData => {
-        navigate(`/course/${courseId}`, {state: {courseData}})
-      })
-      .catch(error => console.log('Error al obtener cursos', error))
-  }
-
-  const handleCreateCourse = () => {
-    navigate('/course')
-  }
-
-  const handleDeleteCourse = (courseId) => {
-     deleteCourse(courseId)
-     .then(() => {
-       navigate('/course-list')
-      }
-     )
-     .catch(error => console.log('Error al eliminar curso', error))
-  }
-
-  const handleCreateEvaluationVersion = (courseId) =>{
-    const selectedCourse = courses.find(course => course.id === courseId);
-    console.log(selectedCourse)
-    navigate('/evaluation-version-course/', {state: { course: selectedCourse}})
-    //navigate('/evaluation-version-course/', {state: { courseId }});
-  }
-
-  if (!courses) {
-    return <p>No hay cursos creados...</p>;
-  }
-
-  return (
-    <section>
-      <div className='flex flex-col gap-2'>
-      <div className='flex justify-end items-center'> 
-        <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-        onClick={handleCreateCourse}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-plus h-6 w-6 mr-2" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M12 5l0 14" />
-                <path d="M5 12l14 0" />
-            </svg>
-            <span>Crear curso</span>
-        </button>
-      </div>
-        {courses.map((curso) => (
-              <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
-                <h2 id={`accordion-collapse-heading-${curso.id}`}>
-                  <div
-                    type="button"
-                    className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
-                    data-accordion-target={`#accordion-collapse-body-${curso.id}`}
-                    aria-expanded={accordionStates[curso.id]}
-                    onClick={() => toggleAccordion(curso.id)}
-                    aria-controls={`accordion-collapse-body-${curso.id}`}
-                  >
-                    <div className='flex items-start gap-2'>
-                      <button className='bg-btn-edit opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEditCourse(curso.id)
-                      }}>
-                        <EditIcon />
-                      </button>
-                      <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                      onClick={(e) => {
-                        // Detener la propagación del evento para que no afecte al botón del acordeón
-                        e.stopPropagation();
-                        handleDeleteCourse(curso.id)
-                      }}>
-                        <DeleteIcon />
-                      </button>
-                      <span>{curso.name}</span>
-                    </div>
-                    <svg
-                      data-accordion-icon
-                      className={`w-3 h-3 ${accordionStates[curso.id] ? 'rotate-0' : 'rotate-180'} shrink-0`}
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 10 6"
-                    >
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
-                    </svg>
-                  </div>
-                </h2>
-                <div
-                  id={`accordion-collapse-body-${curso.id}`}
-                  className={`${accordionStates[curso.id] ? 'block' : 'hidden'}`}
-                  aria-labelledby={`accordion-collapse-heading-${curso.id}`}
-                >
-                  <div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-                    <span>La cantidad de créditos es: {curso.credit}</span>
-                  </div>
-                  <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">             
-                    <button 
-                      className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-                      onClick={(e) =>{
-                        e.stopPropagation();
-                        handleCreateEvaluationVersion(curso.id)
-                        }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-plus h-6 w-6 mr-2" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                            <path d="M12 5l0 14" />
-                            <path d="M5 12l14 0" />
-                        </svg>
-                        <span>Evaluación versión</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-          ))}
-      </div>
-    </section>
-  );
-}
-
-function CourseForm() {
-
-  const { createCourse, updateCourse } = useCourses()
-  const {id} = useParams()
-  const paramsId = id
-  const location = useLocation()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-   /* const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
-    setAvailableNumbers(numbers);*/
-    const loadCourseData = () => {
-      if (location.state && location.state.courseData) {
-        const { name, code, description, credit } = location.state.courseData;
-        document.querySelector('input[name="name"]').value = name;
-        document.querySelector('input[name="code"]').value = code;
-        //document.querySelector('input[name="group"]').value = group;
-        document.querySelector('textarea[name="description"]').value = description;
-        document.querySelector('input[name="credit"]').value = credit;
-        // Llenar el select con el único periodo académico y deshabilitarlo
-        /*const select = document.querySelector('select[name="period_id"]');
-        const option = document.createElement('option');
-        option.textContent = period;
-        option.value = period; // Asigna el mismo valor que el texto del periodo
-        option.selected = true; // Selección por defecto
-        //select.disabled = true; // Deshabilita el select
-        select.appendChild(option);*/
-      }
-    };
-
-    loadCourseData();
-  }, [location.state]);
-
-  const handleSubmit = (event) => {
-
-    event.preventDefault()
-    const fields = Object.fromEntries(new window.FormData(event.target))
-    //const formData = new FormData(event.target);
-
-    // Construir el JSON deseado
-    //const scheduledCourseData = {
-   /*   course: {
-        name: formData.get('name'),
-        code: formData.get('code'),
-        description: formData.get('description'),
-        credit: parseInt(formData.get('credit')),
-      },
-      academic_period: {
-        year: 2024, 
-        semester: 1, 
-      },
-      evaluation_version: {
-        date: '2024-03-08', 
-      },
-      group: formData.get('group'),
-    };*/
-
-    if(paramsId) {
-      updateCourse(paramsId, fields)
-        .then(() => {
-          console.log('Curso actualizado exitosamente');
-          navigate('/course-list')
-        })
-        .catch((error) => {
-          console.error('Error al actualizar curso:', error);
-        });
-    } else{
-      createCourse(fields)
-        .then(() => {
-          console.log('Curso creado exitosamente');
-          navigate('/course-list')
-        })
-        .catch((error) => {
-          console.error('Error al crear curso:', error);
-        });
-    }
-    /*else {
-      createScheduledCourse(scheduledCourseData)
-        .then(() => {
-          console.log(scheduledCourseData)
-          console.log('Curso creado exitosamente');
-        })
-        .catch((error) => {
-          console.error('Error al crear curso:', error);
-        });
-    }*/
-  }
-
-  return (
-      <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
-        <span>{paramsId ? 'Actualizar curso':'Crear curso'}</span>
-        
-        <input type="text" placeholder='Nombre del curso' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <input type="text" placeholder='Código del curso' name='code' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <textarea placeholder='Descripción' name='description' rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <input type="number" placeholder='Créditos' name='credit' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        
-        <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>{paramsId ? 'Actualizar':'Guardar'}</button>
-      </form>
-  )
-}
-
-function EvaluationVersionCourseForm() {
-  const location = useLocation()
-
-  // Extraer el curso del estado de ubicación
-  useEffect(() => {
-     const loadCourseData = () => {
-       if (location.state && location.state.course) {
-         const { name } = location.state.course;
-         document.querySelector('input[name="name"]').value = name;
-       }
-     };
- 
-     loadCourseData();
-   }, [location.state]);
-
-  const [raList, setRaList] = useState([])
-  const [percentage, setPercentage] = useState(0)
-  const [totalPercentage, setTotalPercentage] = useState(0)
-  const [numbers, setNumbers] = useState([]);
-
-  const buildLearningOutcomesList = () => {
-    return raList.map(ra => ({
-      code: ra.code, 
-      description: ra.description,
-      percentage: ra.percentage
-    }));
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    //const fields = Object.fromEntries(new window.FormData(event.target))
-    //const formData = new FormData(event.target);
-
-    // Construir el JSON deseado
-    const evaluationVersionData = {
-      course: {
-        id: location.state.course.id,
-      },
-      /*academic_period: {
-        year: 2024, 
-        semester: 1, 
-      },*/
-      /*evaluation_version: {
-        course_id: location.state.course.id,
-        date: '2024-03-08', 
-      },*/
-      //group: formData.get('group'),
-      learning_outcome: buildLearningOutcomesList()
-    };
-    console.log(evaluationVersionData)
-  }
-
-  const handleAddRa = () => {
-    
-    if(percentage > 0 && totalPercentage + percentage <= 100){
-      // Encontrar el número menor no presente en la lista
-      let nextNumber = 1;
-      //console.log(nextNumber)
-      while (numbers.includes(nextNumber)) {
-        //console.log(nextNumber)
-        //console.log(numbers)
-        nextNumber++;
-        //console.log(nextNumber)
-      }
-      // Agregar el siguiente número a la lista
-      const nuevosNumeros = [...numbers, nextNumber].sort((a, b) => a - b);
-      setNumbers(nuevosNumeros);
-      //console.log(nuevosNumeros)
-      //console.log(numbers)
-
-      const raCode = `R.A.${nextNumber}`;
-      setRaList([...raList, { id:nextNumber, code:raCode, description:'', percentage:`${percentage}%`}])    
-      raList.sort((a, b) => a - b);
-      setTotalPercentage(totalPercentage + percentage)
-      setPercentage(0)
-      console.log(raList)
-    }    
-  }
-
-  const handleEditDescription = (index, newDescription) => {
-    const updateRaList = [...raList]
-    console.log(index)
-    console.log(newDescription)
-    if(newDescription !== undefined && newDescription.trim() !== ''){
-      updateRaList[index].description = newDescription
-      setRaList(updateRaList)
-      console.log(updateRaList)
-    }
-  }
-
-  const handleEditPercentage = (index, newPercentage) => {
-    const updateRaList = [...raList]
-    const diff = newPercentage - parseInt(updateRaList[index].percentage)
-    if(!isNaN(newPercentage) && totalPercentage + diff <= 100 && newPercentage >= 1 && newPercentage <= 100){
-      updateRaList[index].percentage = `${newPercentage}%`
-      setRaList(updateRaList)
-      setTotalPercentage(totalPercentage + diff)
-    }
-  }
-
-  const handleDeleteRa = (index) => {
-    //console.log(index)
-    const deletePercentage = parseInt(raList[index].percentage)
-    const deleteNumber = raList[index].id
-    const updateRaList = raList.filter((_, i) => i !== index)
-    setRaList(updateRaList)
-    setTotalPercentage(totalPercentage - deletePercentage)
-    // Eliminar el número asociado al elemento eliminado
-    const newNumbers = numbers.filter(number => number !== deleteNumber);
-    setNumbers(newNumbers);
-  }
-
-  return (
-    <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
-        <span>Creación evaluación versión curso</span>
-        {/*<select id="countries" name='period_id' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option disabled>Periodo académico</option>
-        </select> 
-  <input type="text" placeholder='Grupo' name='group' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">*/}
-        <input type="text" placeholder='' name='name' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        <div className="flex flex-col gap-2">
-              <div> 
-                <span>Porcentaje de RA:</span>
-                <input
-                  type="number"
-                  placeholder="Porcentaje"
-                  min={0}
-                  max={100}
-                  value={percentage}
-                  onChange={(e) => setPercentage(parseInt(e.target.value))}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
-                <button type='button' onClick={handleAddRa} 
-                  disabled={totalPercentage === 100 || percentage === 1}
-                  className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Agregar RA</button>
-                
-              </div>
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                              <tr>
-                                  <th scope="col" className="px-6 py-3">
-                                      Código
-                                  </th>
-                                  <th scope="col" className="px-6 py-3">
-                                      Descripción
-                                  </th>
-                                  <th scope="col" className="px-6 py-3">
-                                      Porcentaje
-                                  </th>
-                                  <th scope="col" className="px-6 py-3">
-                                      Acciones
-                                  </th>
-                              </tr>
-                          </thead>
-                          <tbody>
-                            {raList.sort((a, b) => a.id - b.id).map((ra, index) => (
-                                <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                  <td name='code_ra' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      {ra.code}
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    <input 
-                                      name='description_learning'  
-                                      type="text" 
-                                      placeholder={`Descripción ${ra.code}`} 
-                                      onChange={(e) => handleEditDescription(index, e.target.value)}
-                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                                  </td>
-                                  <td className="px-6 py-4">
-                                  <input
-                                    name='percentage'
-                                    type="number"
-                                    min={1}
-                                    max={100}
-                                    value={parseInt(ra.percentage)}
-                                    onChange={(e) => handleEditPercentage(index, parseInt(e.target.value))}
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                  />
-                                  </td>
-                                  <td className="flex items-center gap-1">
-                                    <button type='button' 
-                                    onClick={ () => handleDeleteRa(index)}
-                                    className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'>
-                                      <DeleteIcon />
-                                    </button>
-                                  </td>
-                                </tr>
-                            ))}
-                            <tr key={`totalPercentageRa`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      Total Porcentaje
-                                  </th>
-                                  <td className="px-6 py-4">
-
-                                  </td>
-                                  <td className="px-6 py-4">
-                                      {`${totalPercentage}%`}
-                                  </td>
-                                  <td className="px-6 py-4">
-
-                                  </td>
-                                </tr>
-                          </tbody>
-          </table>
-          <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
-        </div>
-    </form>
-  )
-}
-
   return (
       <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
         <HeaderPage />
@@ -609,7 +170,7 @@ function EvaluationVersionCourseForm() {
               <MenuIcon />
             </label>
             <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
-        <aside className='menu-list py-10 flex justify-center'>
+        <aside className={`menu-list py-10 flex justify-center ${menuChecked ? 'open' : ''}`}>
           <ul>
               <li><Link to="/">Inicio</Link></li>
               <li><Link to="/login">Login</Link></li>
@@ -618,12 +179,13 @@ function EvaluationVersionCourseForm() {
               <li><Link to="/course">Create Course</Link></li>
           </ul>
         </aside>
-        <main className='bg-main p-6'>
+        <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''}`}>
           <Routes>
             <Route path='/' element={<main/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/code' element={<CreateCode/>}/>
-            <Route path='/course-list' element={<CourseList/>} />
+            {/* Cambiar forma de pasar props usando useContext para los cursos */}
+            <Route path='/course-list' element={<CourseList courses={courses} getCourse={getCourse} deleteCourse={deleteCourse}/>} />
             <Route path='/course' element={<CourseForm/>} />
             <Route path='/course/:id' element={<CourseForm/>} />
             <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />

@@ -6,6 +6,7 @@ export function useCourses() {
     
     const COURSE_ENDPOINT = `http://localhost:8000/courses/all/courses/`
     const CREATE_SCHEDULED_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
+    const CREATE_EVALUATION_VERSION_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-evaluation-version-course/`
     
     const [responseCourses, setResponseCourses] = useState([])
     
@@ -101,6 +102,30 @@ export function useCourses() {
         })
     }
 
+    const createEvaluationVersionCourse = (fields) => {
+
+      return fetch(CREATE_EVALUATION_VERSION_COURSE_ENPOINT, {
+        method: 'POST', 
+        headers: {
+          'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify(fields)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error al enviar los datos');
+        }
+        return response.json(); // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
+      })
+      .then(data => {
+        console.log('Datos enviados exitosamente', data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+
     const createScheduledCourse = (fields) => {
 
         return fetch(CREATE_SCHEDULED_COURSE_ENPOINT, {
@@ -126,6 +151,6 @@ export function useCourses() {
 
     return { 
         courses: mappedCourses, getCourses, getCourse, createCourse, deleteCourse, updateCourse, 
-        createScheduledCourse
+        createScheduledCourse, createEvaluationVersionCourse
      }
   }

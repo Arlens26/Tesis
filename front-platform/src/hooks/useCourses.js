@@ -22,7 +22,7 @@ export function useCourses() {
     }))
 
     useEffect(() => {
-        getCourses();
+        getCourses()
     }, []);
 
     const getCourses = () => {

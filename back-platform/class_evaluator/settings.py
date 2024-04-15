@@ -145,6 +145,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',  # Opcional: para permitir autenticación mediante sesiones de Django
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        #'rest_framework.permissions.IsAuthenticated',
     ],
 }

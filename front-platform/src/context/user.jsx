@@ -6,11 +6,10 @@ export const AuthContext = createContext()
 
 // Proveer el acceso al contexto
 export function AuthProvider ({ children }) {
-    const [user, setUser] = useState(null)
-    const [token, setToken] = useState(null)
+    const [user, setUser] = useState({ user: null, token: null, profile: null });
 
     return(
-        <AuthContext.Provider value={{ user, setUser, token, setToken}}>
+        <AuthContext.Provider value={{ user, setUser }}>
             {children}
         </AuthContext.Provider>
     )

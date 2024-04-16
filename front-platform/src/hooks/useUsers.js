@@ -6,8 +6,8 @@ export function useUsers() {
     const AUTH_ENDPOINT = `http://127.0.0.1:8000/authentication/user/login/`
     const PROFILE_ENDPOINT = `http://127.0.0.1:8000/authentication/user/profile/`
 
-    const { user, setUser, token, setToken } = useContext(AuthContext);
-
+    const { user, setUser } = useContext(AuthContext);
+    const profile = user.profile;
     /*useEffect(() => {
         console.log(user)
         getProfile(user)
@@ -28,9 +28,30 @@ export function useUsers() {
             return response.json();
           })
           .then(data => {
-            // Aquí deberías establecer el usuario y el token en el contexto de autenticación
+            // Obtener el perfil del usuario después del inicio de sesión
+            fetch(PROFILE_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Token ${data.token}`
+                }
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Error al obtener el perfil del usuario');
+                }
+                return response.json();
+              })
+              .then(profileData => {
+                // Agregar el perfil del usuario al estado
+                setUser(prevUser => ({ ...prevUser, profile: profileData }));
+              })
+              .catch(error => {
+                console.error('Error al obtener el perfil del usuario:', error);
+              });
+
             setUser(data.user);
-            setToken(data.token);
+            //setUser(data.token);
+            console.log(profile)
             console.log('Datos enviados exitosamente', data);
           })
           .catch(error => {
@@ -38,7 +59,7 @@ export function useUsers() {
           });
     };
 
-    const getProfile = (fields) => {
+    /*const getProfile = (fields) => {
         return fetch(PROFILE_ENDPOINT, {
             method: 'POST', 
             headers: {
@@ -61,8 +82,8 @@ export function useUsers() {
           .catch(error => {
             console.error('Error:', error);
           });
-    };
+    };*/
 
     // Devuelve las funciones o valores necesarios del contexto
-    return { user, getLogin, getProfile }
+    return { user, getLogin }
 }

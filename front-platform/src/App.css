@@ -41,7 +41,7 @@
   .container header {
     background: white;
     grid-area: header;
-    display: flex;
+    /*display: flex;*/
     /*grid-column: 1/-1;*/
   }
 

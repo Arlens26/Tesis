@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useContext } from 'react';
+import { AuthContext } from '../context/user';
 //import responseCursos from '../mocks/curso.json';
 //import { json } from 'react-router-dom';
 
@@ -8,9 +9,15 @@ export function useCourses() {
     const CREATE_SCHEDULED_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
     const CREATE_EVALUATION_VERSION_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-evaluation-version-course/`
     
-    const [responseCourses, setResponseCourses] = useState([])
+    const { course, setCourse } = useContext(AuthContext)
+    //const [responseCourses, setResponseCourses] = useState([])
     
-    const courses = responseCourses
+    useEffect(() => {
+      getCourses()
+    }, []);
+
+    const courses = course
+    console.log(courses)
 
     const mappedCourses = courses?.map(course => ({
       id: course.id,
@@ -21,15 +28,11 @@ export function useCourses() {
       //period: course.period
     }))
 
-    useEffect(() => {
-        getCourses()
-    }, []);
-
     const getCourses = () => {
         fetch(COURSE_ENDPOINT)
         .then(res => res.json())
         .then(json => {
-            setResponseCourses(json)
+            setCourse(json)
         })
     }
 

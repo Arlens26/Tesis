@@ -10,7 +10,7 @@ import { LoginForm } from './components/LoginForm.jsx';
 import { CourseList } from './components/CourseList.jsx';
 import { CourseForm } from './components/CourseForm.jsx';
 import { EvaluationVersionCourseForm } from './components/EvaluationVersionCourseForm.jsx';
-import { useCourses } from './hooks/useCourses.js';
+//import { useCourses } from './hooks/useCourses.js';
 import { ScheduledCourse } from './components/ScheduledCourse.jsx';
 
 function App() {
@@ -22,7 +22,7 @@ function App() {
   const size = 30
   const menuCheckId = useId();
 
-  const { courses, getCourse, deleteCourse } = useCourses();
+  //const { courses, getCourse, deleteCourse } = useCourses();
   const [menuChecked, setMenuChecked] = useState(true);
 
   const handleMenuToggle = () => {
@@ -163,7 +163,7 @@ function App() {
             <Route path='/login' element={<LoginForm/>} />
             <Route path='/code' element={<CreateCode/>}/>
             {/* Cambiar forma de pasar props usando useContext para los cursos */}
-            <Route path='/course-list' element={<CourseList courses={courses} getCourse={getCourse} deleteCourse={deleteCourse}/>} />
+            <Route path='/course-list' element={<CourseList/>} />
             <Route path='/course' element={<CourseForm/>} />
             <Route path='/course/:id' element={<CourseForm/>} />
             <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />

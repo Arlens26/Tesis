@@ -46,8 +46,22 @@ class UserViewSet(viewsets.ViewSet):
     @permission_classes([IsAuthenticated])
     def profile(self, request):
         print(request.user)
-        if request.user.is_authenticated:
-            user_serializer = UserSerializer(instance=request.user)
-            return Response(user_serializer.data, status=status.HTTP_200_OK)
+        user = request.user
+        # Verificar si el usuario es profesor, director y/o estudiante
+        is_professor = user.groups.filter(name='professor').exists()
+        is_director = user.groups.filter(name='director').exists()
+        is_student = user.groups.filter(name='student').exists()
+        
+        if user.is_authenticated:
+            #user_serializer = UserSerializer(instance=user)
+            profile_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'is_professor': is_professor,
+                'is_director': is_director,
+                'is_student': is_student
+            }
+            return Response(profile_data, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'User is not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)

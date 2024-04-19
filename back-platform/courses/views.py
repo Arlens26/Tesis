@@ -35,10 +35,22 @@ class CreateEvaluationVersionCourseView(viewsets.ViewSet):
     def create(self, request):
         course_data = request.data.get('course')
         learning_outcome_data = request.data.get('learning_outcome')
+        print(request)
+        # Validar si existe una evaluacion de versión del curso
+        existing_evaluation_version = EvaluationVersion.objects.filter(course_id=course_data['id']).order_by('-initial_date').first()
+        print(existing_evaluation_version)
+        if existing_evaluation_version:
+            existing_evaluation_version.end_date = datetime.now().date()
+            existing_evaluation_version.save()
+            initial_date = datetime.now().date()
+        else:
+            initial_date = datetime.now().date()
 
         # Crear instancia de evaluation version
         evaluation_version_serializer = EvaluationVersionSerializer(data={
-            'course': course_data['id']
+            'course': course_data['id'],
+            'initial_date': initial_date,
+            'end_date': None
         })
 
         # Validar y guardar la instancia evaluation version, learning outcome y percentage

@@ -12,6 +12,7 @@ import { CourseForm } from './components/CourseForm.jsx';
 import { EvaluationVersionCourseForm } from './components/EvaluationVersionCourseForm.jsx';
 //import { useCourses } from './hooks/useCourses.js';
 import { ScheduledCourse } from './components/ScheduledCourse.jsx';
+import { VersionProvider } from './context/evaluationVersion.jsx';
 
 function App() {
 
@@ -142,6 +143,7 @@ function App() {
   }
 
   return (
+    <VersionProvider>
       <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
         <HeaderPage />
             <label className='btn-menu' htmlFor={menuCheckId}>
@@ -172,6 +174,7 @@ function App() {
         </main>
         <FooterPage />
       </section>
+    </VersionProvider>
   )
 }
 

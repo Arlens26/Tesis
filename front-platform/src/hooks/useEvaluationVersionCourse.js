@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
+import { VersionContext } from "../context/evaluationVersion";
 
 export function useEvaluationVersionCourse(){
+    
     const EVALUATION_VERSION_ENDPOINT = `http://localhost:8000/courses/all/evaluation-version/`
     
-    const [responseEvaluationVersion, setEvaluationVersion] = useState([])
+    const { evaluationVersion, setEvaluationVersion, hasEvaluationVersion } = useContext(VersionContext)
+    
+    console.log(hasEvaluationVersion)
 
     useEffect(() => {
         getEvaluationVersion()
@@ -25,6 +29,6 @@ export function useEvaluationVersionCourse(){
         })
     }
 
-    return { responseEvaluationVersion }
+    return { evaluationVersion, hasEvaluationVersion }
 
 }

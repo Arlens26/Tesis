@@ -27,14 +27,14 @@ function BtnCreateCourse() {
 }
 
 function EvaluationVersionList(){
-    const { responseEvaluationVersion } = useEvaluationVersionCourse()
-    console.log(responseEvaluationVersion)
+    const { evaluationVersion } = useEvaluationVersionCourse()
+    console.log(evaluationVersion)
 
     return(
         <>
         <h1>Evaluation Version Data</h1>
         <div>
-            {responseEvaluationVersion.map(version => (
+            {evaluationVersion.map(version => (
             <div key={version.id}>
                 <p>Version ID: {version.id}</p>
                 <p>Date: {version.initial_date}</p>
@@ -52,7 +52,7 @@ function EvaluationVersionList(){
                     </tr>
                 </thead>
                     <tbody>
-                            {responseEvaluationVersion.map(version => (
+                            {evaluationVersion.map(version => (
                                 <tr key={version.id} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                     <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{version.initial_date}</td>
                                     <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{version.end_date}</td>
@@ -79,13 +79,14 @@ function EvaluationVersionList(){
 export function CourseList() { 
     const { courses, getCourse, deleteCourse } = useCourses()
     const [accordionStates, setAccordionStates] = useState({})
-    const { responseEvaluationVersion } = useEvaluationVersionCourse()
+    //const { responseEvaluationVersion } = useEvaluationVersionCourse()
+    const { evaluationVersion, hasEvaluationVersion } = useEvaluationVersionCourse()
   
     const navigate = useNavigate()
 
-    const hasEvaluationVersion = responseEvaluationVersion.length > 0
+    //const hasEvaluationVersion = responseEvaluationVersion.length > 0
     console.log(hasEvaluationVersion)
-    console.log(responseEvaluationVersion)
+    console.log(evaluationVersion)
   
     const toggleAccordion = (id) => {
       setAccordionStates((prevState) => ({
@@ -157,16 +158,15 @@ export function CourseList() {
                         }}>
                           <EditIcon />
                         </button>
-                        { hasEvaluationVersion ? true : (
-                                <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                                    onClick={(e) => {
-                                    // Detener la propagación del evento para que no afecte al botón del acordeón
-                                    e.stopPropagation();
-                                    handleDeleteCourse(curso.id)
-                                 }}> 
-                                <DeleteIcon />
-                                 </button>
-                        )}
+                        {!hasEvaluationVersion || !evaluationVersion.some(ev => ev.course === curso.id) ? (
+                        <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                            onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCourse(curso.id)
+                          }}> 
+                          <DeleteIcon />
+                        </button>
+                      ) : null}
                         <span>{curso.name}</span>
                       </div>
                       <svg
@@ -203,8 +203,8 @@ export function CourseList() {
                           </svg>
                           <span>Evaluación versión</span>
                       </button>
-                      { !hasEvaluationVersion ? true :(
-                        <>
+                      {hasEvaluationVersion && evaluationVersion.some(ev => ev.course === curso.id) ? (
+                      <>
                         <EvaluationVersionList/>
                         <button 
                             className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
@@ -215,7 +215,8 @@ export function CourseList() {
                               <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
                               <span>Programar curso</span>
                         </button>
-                        </>)}
+                      </>
+                    ) : null}
                     </div>
                   </div>
                 </div>

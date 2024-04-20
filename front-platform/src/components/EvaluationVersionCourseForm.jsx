@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { DeleteIcon } from "./Icons";
-import { useCourses } from "../hooks/useCourses";
+import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse";
 
 export function EvaluationVersionCourseForm() {
     const location = useLocation()
-    const { createEvaluationVersionCourse } = useCourses()
+    const { createEvaluationVersionCourse } = useEvaluationVersionCourse()
   
     // Extraer el curso del estado de ubicación
     useEffect(() => {

@@ -7,11 +7,10 @@ export function useCourses() {
     
     const COURSE_ENDPOINT = `http://localhost:8000/courses/all/courses/`
     const CREATE_SCHEDULED_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
-    const CREATE_EVALUATION_VERSION_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-evaluation-version-course/`
     
     const { course, setCourse } = useContext(AuthContext)
     //const [responseCourses, setResponseCourses] = useState([])
-    
+
     useEffect(() => {
       getCourses()
     }, []);
@@ -37,15 +36,25 @@ export function useCourses() {
     }
 
     const getCourse = (courseId) => {
-
-        return fetch(`${COURSE_ENDPOINT}${courseId}`)
-        .then(response => {
-            if(!response.ok){
-                throw new Error('Curso no obtenido')
-            }
-            return response.json()
-        })
-    }
+      // Busca el curso dentro de los cursos ya cargados
+      const existingCourse = courses.find(course => course.id === courseId);
+  
+      // Si el curso ya está cargado, devuelve directamente el curso
+      if (existingCourse) {
+          console.log(existingCourse)
+          return Promise.resolve(existingCourse);
+      } else {
+          // Si el curso no está cargado, realiza la petición para obtenerlo
+          return fetch(`${COURSE_ENDPOINT}${courseId}`)
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Curso no obtenido');
+                  }
+                  return response.json();
+              });
+      }
+  }
+  
 
     const createCourse = (fields) => {
 
@@ -105,30 +114,6 @@ export function useCourses() {
         })
     }
 
-    const createEvaluationVersionCourse = (fields) => {
-
-      return fetch(CREATE_EVALUATION_VERSION_COURSE_ENPOINT, {
-        method: 'POST', 
-        headers: {
-          'Content-Type' : 'application/json'
-        },
-        body : JSON.stringify(fields)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Error al enviar los datos');
-        }
-        return response.json(); // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
-      })
-      .then(data => {
-        console.log('Datos enviados exitosamente', data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-    }
-
-
     const createScheduledCourse = (fields) => {
 
         return fetch(CREATE_SCHEDULED_COURSE_ENPOINT, {
@@ -154,6 +139,6 @@ export function useCourses() {
 
     return { 
         courses: mappedCourses, getCourses, getCourse, createCourse, deleteCourse, updateCourse, 
-        createScheduledCourse, createEvaluationVersionCourse
+        createScheduledCourse
      }
   }

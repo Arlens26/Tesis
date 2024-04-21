@@ -13,6 +13,7 @@ import { EvaluationVersionCourseForm } from './components/EvaluationVersionCours
 //import { useCourses } from './hooks/useCourses.js';
 import { ScheduledCourse } from './components/ScheduledCourse.jsx';
 import { VersionProvider } from './context/evaluationVersion.jsx';
+import { SelectRole } from './components/SelectRole.jsx';
 
 function App() {
 
@@ -150,10 +151,11 @@ function App() {
               <MenuIcon />
             </label>
             <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
-        <aside className={`menu-list py-10 flex justify-center ${menuChecked ? 'open' : ''}`}>
+        <aside className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
           <ul>
               <li><Link to="/">Inicio</Link></li>
               <li><Link to="/login">Login</Link></li>
+              <li><Link to="/role">Role</Link></li>
               <li><Link to="/code">Code</Link></li>
               <li><Link to="/course-list">Courses</Link></li>
               <li><Link to="/course">Create Course</Link></li>
@@ -163,6 +165,7 @@ function App() {
           <Routes>
             <Route path='/' element={<main/>} />
             <Route path='/login' element={<LoginForm/>} />
+            <Route path='/role' element={<SelectRole/>} />
             <Route path='/code' element={<CreateCode/>}/>
             {/* Cambiar forma de pasar props usando useContext para los cursos */}
             <Route path='/course-list' element={<CourseList/>} />

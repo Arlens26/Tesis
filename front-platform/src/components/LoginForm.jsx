@@ -12,9 +12,14 @@ export function LoginForm() {
         event.preventDefault()
         const fields = Object.fromEntries(new window.FormData(event.target))
         getLogin(fields)
-        .then(() => {
+        .then((profile) => {
+            console.log(profile)
             console.log('Usuario logueado exitosamente');
-            navigate('/course-list')
+            if (profile.is_director && profile.is_professor) {
+                navigate('/role');
+            } else {
+                navigate('/course-list');
+            }
           })
           .catch((error) => {
             console.error('Error en el login:', error);

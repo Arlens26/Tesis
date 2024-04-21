@@ -7,10 +7,11 @@ export const AuthContext = createContext()
 // Proveer el acceso al contexto
 export function AuthProvider ({ children }) {
     const [user, setUser] = useState({ user: null, token: null, profile: null });
+    const [role, setRole] = useState(null)
     const [course, setCourse] = useState([])
 
     return(
-        <AuthContext.Provider value={{ user, setUser, course, setCourse }}>
+        <AuthContext.Provider value={{ user, setUser, role, setRole, course, setCourse }}>
             {children}
         </AuthContext.Provider>
     )

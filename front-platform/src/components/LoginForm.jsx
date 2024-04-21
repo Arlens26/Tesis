@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 
 export function LoginForm() {
 
-    const { getLogin } = useUsers()
+    const { getLogin, setRole } = useUsers()
     const navigate = useNavigate()
 
     const handleSubmit = (event) => {
@@ -16,9 +16,19 @@ export function LoginForm() {
             console.log(profile)
             console.log('Usuario logueado exitosamente');
             if (profile.is_director && profile.is_professor) {
-                navigate('/role');
-            } else {
-                navigate('/course-list');
+                setRole('director')
+                navigate('/role')
+            } 
+            else if (profile.is_professor && !profile.is_director && !profile.is_student){
+                setRole('professor')
+                navigate('/course-list')
+            }
+            else if (profile.is_student){ 
+                setRole('student')
+                navigate('/course-list')
+            }
+            else{
+                console.log('No se reconoce el rol')
             }
           })
           .catch((error) => {

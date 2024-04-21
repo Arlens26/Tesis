@@ -6,7 +6,7 @@ export function useUsers() {
     const AUTH_ENDPOINT = `http://127.0.0.1:8000/authentication/user/login/`
     const PROFILE_ENDPOINT = `http://127.0.0.1:8000/authentication/user/profile/`
 
-    const { user, setUser } = useContext(AuthContext);
+    const { user, setUser, role, setRole } = useContext(AuthContext);
     //const profile = user.profile;
     /*useEffect(() => {
         console.log(user)
@@ -79,5 +79,5 @@ export function useUsers() {
     };*/
 
     // Devuelve las funciones o valores necesarios del contexto
-    return { user, getLogin }
+    return { user, getLogin, role, setRole }
 }

@@ -1,17 +1,20 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { VersionContext } from "../context/evaluationVersion";
 
 export function useEvaluationVersionCourse(){
     
     const EVALUATION_VERSION_ENDPOINT = `http://localhost:8000/courses/all/evaluation-version/`
     const CREATE_EVALUATION_VERSION_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-evaluation-version-course/`
-    
+    const ACADEMIC_PERIODS_ENDPOINT = `http://localhost:8000/courses/all/academic-periods/`
+
     const { evaluationVersion, setEvaluationVersion, hasEvaluationVersion } = useContext(VersionContext)
+    const [periods, setPeriod]  = useState()
     
     console.log(hasEvaluationVersion)
 
     useEffect(() => {
         getEvaluationVersion()
+        //getAcademicPeriods()
     },[])
     
     //const evaluationVersion = responseEvaluationVersion
@@ -53,6 +56,15 @@ export function useEvaluationVersionCourse(){
         });
       }
 
-    return { evaluationVersion, hasEvaluationVersion, createEvaluationVersionCourse }
+      const getAcademicPeriods = () => {
+        fetch(ACADEMIC_PERIODS_ENDPOINT)
+        .then(res => res.json())
+        .then(json => {
+            console.log(json)
+            setPeriod(json)
+        })
+    }
+
+    return { evaluationVersion, hasEvaluationVersion, createEvaluationVersionCourse, periods, getAcademicPeriods }
 
 }

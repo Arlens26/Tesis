@@ -65,3 +65,12 @@ class UserViewSet(viewsets.ViewSet):
             return Response(profile_data, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'User is not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class ProfessorListView(viewsets.ViewSet):
+    def list(self, request):
+        queryset = User.objects.filter(groups__name='professor')
+        if queryset.exists():
+            professor_serializer = UserSerializer(queryset, many=True)
+            return Response({'professors':professor_serializer.data}, status=status.HTTP_200_OK)
+        else: 
+            return Response({'error':'No hay profesores disponibles'}, status=status.HTTP_404_NOT_FOUND)

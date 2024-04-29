@@ -5,7 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from .serializer import UserSerializer
+from .serializer import UserSerializer, UserRegisterSerializer
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
@@ -26,20 +26,20 @@ class UserViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['post'])
     def register(self, request):
-        user_serializer = UserSerializer(data=request.data)
+        user_register_serializer = UserRegisterSerializer(data=request.data)
 
-        if user_serializer.is_valid():
-            user_serializer.save()
-            user = User.objects.get(username=user_serializer.data['username'])
-            user.set_password(user_serializer.data['password'])
+        if user_register_serializer.is_valid():
+            user_register_serializer.save()
+            user = User.objects.get(username=user_register_serializer.data['username'])
+            user.set_password(user_register_serializer.data['password'])
             user.save()
 
             token = Token.objects.create(user=user)
 
-            return Response({'token': token.key, 'user': user_serializer.data},
+            return Response({'token': token.key, 'user': user_register_serializer.data},
                             status=status.HTTP_201_CREATED)
 
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(user_register_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'])
     @authentication_classes([TokenAuthentication])
@@ -73,4 +73,4 @@ class ProfessorListView(viewsets.ViewSet):
             professor_serializer = UserSerializer(queryset, many=True)
             return Response(professor_serializer.data, status=status.HTTP_200_OK)
         else: 
-            return Response({'error':'No hay profesores disponibles'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error':'There are no professors available'}, status=status.HTTP_404_NOT_FOUND)

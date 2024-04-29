@@ -1,19 +1,11 @@
 from django.db import models
-from datetime import datetime
+from django.contrib.auth.models import User
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.forms import ValidationError
+from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
-class Professor(models.Model):
-    name = models.CharField(max_length=50)
-    email = models.EmailField(max_length=30)
-
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        ordering = ['id']
-        verbose_name = 'professor'
-        verbose_name_plural = 'professor'
-        db_table = 'professor'
+# Courses models.
 
 class Course(models.Model):
     name = models.CharField(max_length=100)
@@ -31,7 +23,7 @@ class Course(models.Model):
         db_table = 'course'
 
 class AcademicPeriod(models.Model):
-    year = models.IntegerField(default=datetime.now().year)
+    year = models.IntegerField()
     semester = models.IntegerField(choices=[(1, '1'), (2, '2')])
 
     def __str__(self):
@@ -60,7 +52,7 @@ class EvaluationVersion(models.Model):
 class ScheduledCourse(models.Model):
     period = models.ForeignKey(AcademicPeriod, on_delete=models.CASCADE, related_name='scheduled_academic_periods')
     evaluation_version = models.ForeignKey(EvaluationVersion, on_delete=models.CASCADE, related_name='scheduled_evaluation_versions')
-    professor = models.ForeignKey(Professor, on_delete=models.CASCADE, related_name='professors')
+    professor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='professors')
     group = models.CharField(max_length=20)
 
     def __str__(self):
@@ -71,6 +63,13 @@ class ScheduledCourse(models.Model):
         verbose_name = 'scheduled_course'
         verbose_name_plural = 'scheduled_course'
         db_table = 'scheduled_course'
+
+@receiver(pre_save, sender=ScheduledCourse)
+def validate_professor_group(sender, instance, **kwargs):
+    if instance.professor.groups.filter(name='professor').exists():
+        return
+    else:
+        raise ValidationError(_('The selected professor must belong to the professor group.'))
 
 class LearningOutCome(models.Model):
     code = models.CharField(max_length=50)

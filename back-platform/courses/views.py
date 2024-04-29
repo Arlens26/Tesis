@@ -7,6 +7,7 @@ from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, 
 from datetime import datetime
 from decimal import Decimal
 from rest_framework.decorators import action
+from django.contrib.auth.models import User
 
 # Create your views here.
 class CourseView(viewsets.ModelViewSet):
@@ -95,80 +96,65 @@ class CreateScheduledCourseView(viewsets.ViewSet):
 
     def create(self, request):
         # Obtener los datos del request
-        course_data = request.data.get('course')
+        version_id = request.data.get('version_id')
         academic_period_data = request.data.get('academic_period')
-        evaluation_version_data = request.data.get('evaluation_version')
-        learning_outcome_data = request.data.get('learning_outcome')
         group = request.data.get('group')
+        professor_id = request.data.get('professor_id')
 
-        # Crear instancias de Course, AcademicPeriod, y EvaluationVersion
-        course_serializer = CourseSerializer(data=course_data)
-        academic_period_serializer = AcademicPeriodSerializer(data=academic_period_data)
-        evaluation_version_serializer = EvaluationVersionSerializer(data=evaluation_version_data)
-        
-        # Validar y guardar las instancias de Course, AcademicPeriod, y EvaluationVersion
-        if course_serializer.is_valid() and academic_period_serializer.is_valid() and evaluation_version_serializer.is_valid():
-            course_instance = course_serializer.save()
-            academic_period_instance = academic_period_serializer.save()
-            evaluation_version_instance = evaluation_version_serializer.save()
+        # Verificar si existe un periodo académico
+        year = academic_period_data.get('year')
+        semester = academic_period_data.get('semester')
+        existing_academic_period = AcademicPeriod.objects.filter(year=year, semester=semester).first()
+        #existing_academic_period = AcademicPeriod.objects.filter(id=academic_period_data['id']).first()
 
-            # Crear el ScheduledCourse usando las instancias creadas
-            scheduled_course_serializer = ScheduledCourseSerializer(data={
-                'course': course_instance.pk,
-                'period': academic_period_instance.pk,
-                'evaluation_version': evaluation_version_instance.pk,
-                'group': group
-            })
-
-            # Validar y guardar el ScheduledCourse
-            if scheduled_course_serializer.is_valid():
-                scheduled_course_serializer.save()
-
-                for outcome_data in learning_outcome_data:
-                    outcome_serializer = LearningOutComeSerializer(data=outcome_data)
-                    if outcome_serializer.is_valid():
-                        outcome_instance = outcome_serializer.save()
-
-                        percentage_value = Decimal(outcome_data['percentage'].replace('%', ''))
-                        
-                        percentage_serializer = PercentageSerializer(data={
-                            'initial_date': datetime.now().date(),
-                            'end_date': None,
-                            'percentage': percentage_value,
-                            'learning_outcome_id': outcome_instance.pk
-                        })
-                        #print("percentage serializer:", percentage_serializer)
-                        #print("percentage_value:", percentage_value)
-                        print('Outcome id:',outcome_instance.pk)
-                        
-                        #percentage_instance = Percentage.objects.create(
-                         #   learning_outcome=outcome_instance.pk,
-                          #  initial_date=datetime.now().date(),
-                          #  percentage=outcome_data['percentage'].replace('%', '')
-                        #)
-                        if percentage_serializer.is_valid():
-                            percentage_instance = percentage_serializer.save()
-                            print(percentage_instance.pk)
-                            evaluation_version_detail_instance = EvaluationVersionDetail.objects.create(
-                                learning_outcome=outcome_instance,
-                                percentage=percentage_instance,
-                                evaluation_version=evaluation_version_instance
-                            )
-                            print("percentage_serializer data:", percentage_serializer.validated_data)
-                            print("evaluation_version_detail_instance:", evaluation_version_detail_instance)
-                        else:
-                            print("Error in percentage_serializer validation:", percentage_serializer.errors)
-
-                return Response({'message': 'Scheduled course created successfully'}, status=status.HTTP_201_CREATED)
+        if not existing_academic_period:
+            academic_period_serializer = AcademicPeriodSerializer(data={'year':year, 'semester':semester})
+            if academic_period_serializer.is_valid():
+                # Crear instancia de AcademicPeriod
+                academic_period_instance = academic_period_serializer.save()
             else:
-                return Response({'error': scheduled_course_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': academic_period_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            academic_period_instance = existing_academic_period
+
+        print(User.objects.filter(id=professor_id))
+        print(professor_id)
+        try:
+            professor = User.objects.get(id=professor_id, groups__name='professor')
+            print(professor)
+        except User.DoesNotExist:
+            return Response({'error':'User is not a professor'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.MultipleObjectsReturned:
+            return Response({'error': 'Multiple users with the same ID'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear instancias de EvaluationVersion
+        #evaluation_version_serializer = EvaluationVersionSerializer(data=evaluation_version_data)
+        
+        # Validar y guardar las instancias de AcademicPeriod y EvaluationVersion
+        #if evaluation_version_serializer.is_valid():
+            #evaluation_version_instance = evaluation_version_serializer.save()
+
+        # Crear el ScheduledCourse usando las instancias creadas
+        scheduled_course_serializer = ScheduledCourseSerializer(data={
+            'group': group, 
+            'evaluation_version': version_id,
+            'period': academic_period_instance.pk,
+            'professor': professor_id
+        })
+
+        # Validar y guardar el ScheduledCourse
+        if scheduled_course_serializer.is_valid():
+            scheduled_course_serializer.save()                
+
+            return Response({'message': 'Scheduled course created successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': scheduled_course_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        #else:
             # Manejar errores de validación
-            errors = {}
-            errors.update(course_serializer.errors)
-            errors.update(academic_period_serializer.errors)
-            errors.update(evaluation_version_serializer.errors)
-            return Response({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
+            #errors = {}
+            #errors.update(academic_period_serializer.errors)
+            #errors.update(evaluation_version_serializer.errors)
+            #return Response({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class ScheduledCourseVersionDetailView(viewsets.ViewSet):
     serializer_class = ScheduledCourseSerializer

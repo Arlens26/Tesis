@@ -6,7 +6,6 @@ import { AuthContext } from '../context/user';
 export function useCourses() {
     
     const COURSE_ENDPOINT = `http://localhost:8000/courses/all/courses/`
-    const CREATE_SCHEDULED_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
     
     const { course, setCourse } = useContext(AuthContext)
     //const [responseCourses, setResponseCourses] = useState([])
@@ -114,31 +113,7 @@ export function useCourses() {
         })
     }
 
-    const createScheduledCourse = (fields) => {
-
-        return fetch(CREATE_SCHEDULED_COURSE_ENPOINT, {
-          method: 'POST', 
-          headers: {
-            'Content-Type' : 'application/json'
-          },
-          body : JSON.stringify(fields)
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Error al enviar los datos');
-          }
-          return response.json(); // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
-        })
-        .then(data => {
-          console.log('Datos enviados exitosamente', data);
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-      }
-
     return { 
-        courses: mappedCourses, getCourses, getCourse, createCourse, deleteCourse, updateCourse, 
-        createScheduledCourse
+        courses: mappedCourses, getCourses, getCourse, createCourse, deleteCourse, updateCourse
      }
   }

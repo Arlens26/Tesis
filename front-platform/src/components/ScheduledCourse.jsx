@@ -6,7 +6,7 @@ import { useScheduledCourse } from "../hooks/useSheduledCourse"
 
 export function ScheduledCourse(){
     const { periods, getAcademicPeriods } = useEvaluationVersionCourse()
-    const { getProfessors, professors } = useScheduledCourse()
+    const { getProfessors, professors, createScheduledCourse } = useScheduledCourse()
     console.log(professors)
     const { getCourse } = useCourses()
     const location = useLocation()
@@ -43,6 +43,13 @@ export function ScheduledCourse(){
         }
         fields.academic_period = academic_period
         console.log(fields);
+        createScheduledCourse(fields)
+         .then(() => {
+            console.log('Se creo el curso programado de manera correcta');
+         })
+         .catch((error) => {
+            console.error('Error al crear curso programado:', error);
+         });
     }
     
     

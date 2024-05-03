@@ -22,6 +22,10 @@ class EvaluationVersionView(viewsets.ModelViewSet):
     serializer_class = EvaluationVersionSerializer
     queryset = EvaluationVersion.objects.all()
 
+class ScheduledCourseView(viewsets.ModelViewSet):
+    serializer_class = ScheduledCourseSerializer
+    queryset = ScheduledCourse.objects.all()
+
 class LearningOutComeView(viewsets.ModelViewSet):
     serializer_class = LearningOutComeSerializer
     queryset = LearningOutCome.objects.all()

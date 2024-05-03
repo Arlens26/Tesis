@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useCourses } from "../hooks/useCourses"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import { useState, useEffect } from "react"
@@ -13,6 +13,7 @@ export function ScheduledCourse(){
     const [versionId, setVersionId] = useState('')
     const [courseName, setCourseName] = useState('')
     const [courseCode, setCourseCode] = useState('')
+    const navigate = useNavigate()
 
     useEffect(()=>{
         getAcademicPeriods()
@@ -50,6 +51,10 @@ export function ScheduledCourse(){
          .catch((error) => {
             console.error('Error al crear curso programado:', error);
          });
+    }
+
+    const handleReturn = () => {
+        navigate('/course-list')
     }
     
     
@@ -90,7 +95,7 @@ export function ScheduledCourse(){
                   ))}
             </select>
             <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
-            <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Volver</button>
+            <button type='button' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' onClick={handleReturn}>Volver</button>
         </form>
     )
 }

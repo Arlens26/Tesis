@@ -28,7 +28,8 @@ export function useUsers() {
           return response.json();
       })
       .then(data => {
-          setUser(data.user);
+        const updateUser = {...data.user, token: data.token}
+        setUser(updateUser);
           return fetch(PROFILE_ENDPOINT, {
               method: 'POST',
               headers: {
@@ -45,6 +46,15 @@ export function useUsers() {
       .then(profileData => {
           setUser(prevUser => ({ ...prevUser, profile: profileData }));
           console.log(profileData);
+            if (profileData.is_director && profileData.is_professor) {
+                setRole('director');
+            } else if (profileData.is_professor) {
+                setRole('professor');
+            } else if (profileData.is_student) {
+                setRole('student');
+            } else {
+                console.error('No se pudo determinar el rol del usuario');
+            }
           return profileData;
       })
       .catch(error => {

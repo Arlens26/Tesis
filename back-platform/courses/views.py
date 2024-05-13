@@ -26,6 +26,23 @@ class ScheduledCourseView(viewsets.ModelViewSet):
     serializer_class = ScheduledCourseSerializer
     queryset = ScheduledCourse.objects.all()
 
+    def list(self, request):
+        # Obtener el usuario autenticado desde la solicitud
+        user = request.user
+
+        # Verificar si el usuario autenticado es un profesor
+        if user.groups.filter(name='professor').exists():
+            # Filtrar los cursos programados para el profesor autenticado
+            scheduled_courses = ScheduledCourse.objects.filter(professor=user)
+
+            # Serializar y devolver los cursos programados
+            serializer = ScheduledCourseSerializer(scheduled_courses, many=True)
+            return Response(serializer.data)
+
+        else:
+            # Si el usuario no es un profesor, devolver un error de autorización
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
 class LearningOutComeView(viewsets.ModelViewSet):
     serializer_class = LearningOutComeSerializer
     queryset = LearningOutCome.objects.all()

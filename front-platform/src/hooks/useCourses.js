@@ -7,12 +7,13 @@ export function useCourses() {
     
     const COURSE_ENDPOINT = `http://localhost:8000/courses/all/courses/`
     
-    const { course, setCourse } = useContext(AuthContext)
+    const { user, course, setCourse, role } = useContext(AuthContext)
+    console.log(user)
     //const [responseCourses, setResponseCourses] = useState([])
 
     useEffect(() => {
       getCourses()
-    }, []);
+    }, [role]);
 
     const courses = course
     console.log(courses)
@@ -25,13 +26,55 @@ export function useCourses() {
       credit: course.credit,
       //period: course.period
     }))
+    console.log(mappedCourses)
 
     const getCourses = () => {
-        fetch(COURSE_ENDPOINT)
-        .then(res => res.json())
-        .then(json => {
-            setCourse(json)
+        console.log(role)
+        let ENDPOINT = ''
+        if (role === 'director') {
+          ENDPOINT = `http://localhost:8000/courses/all/courses/`;
+          console.log('Cursos del director')
+          
+        }else if (role === 'professor') {
+          ENDPOINT = `http://localhost:8000/courses/all/scheduled-course/`;
+          console.log('Cursos del profesor')
+        }
+        return fetch(ENDPOINT, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Token ${user.token}`,
+            'Content-Type': 'application/json' 
+          },
         })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+          }
+          return response.json();
+        })
+        .then(json => {
+          if(role === 'director'){
+            setCourse(json)
+          }
+          if (role === 'professor') {
+            const courses = json.map(scheduledCourse => ({
+              id: scheduledCourse.course.id,
+              name: scheduledCourse.course.name,
+              code: scheduledCourse.course.code,
+              description: scheduledCourse.course.description,
+              credit: scheduledCourse.course.credit
+            }));
+            setCourse(courses)
+            //return courses
+          } else {
+            // Falta estudiantes
+            return json
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching courses:", error)
+          throw error
+        });
     }
 
     const getCourse = (courseId) => {

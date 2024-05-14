@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EditIcon, DeleteIcon } from "./Icons";
 //import PropTypes from 'prop-types';
+import { useUsers } from "../hooks/useUsers";
 import { useCourses } from "../hooks/useCourses";
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse";
 import { EvaluationVersionList } from "./EvaluationVersionList";
@@ -32,6 +33,8 @@ export function CourseList() {
     const [accordionStates, setAccordionStates] = useState({})
     //const { responseEvaluationVersion } = useEvaluationVersionCourse()
     const { evaluationVersion, hasEvaluationVersion } = useEvaluationVersionCourse()
+
+    const { role } = useUsers()
   
     const navigate = useNavigate()
 
@@ -71,8 +74,12 @@ export function CourseList() {
     }
 
     const handleScheduledCourse = (courseId, versionId) =>{
-        console.log(versionId)
-        navigate('/scheduled-course/', {state: {course_id: courseId, version_id: versionId}})
+      console.log(versionId)
+      navigate('/scheduled-course/', {state: {course_id: courseId, version_id: versionId}})
+    }
+
+    const handleActivity = (courseId) => {
+      navigate('/activity/', {state: {course_id: courseId}})
     }
 
     //console.log(courses.length)
@@ -88,7 +95,9 @@ export function CourseList() {
     return (
       <section>
         <div className='flex flex-col gap-2'>
+        {role === 'director' ? (
           <BtnCreateCourse/>
+        ) : null}
           {courses.map((curso) => (
                 <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
                   <h2 id={`accordion-collapse-heading-${curso.id}`}>
@@ -101,24 +110,28 @@ export function CourseList() {
                       aria-controls={`accordion-collapse-body-${curso.id}`}
                     >
                       <div className='flex items-start gap-2'>
+                      {role === 'director' ? (
+                        <>
                         <button className='bg-btn-edit opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                        onClick={(e) => {
-                          // Detener la propagación del evento para que no afecte al botón del acordeón
-                          e.stopPropagation()
-                          handleEditCourse(curso.id)
-                        }}>
-                          <EditIcon />
-                        </button>
-                        {!hasEvaluationVersion || !evaluationVersion.some(ev => ev.course === curso.id) ? (
-                        <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                            onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCourse(curso.id)
-                          }}> 
-                          <DeleteIcon />
-                        </button>
+                          onClick={(e) => {
+                            // Detener la propagación del evento para que no afecte al botón del acordeón
+                            e.stopPropagation()
+                            handleEditCourse(curso.id)
+                          }}>
+                            <EditIcon />
+                          </button>
+                          {!hasEvaluationVersion || !evaluationVersion.some(ev => ev.course === curso.id) ? (
+                          <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                              onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCourse(curso.id)
+                            }}> 
+                            <DeleteIcon />
+                          </button>
+                          ) : null}
+                        </>
                       ) : null}
-                        <span>{curso.name}</span>
+                      <span>{curso.name} - {curso.code}</span>
                       </div>
                       <svg
                         data-accordion-icon
@@ -140,7 +153,9 @@ export function CourseList() {
                     <div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                       <span>La cantidad de créditos es: {curso.credit}</span>
                     </div>
-                    <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">             
+                    {role === 'director' ? (
+                      <>
+                        <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">             
                       <button 
                         className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
                         onClick={(e) =>{
@@ -156,14 +171,14 @@ export function CourseList() {
                       </button>
                       {hasEvaluationVersion && evaluationVersion.some(ev => ev.course === curso.id) ? (
                       <>
-                        <EvaluationVersionList/>
+                        <EvaluationVersionList courseId={curso.id}/>
                         <button 
                             className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
                             onClick={(e) =>{
                               e.stopPropagation();
                                // Filtrar las versiones para encontrar la última versión activa
-                              const activeVersion = evaluationVersion.filter(version => !version.end_date);
-                              
+                              const activeVersion = evaluationVersion.filter(version => version.course == curso.id && !version.end_date);
+
                               // Verificar si hay alguna versión activa
                               if (activeVersion.length > 0) {
                                 // Obtener el id de la última versión activa
@@ -180,6 +195,21 @@ export function CourseList() {
                       </>
                     ) : null}
                     </div>
+                      </>
+                    ): null}
+
+                    {role === 'professor' ? (
+                      <button 
+                        className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                        onClick={(e) =>{
+                          e.stopPropagation();
+                          console.log(curso.id)
+                          handleActivity(curso.id)
+                        }}>
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
+                        <span>Crear actividades</span>
+                      </button>  
+                    ): null}
                   </div>
                 </div>
             ))}

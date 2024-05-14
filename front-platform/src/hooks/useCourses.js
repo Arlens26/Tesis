@@ -1,14 +1,18 @@
 import { useEffect, useContext } from 'react';
 import { AuthContext } from '../context/user';
+import { VersionContext } from '../context/evaluationVersion';
 //import responseCursos from '../mocks/curso.json';
 //import { json } from 'react-router-dom';
 
 export function useCourses() {
     
     const COURSE_ENDPOINT = `http://localhost:8000/courses/all/courses/`
+    const EVALUATION_VESION_ENDPOINT = `http://localhost:8000/courses/all/evaluation-version/`
     
     const { user, course, setCourse, role } = useContext(AuthContext)
     console.log(user)
+    const { evaluationVersion, setEvaluationVersion } = useContext(VersionContext)
+    console.log(evaluationVersion)
     //const [responseCourses, setResponseCourses] = useState([])
 
     useEffect(() => {
@@ -65,10 +69,21 @@ export function useCourses() {
               credit: scheduledCourse.course.credit
             }));
             setCourse(courses)
+            const evaluationVersionIds = json.map(version => version.evaluation_version_id);
+
+            return Promise.all(evaluationVersionIds.map(id =>
+              fetch(`${EVALUATION_VESION_ENDPOINT}${id}`)
+                .then(res => res.json())
+                .then(json => {
+                  console.log(json)
+                  setEvaluationVersion(json)
+                })
+            ));
             //return courses
-          } else {
+          } if(role === 'student') {
             // Falta estudiantes
-            return json
+            console.log('Es estudiante')
+            //return json
           }
         })
         .catch(error => {

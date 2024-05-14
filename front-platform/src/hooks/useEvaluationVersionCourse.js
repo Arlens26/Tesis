@@ -16,13 +16,6 @@ export function useEvaluationVersionCourse(){
         getEvaluationVersion()
         //getAcademicPeriods()
     },[])
-    
-    //const evaluationVersion = responseEvaluationVersion
-
-          /*const mappedEvaluationVersion = evaluationVersion?.map(version => ({
-        date: version.date,
-        id: version.id,
-      }))*/
 
     const getEvaluationVersion = () => {
         fetch(EVALUATION_VERSION_ENDPOINT)

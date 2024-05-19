@@ -14,6 +14,7 @@ import { EvaluationVersionCourseForm } from './components/EvaluationVersionCours
 import { ScheduledCourse } from './components/ScheduledCourse.jsx';
 import { VersionProvider } from './context/evaluationVersion.jsx';
 import { SelectRole } from './components/SelectRole.jsx';
+import { Activity } from './components/Activity.jsx';
 
 function App() {
 
@@ -173,6 +174,7 @@ function App() {
             <Route path='/course/:id' element={<CourseForm/>} />
             <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
             <Route path='/scheduled-course/' element={<ScheduledCourse/>} />
+            <Route path='/activity/' element={<Activity/>} />
           </Routes>
         </main>
         <FooterPage />

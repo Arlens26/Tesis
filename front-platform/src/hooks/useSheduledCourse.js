@@ -6,8 +6,10 @@ export function useScheduledCourse(){
     
     //const ACADEMIC_PERIODS_ENDPOINT = `http://localhost:8000/courses/all/academic-periods/`
     const PROFESSORS_ENDPOINT = `http://127.0.0.1:8000/authentication/professors/`
-    const CREATE_SCHEDULED_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
-    const EVALUATION_VERSION_DETAIL_ENPOINT = `http://localhost:8000/courses/all/scheduled-course-detail/get_details_by_evaluation_version/?evaluation_version_id=`
+    const CREATE_SCHEDULED_COURSE_ENDPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
+    const EVALUATION_VERSION_DETAIL_ENDPOINT = `http://localhost:8000/courses/all/scheduled-course-detail/get_details_by_evaluation_version/?evaluation_version_id=`
+    const LEARNING_OUTCOME_ENDPOINT = `http://localhost:8000/courses/all/learning-outcome/`
+    const PERCENTAGE_ENDPOINT = `http://localhost:8000/courses/all/percentage/`
 
     const { user } = useContext(AuthContext)
     console.log(user)
@@ -37,7 +39,7 @@ export function useScheduledCourse(){
 
     const createScheduledCourse = (fields) => {
 
-        return fetch(CREATE_SCHEDULED_COURSE_ENPOINT, {
+        return fetch(CREATE_SCHEDULED_COURSE_ENDPOINT, {
           method: 'POST', 
           headers: {
             'Content-Type' : 'application/json'
@@ -70,7 +72,7 @@ export function useScheduledCourse(){
       console.log(existingVersionCourse.id);
       const versionId = existingVersionCourse.id;
       console.log(versionId)
-      return fetch(`${EVALUATION_VERSION_DETAIL_ENPOINT}${versionId}`, {
+      return fetch(`${EVALUATION_VERSION_DETAIL_ENDPOINT}${versionId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${user.token}`,
@@ -85,10 +87,64 @@ export function useScheduledCourse(){
       })
       .then(json => {
         console.log(json)
+        const { evaluation_version_details } = json
+        if(evaluation_version_details && evaluation_version_details.length > 0){
+          evaluation_version_details.forEach(detail => {
+            const { learning_outcome, percentage } = detail
+            getLearningOutCome(learning_outcome)
+            getPercentage(percentage)
+          })
+        }
       })
       .catch(error => {
         console.error("Error fetching evaluation version detail:", error)
         throw error
+      });
+    }
+
+    const getLearningOutCome = (learningOutComeId) => {
+      return fetch(`${LEARNING_OUTCOME_ENDPOINT}${learningOutComeId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+      })
+      .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        return response.json();
+      })
+      .then(json => {
+          console.log(`Learning Outcome ${learningOutComeId}:`, json)
+      })
+      .catch(error => {
+          console.error("Error fetching learning outcome:", error)
+          throw error
+      });
+    }
+
+    const getPercentage = (percentage) => {
+      return fetch(`${PERCENTAGE_ENDPOINT}${percentage}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+      })
+      .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        return response.json();
+      })
+      .then(json => {
+          console.log(`Percentage ${percentage}:`, json)
+      })
+      .catch(error => {
+          console.error("Error fetching percentage:", error)
+          throw error
       });
     }
 

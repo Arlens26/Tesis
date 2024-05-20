@@ -2,12 +2,16 @@ import { useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
+
 export function Activity() {
 
-    const { getEvaluationVersionDetail } = useScheduledCourse()
+    const { getEvaluationVersionDetail, learningOutComes, percentages } = useScheduledCourse()
     const location = useLocation()
     
     const { evaluationVersion } = useEvaluationVersionCourse()
+    
+    console.log(learningOutComes)
+    console.log(percentages)
     
     useEffect(() =>{
         const course_id = location.state.course_id
@@ -18,7 +22,7 @@ export function Activity() {
         } else {
             console.error("No se proporcionó un course_id en el estado de la ubicación.")
         }
-    }, [location.state, evaluationVersion, getEvaluationVersionDetail])
+    }, [location.state?.course_id, evaluationVersion])
 
     const handleSubmit = () => {
         console.log('Actividad agregada')
@@ -41,6 +45,13 @@ export function Activity() {
                                     <th scope="col" className="px-6 py-3">
                                         Descripción
                                     </th>
+                                    {
+                                      Object.keys(learningOutComes).map(id => (
+                                        <th key={id} scope="col" className="px-6 py-3">
+                                          {learningOutComes[id]?.code || 'Cargando...'}
+                                        </th>
+                                      ))
+                                    }
                                     <th scope="col" className="px-6 py-3">
                                         Porcentaje
                                     </th>
@@ -88,8 +99,15 @@ export function Activity() {
                                         Porcentaje
                                     </th>
                                     <td className="px-6 py-4">
-  
+                                      
                                     </td>
+                                    {
+                                      Object.keys(percentages).map(id => (
+                                      <td key={id} className="px-6 py-4">
+                                        {percentages[id]?.percentage}
+                                      </td>
+                                    ))
+                                  }
                                     <td className="px-6 py-4">
                                         100%
                                     </td>

@@ -16,6 +16,8 @@ export function useScheduledCourse(){
     const { evaluationVersion } = useContext(VersionContext)
     console.log(evaluationVersion)
     const [professors, setProfessor] = useState([])
+    const [learningOutComes, setLearningOutComes] = useState({})
+    const [percentages, setPercentages] = useState({})
 
     const versions = Array.isArray(evaluationVersion) ? evaluationVersion : [];
     const mappedVersions = versions?.map(version => ({
@@ -118,6 +120,7 @@ export function useScheduledCourse(){
       })
       .then(json => {
           console.log(`Learning Outcome ${learningOutComeId}:`, json)
+          setLearningOutComes(prev => ({ ...prev, [learningOutComeId] : json }))
       })
       .catch(error => {
           console.error("Error fetching learning outcome:", error)
@@ -125,8 +128,8 @@ export function useScheduledCourse(){
       });
     }
 
-    const getPercentage = (percentage) => {
-      return fetch(`${PERCENTAGE_ENDPOINT}${percentage}`, {
+    const getPercentage = (percentageId) => {
+      return fetch(`${PERCENTAGE_ENDPOINT}${percentageId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${user.token}`,
@@ -140,7 +143,8 @@ export function useScheduledCourse(){
         return response.json();
       })
       .then(json => {
-          console.log(`Percentage ${percentage}:`, json)
+          console.log(`Percentage ${percentageId}:`, json)
+          setPercentages(prev => ({ ...prev, [percentageId] : json }))
       })
       .catch(error => {
           console.error("Error fetching percentage:", error)
@@ -148,5 +152,7 @@ export function useScheduledCourse(){
       });
     }
 
-    return { getProfessors, professors, createScheduledCourse, getEvaluationVersionDetail }
+    return { getProfessors, professors, createScheduledCourse, getEvaluationVersionDetail,
+              learningOutComes, percentages
+     }
 }

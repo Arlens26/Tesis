@@ -19,9 +19,10 @@ class EvaluationVersionSerializer(serializers.ModelSerializer):
 
 class ScheduledCourseSerializer(serializers.ModelSerializer):
     course = serializers.SerializerMethodField()
-    period_id = serializers.ReadOnlyField()
+    #period_id = serializers.ReadOnlyField()
     professor_id = serializers.ReadOnlyField()
     evaluation_version_id = serializers.ReadOnlyField()
+    period = serializers.SerializerMethodField()
 
     def get_course(self, obj):
         course_info = {
@@ -32,10 +33,18 @@ class ScheduledCourseSerializer(serializers.ModelSerializer):
             'credit': obj.evaluation_version.course.credit
         }
         return course_info
+    
+    def get_period(self, obj):
+        period_info = {
+            'id': obj.period.id,
+            'year': obj.period.year,
+            'semester': obj.period.semester
+        }
+        return period_info
 
     class Meta:
         model = ScheduledCourse
-        fields = ['id', 'course', 'group', 'period_id', 'professor_id', 'evaluation_version_id']
+        fields = ['id', 'course', 'group', 'period', 'professor_id', 'evaluation_version_id']
 
 class LearningOutComeSerializer(serializers.ModelSerializer):
     class Meta:

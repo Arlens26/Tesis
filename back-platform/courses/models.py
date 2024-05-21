@@ -105,7 +105,7 @@ class EvaluationVersionDetail(models.Model):
     evaluation_version = models.ForeignKey(EvaluationVersion, on_delete=models.CASCADE, related_name='evaluation_details_evaluation_versions')
 
     def __str__(self):
-        return str(id)
+        return str(self.id)
     
     class Meta:
         ordering = ['id']

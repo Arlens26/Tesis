@@ -28,11 +28,31 @@ function BtnCreateCourse() {
     )
 }
 
+const BtnSemesterGroup = ({ onSelectSemester }) => {
+  return (
+    <div className="inline-flex rounded-md shadow-sm" role="group">
+      <button 
+      type="button" 
+      className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+      onClick={() => onSelectSemester('current')}>
+        Semestre actual
+      </button>
+      <button 
+      type="button" 
+      className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+      onClick={() => onSelectSemester('previous')}>
+        Semestres anteriores
+      </button>
+    </div>
+  )
+}
+
 export function CourseList() { 
     const { courses, getCourse, deleteCourse } = useCourses()
     const [accordionStates, setAccordionStates] = useState({})
     //const { responseEvaluationVersion } = useEvaluationVersionCourse()
     const { evaluationVersion, hasEvaluationVersion } = useEvaluationVersionCourse()
+    const [ selectedSemester, setSelectedSemester ] = useState('current')
 
     const { role } = useUsers()
   
@@ -81,12 +101,31 @@ export function CourseList() {
     const handleActivity = (courseId) => {
       navigate('/activity/', {state: {course_id: courseId}})
     }
+    
+    const handleSelectSemester = (semester) => {
+      setSelectedSemester(semester);
+    }
+
+    const currentYear = new Date().getFullYear()
+    const currentSemester = new Date().getMonth() < 6 ? 1 : 2
+    
+    const currentSemesterCourses = courses.filter(
+      (course) => course.period && course.period.year === currentYear && course.period.semester === currentSemester
+    );
+  
+    const previousSemesterCourses = courses.filter(
+      (course) => course.period && (course.period.year < currentYear || (course.period.year === currentYear && course.period.semester < currentSemester))
+    );
+  
+    const coursesToRender = role === 'professor'
+    ? (selectedSemester === 'current' ? currentSemesterCourses : previousSemesterCourses)
+    : courses;
+    console.log(coursesToRender)
 
     //console.log(courses.length)
     if (!courses || courses.length === 0) {
       return (
           <>
-              <BtnCreateCourse/>
               <span>No hay cursos creados...</span>
           </>
       );
@@ -95,10 +134,13 @@ export function CourseList() {
     return (
       <section>
         <div className='flex flex-col gap-2'>
+        {role === 'professor' ? (
+          <BtnSemesterGroup onSelectSemester={handleSelectSemester}/>
+        ) :  null}
         {role === 'director' ? (
           <BtnCreateCourse/>
         ) : null}
-          {courses.map((curso) => (
+          {coursesToRender.map((curso) => (
                 <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
                   <h2 id={`accordion-collapse-heading-${curso.id}`}>
                     <div

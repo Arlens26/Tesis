@@ -66,7 +66,11 @@ export function useCourses() {
               name: scheduledCourse.course.name,
               code: scheduledCourse.course.code,
               description: scheduledCourse.course.description,
-              credit: scheduledCourse.course.credit
+              credit: scheduledCourse.course.credit,
+              group: scheduledCourse.group,
+              period: scheduledCourse.period,
+              professor_id: scheduledCourse.professor_id,
+              evaluation_version_id: scheduledCourse.evaluation_version_id
             }));
             setCourse(courses)
             const evaluationVersionIds = json.map(version => version.evaluation_version_id);
@@ -172,6 +176,6 @@ export function useCourses() {
     }
 
     return { 
-        courses: mappedCourses, getCourses, getCourse, createCourse, deleteCourse, updateCourse
+        courses: course, getCourses, getCourse, createCourse, deleteCourse, updateCourse
      }
   }

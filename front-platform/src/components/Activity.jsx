@@ -2,10 +2,13 @@ import { useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
+import { useActivities } from "../hooks/useActivities"
 
 export function Activity() {
 
     const { getEvaluationVersionDetail, learningOutComes, percentages } = useScheduledCourse()
+    const { getActivities, activities } = useActivities()
+    
     const location = useLocation()
     
     const { evaluationVersion } = useEvaluationVersionCourse()
@@ -14,6 +17,7 @@ export function Activity() {
     console.log(percentages)
     
     useEffect(() =>{
+        getActivities()
         const course_id = location.state.course_id
         console.log(course_id)
         console.log(evaluationVersion)
@@ -30,7 +34,7 @@ export function Activity() {
 
     return(
         <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
-          <span>Crear Actividad</span>
+          <span>Configuración evaluación</span>
           
           <input type="text" placeholder='Nombre de la actividad' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           <textarea placeholder='Descripción' name='description' rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>          
@@ -61,39 +65,39 @@ export function Activity() {
                                 </tr>
                             </thead>
                             <tbody>
-                              {/*raList.sort((a, b) => a.id - b.id).map((ra, index) => (
-                                  <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                    <td name='code_ra' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {ra.code}
+                              {
+                                Object.keys(activities).map(id => (
+                                  <tr 
+                                  key={activities[id].id} 
+                                  className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                    <td name='name' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                      {activities[id].name}
+                                    </td>
+                                    <td name='description' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                      {activities[id].description}
                                     </td>
                                     <td className="px-6 py-4">
                                       <input 
                                         name='description_learning'  
                                         type="text" 
-                                        placeholder={`Descripción ${ra.code}`} 
-                                        onChange={(e) => handleEditDescription(index, e.target.value)}
                                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                     </td>
                                     <td className="px-6 py-4">
-                                    <input
-                                      name='percentage'
-                                      type="number"
-                                      min={1}
-                                      max={100}
-                                      value={parseInt(ra.percentage)}
-                                      onChange={(e) => handleEditPercentage(index, parseInt(e.target.value))}
-                                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    />
+                                    <input 
+                                        name='description_learning'  
+                                        type="text" 
+                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                                     </td>
-                                    <td className="flex items-center gap-1">
-                                      <button type='button' 
-                                      onClick={ () => handleDeleteRa(index)}
-                                      className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'>
-                                        <DeleteIcon />
-                                      </button>
-                                    </td>
+                                    {
+                                      Object.keys(learningOutComes).map(id => (
+                                        <td key={id} className="px-6 py-4">
+                                          
+                                        </td>
+                                      ))
+                                    }
                                   </tr>
-                              ))*/}
+                                ))
+                              }
                               <tr key={`totalPercentageRa`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                     <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                         Porcentaje

@@ -13,5 +13,27 @@ export function useActivities(){
         })
     }
 
-    return { getActivities, activities }
+    const createActivity = (fields) => {
+        return fetch(ACTIVITY_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(fields)
+        })
+        .then(response => {
+            if(!response.ok){
+                throw new Error('Error al enviar los datos de la actividad')
+            }
+            return response.json()
+        })
+        .then(data => {
+            console.log('Datos enviados exitosamente', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    return { getActivities, activities, createActivity }
 }

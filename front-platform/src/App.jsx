@@ -15,6 +15,7 @@ import { ScheduledCourse } from './components/ScheduledCourse.jsx';
 import { VersionProvider } from './context/evaluationVersion.jsx';
 import { SelectRole } from './components/SelectRole.jsx';
 import { Activity } from './components/Activity.jsx';
+import { ScheduledCourseProvider } from './context/scheduledCourse.jsx';
 
 function App() {
 
@@ -146,6 +147,7 @@ function App() {
 
   return (
     <VersionProvider>
+      <ScheduledCourseProvider>
       <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
         <HeaderPage />
             <label className='btn-menu' htmlFor={menuCheckId}>
@@ -179,6 +181,7 @@ function App() {
         </main>
         <FooterPage />
       </section>
+      </ScheduledCourseProvider>
     </VersionProvider>
   )
 }

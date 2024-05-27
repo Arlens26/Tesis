@@ -1,6 +1,7 @@
 import { useState, useContext } from "react"
 import { AuthContext } from '../context/user';
 import { VersionContext } from "../context/evaluationVersion";
+import { ScheduledCourseContext } from "../context/scheduledCourse";
 
 export function useScheduledCourse(){
     
@@ -12,10 +13,14 @@ export function useScheduledCourse(){
     const PERCENTAGE_ENDPOINT = `http://localhost:8000/courses/all/percentage/`
 
     const { user } = useContext(AuthContext)
-    console.log(user)
+    //console.log(user)
     const { evaluationVersion } = useContext(VersionContext)
-    console.log(evaluationVersion)
+    //console.log(evaluationVersion)
+    const { scheduledCourse, setScheduledCourse } = useContext(ScheduledCourseContext)
+    //console.log(scheduledCourse)
     const [professors, setProfessor] = useState([])
+    const [evaluationVersionDetail, setEvaluationVersionDetail] = useState({})
+    console.log(evaluationVersionDetail)
     const [learningOutComes, setLearningOutComes] = useState({})
     const [percentages, setPercentages] = useState({})
 
@@ -26,7 +31,7 @@ export function useScheduledCourse(){
         end_date: version.end_date,
         course_id: version.course
     }))
-    console.log(mappedVersions)
+    //console.log(mappedVersions)
 
     const getProfessors = () => {
         fetch(PROFESSORS_ENDPOINT)
@@ -71,7 +76,7 @@ export function useScheduledCourse(){
           console.error(`No se encontró una versión de evaluación para el curso id ${courseId}`)
           return;
       }
-      console.log(existingVersionCourse.id);
+      //console.log(existingVersionCourse.id);
       const versionId = existingVersionCourse.id;
       console.log(versionId)
       return fetch(`${EVALUATION_VERSION_DETAIL_ENDPOINT}${versionId}`, {
@@ -89,7 +94,10 @@ export function useScheduledCourse(){
       })
       .then(json => {
         console.log(json)
+        const { scheduled_courses } = json
+        setScheduledCourse(scheduled_courses)
         const { evaluation_version_details } = json
+        setEvaluationVersionDetail(evaluation_version_details)
         if(evaluation_version_details && evaluation_version_details.length > 0){
           evaluation_version_details.forEach(detail => {
             const { learning_outcome, percentage } = detail
@@ -153,6 +161,6 @@ export function useScheduledCourse(){
     }
 
     return { getProfessors, professors, createScheduledCourse, getEvaluationVersionDetail,
-              learningOutComes, percentages
+              learningOutComes, percentages, scheduledCourse
      }
 }

@@ -20,7 +20,7 @@ export function useScheduledCourse(){
     //console.log(scheduledCourse)
     const [professors, setProfessor] = useState([])
     const [evaluationVersionDetail, setEvaluationVersionDetail] = useState({})
-    console.log(evaluationVersionDetail)
+    //console.log(evaluationVersionDetail)
     const [learningOutComes, setLearningOutComes] = useState({})
     const [percentages, setPercentages] = useState({})
 
@@ -95,7 +95,8 @@ export function useScheduledCourse(){
       .then(json => {
         console.log(json)
         const { scheduled_courses } = json
-        setScheduledCourse(scheduled_courses)
+        const newScheduledCorses = scheduled_courses.filter(element => element.professor_id === user.id)
+        setScheduledCourse(newScheduledCorses)
         const { evaluation_version_details } = json
         setEvaluationVersionDetail(evaluation_version_details)
         if(evaluation_version_details && evaluation_version_details.length > 0){

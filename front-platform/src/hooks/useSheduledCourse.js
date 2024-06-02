@@ -161,6 +161,6 @@ export function useScheduledCourse(){
     }
 
     return { getProfessors, professors, createScheduledCourse, getEvaluationVersionDetail,
-              learningOutComes, percentages, scheduledCourse
+              learningOutComes, percentages, scheduledCourse, evaluationVersionDetail
      }
 }

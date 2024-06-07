@@ -143,7 +143,7 @@ export function CourseList() {
         {role === 'director' ? (
           <BtnCreateCourse/>
         ) : null}
-          {coursesToRender.map((curso) => (
+          {coursesToRender.sort((a,b) => a.name > b.name).map((curso) => (
                 <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
                   <h2 id={`accordion-collapse-heading-${curso.id}`}>
                     <div

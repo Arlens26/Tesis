@@ -1,5 +1,5 @@
 from django.db import models
-from courses.models import ScheduledCourse
+from courses.models import ScheduledCourse, EvaluationVersionDetail
 
 # Create your models here.
 class Activity(models.Model):
@@ -15,3 +15,17 @@ class Activity(models.Model):
         verbose_name = 'activity'
         verbose_name_plural = 'activity'
         db_table = 'activity'
+
+class ActivityEvaluationDetail(models.Model):
+    version_evaluation_detail = models.ForeignKey(EvaluationVersionDetail, on_delete=models.CASCADE, related_name='evaluation_version_details')
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='activities')
+    percentage = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self) -> str:
+        return str(self.activity) + '-' + str(self.percentage)
+    
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'activity_evaluation_detail'
+        verbose_name_plural = 'activity_evaluation_detail'
+        db_table = 'activity_evaluation_detail'

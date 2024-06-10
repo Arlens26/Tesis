@@ -20,6 +20,7 @@ export function Activity() {
     //console.log(percentages)
     const [newActivities, setNewActivities] = useState([])
     //const [activityList, setActivityList] = useState([])
+    const [filteredActivities, setFilteredActivities] = useState([])
     
     useEffect(() =>{
         getActivities()
@@ -33,16 +34,25 @@ export function Activity() {
         }
     }, [location.state?.course_id, evaluationVersion])
 
+    useEffect(() => {
+      const scheduledCourseIds = scheduledCourse.map(scheduled_course => scheduled_course.id)
+      const filtered = Object.keys(activities).filter(id => scheduledCourseIds.includes(activities[id].scheduled_course))
+      setFilteredActivities(filtered)
+    }, [scheduledCourse, activities])
+
     const handleSubmit = (event) => {
       event.preventDefault()
 
-    const buildActivityDetailList = () => {
-      return activityDetailList.map((detail, index) => (console.log(detail) ,{
-        version_detail_id: evaluationVersionDetail[index]?.id, 
-        activity_id: activities[index]?.id,
-        percentage: detail.percentages
-      }))
-    }
+      const buildActivityDetailList = () => {
+        return activityDetailList.map((detail, index) => {
+          const activityId = filteredActivities[index]
+          return (console.log(detail) ,{
+          version_detail_id: evaluationVersionDetail[index]?.id, 
+          activity_id: activities[activityId].id,
+          percentage: detail.percentages
+          })
+        })
+      }
 
       const buildActivity = () => {
         return newActivities.map(activity => ({
@@ -125,7 +135,7 @@ export function Activity() {
       return percentages.reduce((acc, percentage) => acc + parseInt(percentage || 0), 0)
     }
 
-    const scheduledCourseIds = scheduledCourse.map(scheduled_course => scheduled_course.id)
+    //const scheduledCourseIds = scheduledCourse.map(scheduled_course => scheduled_course.id)
     //console.log(scheduledCourseIds)
 
     return(
@@ -167,7 +177,7 @@ export function Activity() {
                             </thead>
                             <tbody>
                               {
-                               Object.keys(activities).filter(id => scheduledCourseIds.includes(activities[id].scheduled_course)).map((id, activityIndex )=> (
+                               filteredActivities.map((id, activityIndex )=> (
                                   <tr 
                                   key={activities[id].id} 
                                   className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">

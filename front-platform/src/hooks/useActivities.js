@@ -2,7 +2,9 @@ import { useState } from "react"
 
 export function useActivities(){
     const ACTIVITY_ENDPOINT = `http://localhost:8000/activities/all/activities/`
+    const ACTIVITY_DETAIL_ENDPOINT = `http://localhost:8000/activities/all/activity-evaluation-detail/`
     const [activities, setActivities] = useState({})
+    const [activityDetail, setActivityDetail] = useState({})
 
     const getActivities = () => {
         fetch(ACTIVITY_ENDPOINT)
@@ -10,6 +12,15 @@ export function useActivities(){
         .then(json => {
             console.log(json)
             setActivities(json)
+        })
+    }
+
+    const getActivityDetail = () => {
+        fetch(ACTIVITY_DETAIL_ENDPOINT)
+        .then(res => res.json())
+        .then(json => {
+            console.log(json)
+            setActivityDetail(json)
         })
     }
 
@@ -35,5 +46,5 @@ export function useActivities(){
         });
     }
 
-    return { getActivities, activities, createActivity }
+    return { getActivities, activities, createActivity, getActivityDetail, activityDetail }
 }

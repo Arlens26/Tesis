@@ -4,12 +4,15 @@ import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import { useActivities } from "../hooks/useActivities"
 import { ActivityForm } from "./ActivityForm"
+import { useCourses } from "../hooks/useCourses"
 
 export function Activity() {
 
     const { getEvaluationVersionDetail, learningOutComes, percentages, scheduledCourse, evaluationVersionDetail } = useScheduledCourse()   
-    const { getActivities, activities } = useActivities()
+    const { getActivities, activities, getActivityDetail, activityDetail } = useActivities()
     console.log(activities)
+    console.log(activityDetail)
+    const { getCourse } = useCourses()
     const location = useLocation()
     
     const { evaluationVersion } = useEvaluationVersionCourse()
@@ -24,8 +27,15 @@ export function Activity() {
     
     useEffect(() =>{
         getActivities()
+        getActivityDetail()
         const course_id = location.state.course_id
         console.log(course_id)
+        const course = getCourse(course_id)
+        course.then(course => {
+          const newRoute = `/${course.name}/activity/`
+          history.pushState({}, '', newRoute)
+          console.log(newRoute)
+        })
         //console.log(evaluationVersion)
         if (course_id) {
             getEvaluationVersionDetail(course_id)
@@ -38,6 +48,10 @@ export function Activity() {
       const scheduledCourseIds = scheduledCourse.map(scheduled_course => scheduled_course.id)
       const filtered = Object.keys(activities).filter(id => scheduledCourseIds.includes(activities[id].scheduled_course))
       setFilteredActivities(filtered)
+
+      /*const filteredDetail = Object.groupBy(activityDetail, ({activity}) => activity)
+      console.log(filteredDetail)*/
+
     }, [scheduledCourse, activities])
 
     const handleSubmit = (event) => {

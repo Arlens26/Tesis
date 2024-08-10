@@ -16,6 +16,7 @@ import { VersionProvider } from './context/evaluationVersion.jsx';
 import { SelectRole } from './components/SelectRole.jsx';
 import { Activity } from './components/Activity.jsx';
 import { ScheduledCourseProvider } from './context/scheduledCourse.jsx';
+import { BreadCrumb } from './components/BreadCrumb.jsx';
 
 function App() {
 
@@ -148,38 +149,39 @@ function App() {
   return (
     <VersionProvider>
       <ScheduledCourseProvider>
-      <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
-        <HeaderPage />
-            <label className='btn-menu' htmlFor={menuCheckId}>
-              <MenuIcon />
-            </label>
-            <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
-        <aside className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
-          <ul>
-              <li><Link to="/">Inicio</Link></li>
-              <li><Link to="/login">Login</Link></li>
-              <li><Link to="/role">Role</Link></li>
-              <li><Link to="/code">Code</Link></li>
-              <li><Link to="/course-list">Courses</Link></li>
-              <li><Link to="/course">Create Course</Link></li>
-          </ul>
-        </aside>
-        <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''}`}>
-          <Routes>
-            <Route path='/' element={<main/>} />
-            <Route path='/login' element={<LoginForm/>} />
-            <Route path='/role' element={<SelectRole/>} />
-            <Route path='/code' element={<CreateCode/>}/>
-            {/* Cambiar forma de pasar props usando useContext para los cursos */}
-            <Route path='/course-list' element={<CourseList/>} />
-            <Route path='/course' element={<CourseForm/>} />
-            <Route path='/course/:id' element={<CourseForm/>} />
-            <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
-            <Route path='/scheduled-course/' element={<ScheduledCourse/>} />
-            <Route path='/activity/' element={<Activity/>} />
-          </Routes>
-        </main>
-        <FooterPage />
+        <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
+          <HeaderPage />
+              <label className='btn-menu' htmlFor={menuCheckId}>
+                <MenuIcon />
+              </label>
+              <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
+          <aside className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
+            <ul>
+                <li><Link to="/">Inicio</Link></li>
+                <li><Link to="/login">Login</Link></li>
+                <li><Link to="/role">Role</Link></li>
+                <li><Link to="/code">Code</Link></li>
+                <li><Link to="/course-list">Courses</Link></li>
+                <li><Link to="/course">Create Course</Link></li>
+            </ul>
+          </aside>
+          <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''}`}>
+            <BreadCrumb/>
+            <Routes>
+              <Route path='/' element={<main/>} />
+              <Route path='/login' element={<LoginForm/>} />
+              <Route path='/role' element={<SelectRole/>} />
+              <Route path='/code' element={<CreateCode/>}/>
+              {/* Cambiar forma de pasar props usando useContext para los cursos */}
+              <Route path='/course-list' element={<CourseList/>} />
+              <Route path='/course' element={<CourseForm/>} />
+              <Route path='/course/:id' element={<CourseForm/>} />
+              <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
+              <Route path='/scheduled-course/' element={<ScheduledCourse/>} />
+              <Route path='course-list/activity/' element={<Activity/>} />
+            </Routes>
+          </main>
+          <FooterPage />
       </section>
       </ScheduledCourseProvider>
     </VersionProvider>

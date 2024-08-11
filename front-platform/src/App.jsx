@@ -1,6 +1,7 @@
 
 import './App.css';
 import MonacoEditorWrapper from './components/MonacoEditor';
+import { Toaster } from 'sonner';
 import { MenuIcon } from './components/Icons';
 import { useId, useState } from 'react';
 import { FooterPage } from './pages/Footer.jsx';
@@ -149,6 +150,7 @@ function App() {
   return (
     <VersionProvider>
       <ScheduledCourseProvider>
+        <Toaster />
         <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
           <HeaderPage />
               <label className='btn-menu' htmlFor={menuCheckId}>

@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { useCourses } from "../hooks/useCourses"
+import { toast } from "sonner"
 
 export function CourseForm() {
 
@@ -13,48 +14,46 @@ export function CourseForm() {
     useEffect(() => {
       const loadCourseData = () => {
         if (location.state && location.state.courseData) {
-          const { name, code, description, credit } = location.state.courseData;
-          document.querySelector('input[name="name"]').value = name;
-          document.querySelector('input[name="code"]').value = code;
-          document.querySelector('textarea[name="description"]').value = description;
-          document.querySelector('input[name="credit"]').value = credit;
-          // Llenar el select con el único periodo académico y deshabilitarlo
-          /*const select = document.querySelector('select[name="period_id"]');
-          const option = document.createElement('option');
-          option.textContent = period;
-          option.value = period; // Asigna el mismo valor que el texto del periodo
-          option.selected = true; // Selección por defecto
-          //select.disabled = true; // Deshabilita el select
-          select.appendChild(option);*/
+          const { name, code, description, credit } = location.state.courseData
+          document.querySelector('input[name="name"]').value = name
+          document.querySelector('input[name="code"]').value = code
+          document.querySelector('textarea[name="description"]').value = description
+          document.querySelector('input[name="credit"]').value = credit
         }
-      };
+      }
   
-      loadCourseData();
-    }, [location.state]);
+      loadCourseData()
+    }, [location.state])
   
     const handleSubmit = (event) => {
   
       event.preventDefault()
       const fields = Object.fromEntries(new window.FormData(event.target))
-  
+
+      const { name, code, description, credit } = fields
+      if (!name || !code || !description || !credit) {
+        toast.error('Por favor, completa todos los campos requeridos')
+        return
+      }
+
       if(paramsId) {
         updateCourse(paramsId, fields)
           .then(() => {
-            console.log('Curso actualizado exitosamente');
+            toast.success('Curso actualizado exitosamente')
             navigate('/course-list')
           })
           .catch((error) => {
-            console.error('Error al actualizar curso:', error);
-          });
+            toast.error('Error al actualizar curso:', error)
+          })
       } else{
         createCourse(fields)
           .then(() => {
-            console.log('Curso creado exitosamente');
+            toast.success('Curso creado exitosamente')
             navigate('/course-list')
           })
           .catch((error) => {
-            console.error('Error al crear curso:', error);
-          });
+            toast.error('Error al crear curso:', error)
+          })
       }
     }
   

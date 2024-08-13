@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { EditIcon, DeleteIcon } from "./Icons";
-//import PropTypes from 'prop-types';
-import { useUsers } from "../hooks/useUsers";
-import { useCourses } from "../hooks/useCourses";
-import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse";
-import { EvaluationVersionList } from "./EvaluationVersionList";
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+import { EditIcon, DeleteIcon } from "./Icons"
+//import PropTypes from 'prop-types'
+import { useUsers } from "../hooks/useUsers"
+import { useCourses } from "../hooks/useCourses"
+import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
+import { EvaluationVersionList } from "./EvaluationVersionList"
 
 function BtnCreateCourse() {
     const navigate = useNavigate()
@@ -107,9 +108,11 @@ export function CourseList() {
         .catch(error => console.log('Error al obtener cursos', error))
     }
   
-    const handleDeleteCourse = (courseId) => {
+    const handleDeleteCourse = (courseId, courseName) => {
+      console.log(courseName)
        deleteCourse(courseId)
        .then(() => {
+         toast.success(`El curso ${courseName} ha sido eliminado`)
          navigate('/course-list')
         }
        )
@@ -214,7 +217,7 @@ export function CourseList() {
                     </svg>
                 </div>
                 <input name="search" onChange={handleChange} value={search} type="search" id="default-search" className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Cursos, códigos..." required />
-                <button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Buscar</button>
+                {/*<button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Buscar</button>*/}
             </div>
         </form>
         <div className='flex flex-col gap-2'>
@@ -252,7 +255,7 @@ export function CourseList() {
                           <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
                               onClick={(e) => {
                               e.stopPropagation();
-                              handleDeleteCourse(curso.id)
+                              handleDeleteCourse(curso.id, curso.name)
                             }}> 
                             <DeleteIcon />
                           </button>

@@ -1,6 +1,7 @@
-import { useUsers } from '../hooks/useUsers';
-import { LogoUnivalleIcon} from './Icons';
+import { useUsers } from '../hooks/useUsers'
+import { LogoUnivalleIcon} from './Icons'
 import { useNavigate } from "react-router-dom"
+import { toast } from 'sonner'
 
 export function LoginForm() {
 
@@ -14,7 +15,7 @@ export function LoginForm() {
         getLogin(fields)
         .then((profile) => {
             console.log(profile)
-            console.log('Usuario logueado exitosamente');
+            toast.success('Usuario logueado exitosamente')
             if (profile.is_director && profile.is_professor) {
                 setRole('director')
                 navigate('/role')
@@ -32,7 +33,7 @@ export function LoginForm() {
             }
           })
           .catch((error) => {
-            console.error('Error en el login:', error);
+            toast.error('Usurio o contraseña incorrecta', error)
         })
 
     }

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { DeleteIcon } from "./Icons";
-import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse";
+import { useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
+import { toast } from "sonner"
+import { DeleteIcon } from "./Icons"
+import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 
 export function EvaluationVersionCourseForm() {
     const location = useLocation()
@@ -11,29 +12,30 @@ export function EvaluationVersionCourseForm() {
     useEffect(() => {
        const loadCourseData = () => {
          if (location.state && location.state.course) {
-           const { name, code, description, credit } = location.state.course;
-           document.querySelector('input[name="name"]').value = name;
-           document.querySelector('input[name="code"]').value = code;
-           document.querySelector('textarea[name="description"]').value = description;
-           document.querySelector('input[name="credit"]').value = credit;
+           const { name, code, description, credit } = location.state.course
+           document.querySelector('input[name="name"]').value = name
+           document.querySelector('input[name="code"]').value = code
+           document.querySelector('textarea[name="description"]').value = description
+           document.querySelector('input[name="credit"]').value = credit
          }
        };
    
-       loadCourseData();
-     }, [location.state]);
+       loadCourseData()
+     }, [location.state])
   
     const [raList, setRaList] = useState([])
+    console.log(raList)
     const [percentage, setPercentage] = useState(0)
     const [totalPercentage, setTotalPercentage] = useState(0)
-    const [numbers, setNumbers] = useState([]);
+    const [numbers, setNumbers] = useState([])
   
     const buildLearningOutcomesList = () => {
       return raList.map(ra => ({
         code: ra.code, 
         description: ra.description,
         percentage: ra.percentage
-      }));
-    };
+      }))
+    }
   
     const handleSubmit = (event) => {
       event.preventDefault()
@@ -46,17 +48,29 @@ export function EvaluationVersionCourseForm() {
         learning_outcome: buildLearningOutcomesList()
       };
       console.log(evaluationVersionData)
-      createEvaluationVersionCourse(evaluationVersionData)
+      // Función para validar los campos
+      const validateRaList = (list) => {
+        for (const item of list) {
+            if (!item.description || !item.percentage) {
+                toast.error('Por favor, completa todos los campos requeridos')
+                console.log('falta campos')
+                return
+            }
+        }
+        // Si todos los campos son válidos, puedes continuar con tu lógica
+        console.log('Todos los campos están completos')
+        createEvaluationVersionCourse(evaluationVersionData)
+      }
+      validateRaList(raList)
     }
   
     const handleAddRa = () => {
-      
       if(percentage > 0 && totalPercentage + percentage <= 100){
         // Encontrar el número menor no presente en la lista
-        let nextNumber = 1;
+        let nextNumber = 1
   
         while (numbers.includes(nextNumber)) {
-          nextNumber++;
+          nextNumber++
         }
         // Agregar el siguiente número a la lista
         const nuevosNumeros = [...numbers, nextNumber].sort((a, b) => a - b);
@@ -68,6 +82,10 @@ export function EvaluationVersionCourseForm() {
         setTotalPercentage(totalPercentage + percentage)
         setPercentage(0)
         console.log(raList)
+      }else if(percentage === 0){
+        toast.info('El porcentaje no debe ser igual a 0')
+      }else {
+        toast.info('El porcentaje total no debe ser mayor a 100')
       }    
     }
   
@@ -99,8 +117,8 @@ export function EvaluationVersionCourseForm() {
       setRaList(updateRaList)
       setTotalPercentage(totalPercentage - deletePercentage)
       // Eliminar el número asociado al elemento eliminado
-      const newNumbers = numbers.filter(number => number !== deleteNumber);
-      setNumbers(newNumbers);
+      const newNumbers = numbers.filter(number => number !== deleteNumber)
+      setNumbers(newNumbers)
     }
   
     return (
@@ -131,8 +149,8 @@ export function EvaluationVersionCourseForm() {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   />
                   <button type='button' onClick={handleAddRa} 
-                    disabled={totalPercentage === 100 || percentage === 1}
-                    className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Agregar RA</button>
+                    disabled={totalPercentage === 100}
+                    className={`bg-btn-create ${totalPercentage === 100 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'} px-20 py-1 rounded-lg text-slate-100`}>Agregar RA</button>
                   
                 </div>
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">

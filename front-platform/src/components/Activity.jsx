@@ -6,6 +6,7 @@ import { useActivities } from "../hooks/useActivities"
 //import { ActivityForm } from "./ActivityForm"
 import { useCourses } from "../hooks/useCourses"
 import { DeleteIcon } from "./Icons"
+import { toast } from "sonner"
 
 export function Activity() {
 
@@ -20,18 +21,11 @@ export function Activity() {
     const location = useLocation()
     
     const { evaluationVersion } = useEvaluationVersionCourse()
-    //const [totalPercentage, setTotalPercentage] = useState(0)
     const [activityDetailList, setActivityDetailList] = useState([])
-    //console.log(evaluationVersionDetail)
-    //console.log(learningOutComes)
-    //console.log(percentages)
+    console.log(activityDetailList)
     const [newActivities, setNewActivities] = useState([])
-    //const [newDetailActivity, setNewDetailActivity] = useState([])
-    //console.log(newActivities)
-    //const [activityList, setActivityList] = useState([])
-    
-    /*const [filteredActivities, setFilteredActivities] = useState([])
-    console.log(filteredActivities)*/
+    console.log(newActivities)
+    const [raSums, setRaSums] = useState({})
 
     const [selectedScheduledId, setSelectedScheduledId] = useState(null)
     console.log(selectedScheduledId)
@@ -58,38 +52,8 @@ export function Activity() {
         }
     }, [location.state?.course_id, evaluationVersion])
 
-    //useEffect(() => {
-      //const scheduledCourseIds = scheduledCourse.map(scheduled_course => scheduled_course.id)
-      //console.log(scheduledCourseIds)
-      //const filtered = Object.keys(activities).filter(id => scheduledCourseIds.includes(activities[id].scheduled_course))
-      //const filtered = Object.keys(activities).filter(id => selectedScheduledId === activities[id].scheduled_course)
-      /*const filtered = Object.keys(activityDetail).filter(id => selectedScheduledId === activityDetail[id].activity.scheduled_course_id)
-      console.log(filtered)
-      const filteredActivities = [...new Set(Object.keys(activityDetail).filter(id => activityDetail[id].activity.scheduled_course_id === selectedScheduledId))]
-      console.log(filteredActivities)*/
-      /*const versionEvaluationDetailIds = evaluationVersionDetail.map(details => details.id)
-      console.log(versionEvaluationDetailIds)
-      const filteredActivities = Object.values(activityDetail)
-                          .filter(activity => versionEvaluationDetailIds.includes(activity.version_evaluation_detail_id))
-                          .map(activity => activity.activity)
-      console.log(filteredActivities)*/
-      //setFilteredActivities(filteredActivities)
-
-    //}, [scheduledCourse, selectedScheduledId])
-
     const handleSubmit = (event) => {
       event.preventDefault()
-
-      /*const buildActivityDetailList = () => {
-        return activityDetailList.map((detail, index) => {
-          const activityId = filteredActivities[index]
-          return (console.log(detail) ,{
-          version_detail_id: evaluationVersionDetail[index]?.id, 
-          activity_id: activities[activityId].id,
-          percentage: detail.percentages
-          })
-        })
-      }*/
 
       const buildActivity = () => {
         return newActivities.map(activity => ({
@@ -102,14 +66,6 @@ export function Activity() {
         activity: buildActivity()
       }
       console.log(activity)
-
-      // Json para detalle de activides de evaluación
-      /*const activityDetail = {
-        activity_detail: buildActivityDetailList()
-      }
-      console.log(activityDetail)*/
-
-      
     }
 
     const handleActivity = () => {
@@ -118,63 +74,93 @@ export function Activity() {
     }
 
     const handlePercentage = (activityIndex, learningOutComeIndex, newPercentage, isNewActivity = false) => {
-      console.log(activityIndex, learningOutComeIndex)
-      const learningOutcomeId = Object.keys(learningOutComes)[learningOutComeIndex]
-      const percentageLearningOutCome = parseInt(percentages[learningOutcomeId]?.percentage)
+      const learningOutcomeId = Object.keys(learningOutComes)[learningOutComeIndex];
+      const maxPercentage = parseInt(percentages[learningOutcomeId]?.percentage);
+      
+      // Obtener la suma actual del RA desde raSums (actividades existentes)
+      const existingSum = raSums[learningOutcomeId] || 0;
   
-      const updatedDetailList = [...activityDetailList]
-      const updatedNewActivities = [...newActivities]
-
-      if (isNewActivity) {
-        if (!updatedNewActivities[activityIndex]) {
-            updatedNewActivities[activityIndex] = { percentages: [] }
-        }
-      } else {
-          if (!updatedDetailList[activityIndex]) {
-              updatedDetailList[activityIndex] = { percentages: [] }
-          }
-      }
+      // Sumar todos los porcentajes de las nuevas actividades para este RA
+      const sumNewActivities = newActivities.reduce((sum, activity) => {
+        const currentPercentage = parseInt(activity.percentages[learningOutComeIndex]) || 0;
+        return sum + currentPercentage;
+    }, 0);
   
-      const allActivities = [...updatedDetailList, ...updatedNewActivities]
-      //const totalActivitiesCount = updatedDetailList.length + updatedNewActivities.length
+      // Calcular la suma total con la nueva entrada
+      const currentActivityPercentage = isNewActivity
+          ? parseInt(newActivities[activityIndex]?.percentages[learningOutComeIndex] || 0)
+          : 0;
   
-      const actualActivityIndex = isNewActivity ? updatedDetailList.length + activityIndex : activityIndex
-
-      if (!allActivities[actualActivityIndex]) {
-          allActivities[actualActivityIndex] = { percentages: [] }
-      }
-  
-      const updatedMatrix = allActivities.map(detail => [...(detail.percentages || [])])
-      //console.log(updatedMatrix)
-  
-      if (!isNaN(newPercentage) && newPercentage >= 0 && newPercentage <= percentageLearningOutCome) {
-          const columnSum = updatedMatrix.reduce((acc, row) => acc + parseInt(row[learningOutComeIndex] || 0), 0)
-          //console.log(columnSum)
-          //console.log(percentageLearningOutCome)
-          
-          if (columnSum - (updatedMatrix[actualActivityIndex][learningOutComeIndex] || 0) + parseInt(newPercentage) <= percentageLearningOutCome) {
-              if (isNewActivity) {
-                  updatedNewActivities[activityIndex].percentages[learningOutComeIndex] = newPercentage
-                  setNewActivities(updatedNewActivities)
-                  console.log(updatedNewActivities)
-              } else {
-                  updatedDetailList[activityIndex].percentages[learningOutComeIndex] = newPercentage
-                  setActivityDetailList(updatedDetailList)
-                  console.log(updatedDetailList)
+      const newSum = existingSum + sumNewActivities - currentActivityPercentage + parseInt(newPercentage)
+      console.log(newSum)
+      /*console.log(sumNewActivities)
+      console.log(existingSum)
+      console.log(newSum)
+      console.log(maxPercentage)*/
+      if (newSum <= maxPercentage) {
+        //console.log('se ejecuta')
+          if (isNewActivity) {
+              const updatedNewActivities = [...newActivities];
+              if (!updatedNewActivities[activityIndex].percentages) {
+                  updatedNewActivities[activityIndex].percentages = [];
               }
-          } else {
-              console.log(`El porcentaje total para el RA ${learningOutComes[learningOutcomeId]?.code} no puede exceder ${percentageLearningOutCome}%`)
+              updatedNewActivities[activityIndex].percentages[learningOutComeIndex] = newPercentage;
+              setNewActivities(updatedNewActivities);
           }
+  
+          // Actualizar la suma en el estado `raSums`
+          setRaSums(prevSums => ({
+              ...prevSums,
+              [learningOutcomeId]: newSum
+          }));
+      } else {
+          toast.info(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
+          console.log(`El porcentaje total para el RA ${learningOutComes[learningOutcomeId]?.code} no puede exceder ${maxPercentage}%.`);
       }
-  }
+  };
+  
+  
+  
+  
+
+
+  const handlePercentageChange = (activityId, versionId, value) => {
+    const newPercentage = parseFloat(value) || 0
+    const learningOutcomeId = versionId // Mapea correctamente el RA
+    const currentSum = raSums[learningOutcomeId] || 0
+    const maxPercentage = parseFloat(percentages[learningOutcomeId]?.percentage)
+
+    // Busca la actividad actual
+    const activity = activities.find(activity => activity.id === activityId)
+    const currentActivityPercentage = parseFloat(activity.percentages[versionId]) || 0
+    
+    // Calcula la nueva suma potencial
+    const newSum = currentSum - currentActivityPercentage + newPercentage
+    console.log(newSum)
+
+    if (newSum <= maxPercentage) {
+        setActivities(prevActivities => 
+            prevActivities.map(activity =>
+                activity.id === activityId ? { 
+                    ...activity, 
+                    percentages: { ...activity.percentages, [versionId]: value } 
+                } : activity
+            )
+        );
+        setRaSums(prevSums => ({
+            ...prevSums,
+            [learningOutcomeId]: newSum
+        }));
+    } else {
+        toast.info(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
+        console.log(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
+    }
+}
 
     const calculateTotalPercentage = (percentages) => {
       return percentages.reduce((acc, percentage) => acc + parseInt(percentage || 0), 0)
     }
 
-    //const scheduledCourseIds = scheduledCourse.map(scheduled_course => scheduled_course.id)
-    //console.log(scheduledCourseIds)
-    // Ensure activityDetail is an array
 // Inicializar el estado
 const [activities, setActivities] = useState([])
 const filteredActivities = activities.filter(activity => activity.scheduled_course_id === selectedScheduledId)
@@ -188,22 +174,32 @@ const calculatePercentageActivity = (activity) => {
 // Asegurarse que activityDetail sea una matriz y agrupar las actividades
 useEffect(() => {
   if (Array.isArray(activityDetail)) {
-    const groupedActivities = activityDetail.reduce((acc, detail) => {
-      const { activity } = detail
-      if (!acc[activity.id]) {
-        acc[activity.id] = {
-          ...activity,
-          percentages: {},
-        };
-      }
-      acc[activity.id].percentages[detail.version_evaluation_detail_id] = detail.percentage
-      return acc
-    }, {})
-    setActivities(Object.values(groupedActivities))
+      const groupedActivities = activityDetail.reduce((acc, detail) => {
+          const { activity } = detail;
+          if (!acc[activity.id]) {
+              acc[activity.id] = {
+                  ...activity,
+                  percentages: {},
+              };
+          }
+          acc[activity.id].percentages[detail.version_evaluation_detail_id] = detail.percentage;
+          return acc;
+      }, {});
+      
+      setActivities(Object.values(groupedActivities));
+
+      // Inicializa raSums con los porcentajes existentes en activityDetail
+      const initialRaSums = activityDetail.reduce((acc, detail) => {
+          const learningOutcomeId = detail.version_evaluation_detail_id;
+          acc[learningOutcomeId] = (acc[learningOutcomeId] || 0) + parseInt(detail.percentage || 0);
+          return acc;
+      }, {});
+      
+      setRaSums(initialRaSums);
   } else {
-    console.error('ActivityDetail is not an array:', activityDetail)
+      console.error('ActivityDetail is not an array:', activityDetail);
   }
-}, [activityDetail])
+}, [activityDetail]);
 
   if (!Array.isArray(activityDetail)) {
     console.error('ActivityDetail is not an array:', activityDetail)
@@ -217,13 +213,15 @@ useEffect(() => {
     ))
   }
 
-  const handlePercentageChange = (activityId, versionId, value) => {
-    setActivities(prevActivities => prevActivities.map(activity =>
-      activity.id === activityId ? {
-        ...activity,
-        percentages: { ...activity.percentages, [versionId]: value }
-      } : activity
-    ))
+  const handleDeleteActivity = (index) => {
+      // Crear una copia del estado actual de newActivities
+      const updatedActivities = [...newActivities]
+      
+      // Eliminar la actividad en el índice especificado
+      updatedActivities.splice(index, 1)
+      
+      // Actualizar el estado con las actividades restantes
+      setNewActivities(updatedActivities)
   }
 
   // Render table headers
@@ -322,7 +320,12 @@ useEffect(() => {
                                         {calculateTotalPercentage(activity.percentages || [])}%
                                     </td>
                                     <td className="px-6 py-4">
-
+                                      <button 
+                                        type='button'
+                                        onClick={ () => handleDeleteActivity(activityIndex)}
+                                        className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'>
+                                        <DeleteIcon/>
+                                      </button>
                                     </td>
                                 </tr>
       ))}
@@ -344,7 +347,7 @@ useEffect(() => {
                                         100%
                                     </td>
                                     <td className="px-6 py-4">
-                                        
+                                    
                                     </td>
                                   </tr>
     </tbody>
@@ -367,7 +370,6 @@ useEffect(() => {
                           </option>
                     ))}
         </select>
-        {/*<ActivityForm/>*/}
         <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
           <button 
             className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
@@ -380,172 +382,8 @@ useEffect(() => {
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             {renderTableHeaders()}
             {renderTableRows()}
-          </table>
-          {/*<table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3">
-                                        Actividad
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Descripción
-                                    </th>
-                                    {
-                                      Object.keys(learningOutComes).map(id => (
-                                        <th key={id} scope="col" className="px-6 py-3">
-                                          {learningOutComes[id]?.code || 'Cargando...'}
-                                        </th>
-                                      ))
-                                    }
-                                    <th scope="col" className="px-6 py-3">
-                                        Porcentaje
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Acciones
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                              {/*
-                               filteredActivities.map((id, activityIndex )=> (
-                                  <tr 
-                                  key={activities[id].id} 
-                                  className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                    <td name='name' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      <input type="text" value={activities[id].name} placeholder='Nombre de la actividad' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>                               
-                                    </td>
-                                    <td name='description' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      <textarea value={activities[id].description} placeholder='Descripción' name='description' rows="1" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>           
-                                    </td>
-                                    {Object.entries(learningOutComes).map((learningOutcomeId, learningOutComeIndex) => (
-                                        <td key={learningOutcomeId} className="px-6 py-4">
-                                            <input
-                                                name={`learning_percentage${learningOutComeIndex}_${learningOutcomeId}`}
-                                                type="text"
-                                                value={activityDetailList[activityIndex]?.percentages[learningOutComeIndex] || ''}
-                                                onChange={(e) => handlePercentage(activityIndex, learningOutComeIndex, e.target.value)}
-                                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                                        </td>
-                                    ))}
-                                    <td className="px-6 py-4">
-                                        {calculateTotalPercentage(activityDetailList[activityIndex]?.percentages || [])}%
-                                    </td>
-                                    <td key={id} className="px-6 py-4">
-                                          
-                                    </td>
-                                  </tr>
-                                ))
-                              */}
-                               {/*
-                                          Object.keys(activityDetail).map((key, index) => {
-                                            const detailAd = activityDetail[key]
-                                            console.log(`detailAd ${index}:`, detailAd)
-                                            return (
-                                              <>
-                                                <div className="flex flex-col" key={index}>
-                                                  <h2>Detail {index}</h2>
-                                                  <p>Id: {detailAd.id}</p>
-                                                  <p>Percentage: {detailAd.percentage}</p>
-                                                  <p>Activity Name: {detailAd.activity.name}</p>
-                                                </div>
-                                                <tr 
-                                  key={detailAd.activity.id} 
-                                  className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                    <td name='name' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      <input type="text" value={detailAd.activity.name} placeholder='Nombre de la actividad' name='name' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>                               
-                                    </td>
-                                    <td name='description' scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      <textarea value={detailAd.activity.description} placeholder='Descripción' name='description' rows="1" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>           
-                                    </td>
-                                    {Object.entries(learningOutComes).map((learningOutcomeId, learningOutComeIndex) => (
-                                        <td key={learningOutcomeId} className="px-6 py-4">
-                                            <input
-                                                name={`learning_percentage${learningOutComeIndex}_${learningOutcomeId}`}
-                                                type="text"
-                                                value={detailAd.percentage || ''}
-                                                onChange={(e) => handlePercentage(index, learningOutComeIndex, e.target.value)}
-                                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                                        </td>
-                                    ))}
-                                    <td className="px-6 py-4">
-                                        {calculateTotalPercentage(activityDetailList[index]?.percentages || [])}%
-                                    </td>
-                                    <td key={key} className="px-6 py-4">
-                                          
-                                    </td>
-                                  </tr>
-                                              </>
-                                            )
-                                        })
-
-                                      }
-                              {newActivities.map((activity, activityIndex) => (
-                                <tr key={`newActivity_${activityIndex}`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                    <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        <input type="text" value={activity.name} placeholder='Nombre de la actividad' name={`new_name_${activityIndex}`} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => {
-                                            const updatedActivities = [...newActivities];
-                                            updatedActivities[activityIndex].name = e.target.value;
-                                            setNewActivities(updatedActivities);
-                                        }} />
-                                    </td>
-                                    <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        <textarea value={activity.description} placeholder='Descripción' name={`new_description_${activityIndex}`} rows="1" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => {
-                                            const updatedActivities = [...newActivities];
-                                            updatedActivities[activityIndex].description = e.target.value;
-                                            setNewActivities(updatedActivities);
-                                        }} />
-                                    </td>
-                                    {Object.entries(learningOutComes).map((learningOutcomeId, learningOutComeIndex) => (
-                                        <td key={learningOutcomeId} className="px-6 py-4">
-                                            <input
-                                                name={`new_learning_percentage${learningOutComeIndex}_${learningOutcomeId}`}
-                                                type="text"
-                                                value={activity.percentages[learningOutComeIndex] || ''}
-                                                onChange={(e) => {
-                                                    const updatedActivities = [...newActivities];
-                                                    if (!updatedActivities[activityIndex].percentages) {
-                                                        updatedActivities[activityIndex].percentages = []
-                                                    }
-                                                    updatedActivities[activityIndex].percentages[learningOutComeIndex] = e.target.value
-                                                    setNewActivities(updatedActivities)
-                                                    handlePercentage(activityIndex, learningOutComeIndex, e.target.value, true)
-                                                }}
-                                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                            />
-                                        </td>
-                                    ))}
-                                    <td className="px-6 py-4">
-                                        {calculateTotalPercentage(activity.percentages || [])}%
-                                    </td>
-                                    <td className="px-6 py-4">
-
-                                    </td>
-                                </tr>
-                            ))}
-                              <tr key={`totalPercentageRa`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        PORCENTAJE
-                                    </th>
-                                    <td className="px-6 py-4">
-                                      
-                                    </td>
-                                    {
-                                      Object.keys(percentages).map(id => (
-                                      <td key={id} className="px-6 py-4">
-                                        {parseFloat(percentages[id]?.percentage).toFixed(0)}%
-                                      </td>
-                                    ))
-                                  }
-                                    <td className="px-6 py-4">
-                                        100%
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        
-                                    </td>
-                                  </tr>
-                            </tbody>
-                                </table> */} 
-            <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Configurar Actividad</button>                      
+          </table>      
+          <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Configurar Actividad</button>                      
         </form>
       </div>
     )

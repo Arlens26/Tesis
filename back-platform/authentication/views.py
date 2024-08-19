@@ -74,3 +74,12 @@ class ProfessorListView(viewsets.ViewSet):
             return Response(professor_serializer.data, status=status.HTTP_200_OK)
         else: 
             return Response({'error':'There are no professors available'}, status=status.HTTP_404_NOT_FOUND)
+
+class StudentListView(viewsets.ViewSet):
+    def list(self, request):
+        queryset = User.objects.filter(groups__name='student')
+        if queryset.exists():
+            student_serializer = UserSerializer(queryset, many=True)
+            return Response(student_serializer.data, status=status.HTTP_200_OK)
+        else: 
+            return Response({'error':'There are no students available'}, status=status.HTTP_404_NOT_FOUND)

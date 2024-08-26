@@ -112,3 +112,23 @@ class EvaluationVersionDetail(models.Model):
         verbose_name = 'evaluation_version_detail'
         verbose_name_plural = 'evaluation_version_detail'
         db_table = 'evaluation_version_detail'
+
+class StudentEnrolledCourse(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='students')
+    scheduled_course = models.ForeignKey(ScheduledCourse, on_delete=models.CASCADE, related_name='scheduled_courses')
+
+    def __str__(self):
+        return str(self.student) + '-' + str(self.scheduled_course)
+    
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'student_enrolled_course'
+        verbose_name_plural = 'student_enrolled_course'
+        db_table = 'student_enrolled_course'
+
+@receiver(pre_save, sender=ScheduledCourse)
+def validate_student_group(sender, instance, **kwargs):
+    if instance.student.groups.filter(name='student').exists():
+        return
+    else:
+        raise ValidationError(_('The selected student must belong to the student group.'))

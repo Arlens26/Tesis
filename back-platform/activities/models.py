@@ -1,9 +1,9 @@
 from django.db import models
-from courses.models import ScheduledCourse, EvaluationVersionDetail
+from courses.models import ScheduledCourse, EvaluationVersionDetail, StudentEnrolledCourse
 
 # Create your models here.
 class Activity(models.Model):
-    scheduled_course = models.ForeignKey(ScheduledCourse, on_delete=models.CASCADE, related_name='scheduled_courses')
+    scheduled_course = models.ForeignKey(ScheduledCourse, on_delete=models.CASCADE, related_name='activity_scheduled_courses')
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=255, blank=True)
 
@@ -29,3 +29,17 @@ class ActivityEvaluationDetail(models.Model):
         verbose_name = 'activity_evaluation_detail'
         verbose_name_plural = 'activity_evaluation_detail'
         db_table = 'activity_evaluation_detail'
+
+class GradeDetailLearningOutCome(models.Model):
+    enrolled_course = models.ForeignKey(StudentEnrolledCourse, on_delete=models.CASCADE, related_name='student_enrolled_courses')
+    activity_evaluation_detail = models.ForeignKey(ActivityEvaluationDetail, on_delete=models.CASCADE, related_name='activity_evaluation_details') 
+    grade = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self):
+        return str(self.enrolled_course) + '-' + str(self.grade)
+    
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'grade_detail_learning_outcome'
+        verbose_name_plural = 'grade_detail_learning_outcome'
+        db_table = 'grade_detail_learning_outcome'

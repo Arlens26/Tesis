@@ -3,7 +3,7 @@ import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 
 export function ActivityRating() {
 
-    const { getStudents, students } = useEnrolledStudent()
+    const { getStudents, students, getGradeDetail } = useEnrolledStudent()
 
     const learningOutComes = [
         { id: "RA1", weight: 20 },
@@ -15,6 +15,7 @@ export function ActivityRating() {
 
     useEffect(() => {
         getStudents()
+        getGradeDetail()
     }, [])
 
     useEffect(() => {
@@ -53,7 +54,7 @@ export function ActivityRating() {
                 <th scope="col" className="px-6 py-3">Estudiantes</th>
                 {learningOutComes.map((outcome) => (
                 <th key={outcome.id} scope="col" className="px-6 py-3">
-                    {`R.A. ${outcome.id} - ${outcome.weight}%`}
+                    {`${outcome.id} - ${outcome.weight}%`}
                 </th>
                 ))}
                 <th scope="col" className="px-6 py-3">Escala</th>
@@ -81,6 +82,8 @@ export function ActivityRating() {
               <td key={outcome.id} className="px-6 py-4">
                 <input
                   type="number"
+                  min={0}
+                  max={5}
                   value={studentNote[outcome.id] || ""}
                   onChange={(e) =>
                     handleNoteChange(student.id, outcome.id, e.target.value)

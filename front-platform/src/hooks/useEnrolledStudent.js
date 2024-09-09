@@ -32,5 +32,5 @@ export function useEnrolledStudent() {
       });
     }
 
-    return { getStudents, students, getGradeDetail }
+    return { getStudents, students, getGradeDetail, gradeDetail }
 }

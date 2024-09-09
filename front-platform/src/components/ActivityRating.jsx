@@ -3,49 +3,158 @@ import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 
 export function ActivityRating() {
 
-    const { getStudents, students, getGradeDetail } = useEnrolledStudent()
+    const { getGradeDetail, gradeDetail } = useEnrolledStudent()
+    const [selectedActivityId, setSelectedActivityId] = useState(null)
 
-    const learningOutComes = [
+    /*const learningOutComes = [
         { id: "RA1", weight: 20 },
         { id: "RA2", weight: 30 },
-      ]
+      ]*/
 
-    const max = 2.5
+    const filteredByActivities = gradeDetail
+      .filter(detail => detail.activity_evaluation_detail.activities.id === Number(selectedActivityId))
+      /*.reduce((uniqueStudents, currentDetail) => {
+        const isStudentAlreadyAdded = uniqueStudents.some(
+          studentDetail => studentDetail.enrolled_course.student.id === currentDetail.enrolled_course.student.id
+        );
+        
+        if (!isStudentAlreadyAdded) {
+          uniqueStudents.push(currentDetail)
+        }
+    
+        return uniqueStudents
+      }, [])*/
+    console.log('Filtered by activities: ', filteredByActivities)
+    
+    // Verificar que las RAs sean únicos
+    const uniqueLearningOutComes = Array.from(
+      new Set(filteredByActivities.map((detail) => detail.activity_evaluation_detail.version_evaluation_detail.id))
+    ).map((id) => {
+      return filteredByActivities.find((detail) => detail.activity_evaluation_detail.version_evaluation_detail.id === id)
+    })
+    console.log('Unique RA: ', uniqueLearningOutComes)
+
+    // Verificar que las estudiantes sean únicos
+    const uniqueStudents = Array.from(
+      new Set(filteredByActivities.map((detail) => detail.enrolled_course.student.id))
+    ).map((id) => {
+      return filteredByActivities.find((detail) => detail.enrolled_course.student.id === id)
+    })
+    console.log('Unique Students: ', uniqueStudents)
+
+    const [max, setMax] = useState(0)
     const [notes, setNotes] = useState([])
+    console.log('Notes: ',notes)
+    const [isInitialized, setIsInitialized] = useState(false)
+
+    // Calcular el total de porcentaje y luego hayar el máximo
+    useEffect(() => {
+      const total = uniqueLearningOutComes.reduce((acc, detail) => {
+        return acc + detail.activity_evaluation_detail.percentage
+      }, 0)
+      const max = (total/100)*5 
+      setMax(max)
+    }, [uniqueLearningOutComes])
+
+    const learningOutComes = uniqueLearningOutComes.map(detail => {
+      return {
+        id: detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome, 
+        weight: detail.activity_evaluation_detail.percentage,
+        sum: max
+      }
+    })
+    console.log('Learnig outcomes: ', learningOutComes)
 
     useEffect(() => {
-        getStudents()
         getGradeDetail()
     }, [])
 
-    useEffect(() => {
-        if (students.length > 0) {
-          const initialNotes = students.map((student) => ({
-            id: student.id,
-            RA1: 0,
-            RA2: 0,
+    /*useEffect(() => {
+        if (filteredByActivities.length > 0) {
+          const initialNotes = filteredByActivities.map((detail) => ({
+            id: detail.id,
+            //RA1: 0,
+            //RA2: 0,
             accNote: 0,
           }));
           setNotes(initialNotes)
         }
-      }, [students])
+      }, [selectedActivityId])*/
 
-    const handleNoteChange = (studentId, RAId, value) => {
+      useEffect(() => {
+        if (filteredByActivities.length > 0 && !isInitialized) {
+          const initialNotes = uniqueStudents.map((studentDetail) => {
+          const studentNotes = {}
+          
+          // Llenar los RA con los valores de grade desde filteredByActivities
+          filteredByActivities.forEach((detail) => {
+            if (detail.enrolled_course.student.id === studentDetail.enrolled_course.student.id) {
+              const RAId = detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome
+              studentNotes[RAId] = parseFloat(detail.grade) // Cargar el grade correspondiente al RA
+            }
+          })
+
+          // Calcular la nota acumulada basándose en los valores iniciales de filteredByActivities
+          const accumulatedNote = learningOutComes.reduce((acc, outcome) => {
+            const outcomeId = outcome.id
+            const outcomeWeight = outcome.weight
+            const studentOutcomeNote = studentNotes[outcomeId] || 0
+            return acc + (studentOutcomeNote * outcomeWeight) / 100
+          }, 0)
+      
+            return {
+              id: studentDetail.id,
+              ...studentNotes,  // Agregar las notas iniciales por RA
+              accNote: accumulatedNote, // Se calculará después
+            }
+          })
+          setNotes(initialNotes)
+          setIsInitialized(true)
+        }
+      }, [filteredByActivities, uniqueStudents, isInitialized])
+
+      useEffect(() => {
+        if (gradeDetail && gradeDetail.length > 0) {
+          setSelectedActivityId(gradeDetail[0].activity_evaluation_detail.activities.id)
+          console.log("Activity ID seleccionado:", selectedActivityId)
+        }
+      }, [gradeDetail])
+
+      
+      
+      // Verificar que las actividades sean unicas en el combo box
+      const uniqueActivities = Array.from(
+        new Set(gradeDetail.map((detail) => detail.activity_evaluation_detail.activities.id))
+      ).map((id) => {
+        return gradeDetail.find((detail) => detail.activity_evaluation_detail.activities.id === id)
+      })
+      //const detailsArray = Array.isArray(gradeDetail) ? gradeDetail : Object.entries(gradeDetail || {})
+
+      const handleNoteChange = (studentId, RAId, value) => {
         const newNotes = notes.map((note) => {
           if (note.id === studentId) {
             const updatedNote = {
               ...note,
-              [RAId]: parseFloat(value),
-            };
-            updatedNote.accNote =
-              (updatedNote.RA1 * learningOutComes[0].weight) / 100 +
-              (updatedNote.RA2 * learningOutComes[1].weight) / 100
+              [RAId]: parseFloat(value), // Actualiza la nota para el RA específico
+            }
+      
+            // Calcular la nota acumulada basándose en los pesos de los resultados de aprendizaje
+            const accumulatedNote = learningOutComes.reduce((acc, outcome) => {
+              const outcomeId = outcome.id;
+              const outcomeWeight = outcome.weight;
+              const studentOutcomeNote = updatedNote[outcomeId] || 0
+              return acc + (studentOutcomeNote * outcomeWeight) / 100
+            }, 0)
+      
+            updatedNote.accNote = accumulatedNote
+      
             return updatedNote
           }
           return note
         })
         setNotes(newNotes)
       }
+      
 
     // Render table headers
     const renderTableHeaders = () => (
@@ -66,17 +175,20 @@ export function ActivityRating() {
     // Render table rows
   const renderTableRows = () => (
     <tbody>
-       {students.map((student) => {
-        const studentNote = notes.find((note) => note.id === student.id)
+       {uniqueStudents.map((detail) => {
+        const studentNote = notes.find((note) => note.id === detail.id)
         if (!studentNote) return null
+
+        const nameStudent = detail.enrolled_course.student.name
+        //const grade = detail.grade
 
         return (
           <tr
-            key={student.id}
+            key={detail.id}
             className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
           >
             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              <span>{`${student.first_name} ${student.last_name}`}</span>
+              <span>{nameStudent}</span>
             </td>
             {learningOutComes.map((outcome) => (
               <td key={outcome.id} className="px-6 py-4">
@@ -84,18 +196,18 @@ export function ActivityRating() {
                   type="number"
                   min={0}
                   max={5}
-                  value={studentNote[outcome.id] || ""}
+                  value={notes.find(note => note.id === detail.id)?.[outcome.id] || ""}
                   onChange={(e) =>
-                    handleNoteChange(student.id, outcome.id, e.target.value)
+                    handleNoteChange(detail.id, outcome.id, e.target.value)
                   }
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
+                /> 
               </td>
             ))}
             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
               <input
                 type="number"
-                value={(studentNote.accNote / (max * 5)).toFixed(2)}
+                value={((studentNote.accNote / max) * 5).toFixed(2)}
                 readOnly
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
@@ -115,11 +227,44 @@ export function ActivityRating() {
   )
 
     return(
+      <>
+        <span>Calificicaciones</span>
+        <div>
+          <label className="text-sm">Actividades:</label>
+          <select 
+            id="activity_course" 
+            name='activities' 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            onChange={(e) => setSelectedActivityId(e.target.value)}
+          >
+                      <option disabled>Seleccione una actividad</option>
+          {uniqueActivities &&
+            uniqueActivities.map((detail) => (
+              <option
+                key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
+                value={detail.activity_evaluation_detail.activities.id}
+              >
+                {`${detail.activity_evaluation_detail.activities.name}`}
+              </option>
+                      ))}
+          </select>
+    <div>
+      {gradeDetail.map((detail) => (
+        <div key={`activityGrade_${detail.id}`}>
+          <span>Activity selected: {selectedActivityId} - </span>
+          <span>{detail.id} - {detail.grade} - {detail.enrolled_course.student.name} - </span>
+          <span>{detail.activity_evaluation_detail.activities.name} - {detail.activity_evaluation_detail.percentage}% - </span>
+          <span>{detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome} - </span>        
+        </div>
+      ))}
+    </div>
+        </div>
         <form className='form flex flex-col gap-4 mt-4'>
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             {renderTableHeaders()}
             {renderTableRows()}
             </table>
         </form>
+      </>
     )
 }

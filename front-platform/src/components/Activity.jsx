@@ -163,7 +163,7 @@ export function Activity() {
 
 // Inicializar el estado
 const [activities, setActivities] = useState([])
-const filteredActivities = activities.filter(activity => activity.scheduled_course_id === selectedScheduledId)
+const filteredActivities = activities.filter(activity => activity.scheduled_course_id === Number(selectedScheduledId))
 console.log(filteredActivities)
 //const [totalPercentage, setTotalPercentage] = useState(0)
 

@@ -34,6 +34,7 @@ class GradeDetailLearningOutComeSerializer(serializers.ModelSerializer):
         return {
             'id': enrolled_course.id,
             'student': {
+                'id': enrolled_course.student.id,
                 'name': enrolled_course.student.first_name,
             },
             'course': {
@@ -52,7 +53,10 @@ class GradeDetailLearningOutComeSerializer(serializers.ModelSerializer):
                 'description': activity_evaluation_detail.activity.description,
             },
             'percentage': activity_evaluation_detail.percentage,
-            'version_evaluation_detail' : activity_evaluation_detail.version_evaluation_detail_id,
+            'version_evaluation_detail' : {
+                'id': activity_evaluation_detail.version_evaluation_detail_id,
+                'learning_outcome': activity_evaluation_detail.version_evaluation_detail.learning_outcome.code,
+            },
         }
     
     class Meta:

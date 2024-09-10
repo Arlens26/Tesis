@@ -3,7 +3,7 @@ import { useState } from "react";
 export function useEnrolledStudent() {
     
     const STUDENTS_ENDPOINT = `http://127.0.0.1:8000/authentication/students/`
-    const GRADE_DETAIL_LEARNING_OTUCOME = `http://localhost:8000/activities/all/grade-detail-learning-outcome`
+    const GRADE_DETAIL_LEARNING_OTUCOME = `http://localhost:8000/activities/all/grade-detail-learning-outcome/`
 
     const [students, setStudent] = useState([])
     console.log(students)
@@ -32,5 +32,24 @@ export function useEnrolledStudent() {
       });
     }
 
-    return { getStudents, students, getGradeDetail, gradeDetail }
+    const updateGradeDetail = (gradeId, data) => {
+
+        return fetch(`${GRADE_DETAIL_LEARNING_OTUCOME}${gradeId}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if(response.ok){
+                console.log('Calificación actualizada exitosamente')
+            }
+            if(!response.ok){
+                throw new Error('Error al actualizar la calificación')
+            }
+        })
+    }
+
+    return { getStudents, students, getGradeDetail, gradeDetail, updateGradeDetail }
 }

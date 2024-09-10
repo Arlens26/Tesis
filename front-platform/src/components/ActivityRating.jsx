@@ -1,29 +1,15 @@
 import { useEffect, useState } from "react"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
+import { toast } from "sonner"
 
 export function ActivityRating() {
 
-    const { getGradeDetail, gradeDetail } = useEnrolledStudent()
+    const { getGradeDetail, gradeDetail, updateGradeDetail } = useEnrolledStudent()
     const [selectedActivityId, setSelectedActivityId] = useState(null)
 
-    /*const learningOutComes = [
-        { id: "RA1", weight: 20 },
-        { id: "RA2", weight: 30 },
-      ]*/
 
     const filteredByActivities = gradeDetail
       .filter(detail => detail.activity_evaluation_detail.activities.id === Number(selectedActivityId))
-      /*.reduce((uniqueStudents, currentDetail) => {
-        const isStudentAlreadyAdded = uniqueStudents.some(
-          studentDetail => studentDetail.enrolled_course.student.id === currentDetail.enrolled_course.student.id
-        );
-        
-        if (!isStudentAlreadyAdded) {
-          uniqueStudents.push(currentDetail)
-        }
-    
-        return uniqueStudents
-      }, [])*/
     console.log('Filtered by activities: ', filteredByActivities)
     
     // Verificar que las RAs sean únicos
@@ -69,18 +55,6 @@ export function ActivityRating() {
     useEffect(() => {
         getGradeDetail()
     }, [])
-
-    /*useEffect(() => {
-        if (filteredByActivities.length > 0) {
-          const initialNotes = filteredByActivities.map((detail) => ({
-            id: detail.id,
-            //RA1: 0,
-            //RA2: 0,
-            accNote: 0,
-          }));
-          setNotes(initialNotes)
-        }
-      }, [selectedActivityId])*/
 
       useEffect(() => {
         if (filteredByActivities.length > 0 && !isInitialized) {
@@ -130,14 +104,14 @@ export function ActivityRating() {
       ).map((id) => {
         return gradeDetail.find((detail) => detail.activity_evaluation_detail.activities.id === id)
       })
-      //const detailsArray = Array.isArray(gradeDetail) ? gradeDetail : Object.entries(gradeDetail || {})
 
       const handleNoteChange = (studentId, RAId, version_id, value) => {
         
         console.log("Student ID:", studentId) // Verificar el ID del estudiante
-        console.log("RA ID:", RAId)  // Verificar el ID del Resultado de Aprendizaje (R.A.)
-        console.log("FilteredByActivities:", filteredByActivities)
-         // Crear el JSON cuando se modifica la nota
+        console.log("Version evaluation detail ID:", version_id)  // Verificar el ID del version evaluation detail
+        //console.log("FilteredByActivities:", filteredByActivities)
+        
+        // Crear el JSON cuando se modifica la nota
         const updatedGrade = filteredByActivities.find((detail) => {
           return detail.enrolled_course.student.id === studentId &&
                 detail.activity_evaluation_detail.version_evaluation_detail.id === version_id
@@ -145,14 +119,15 @@ export function ActivityRating() {
         console.log('Update grade: ', updatedGrade)
 
         if (updatedGrade) {
-          const jsonPayload = {
+          const jsonGradeDetailLearningOutCome = {
             enrolled_course_id: updatedGrade.enrolled_course.id, // Obtener el enrolled_course_id
             activity_evaluation_detail_id: updatedGrade.activity_evaluation_detail.id, // Obtener el activity_evaluation_detail_id
             grade: parseFloat(value) // La nueva nota modificada
           }
 
-          console.log('JSON Payload:', jsonPayload) // Puedes enviarlo o procesarlo aquí
-          // Aquí puedes enviar este JSON a una API o guardarlo de alguna forma
+          console.log('JSON Grade detail:', jsonGradeDetailLearningOutCome) 
+          updateGradeDetail(updatedGrade.id, jsonGradeDetailLearningOutCome)
+          toast.success(`Al estudiante ${updatedGrade.enrolled_course.student.name} se le cambió la calificación en el ${updatedGrade.activity_evaluation_detail.version_evaluation_detail.learning_outcome}`)
         }
 
         const newNotes = notes.map((note) => {

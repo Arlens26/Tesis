@@ -58,7 +58,8 @@ export function ActivityRating() {
 
     const learningOutComes = uniqueLearningOutComes.map(detail => {
       return {
-        id: detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome, 
+        id: detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome,
+        version_id: detail.activity_evaluation_detail.version_evaluation_detail.id,
         weight: detail.activity_evaluation_detail.percentage,
         sum: max
       }
@@ -104,6 +105,7 @@ export function ActivityRating() {
       
             return {
               id: studentDetail.id,
+              student_id: studentDetail.enrolled_course.student.id,
               ...studentNotes,  // Agregar las notas iniciales por RA
               accNote: accumulatedNote, // Se calculará después
             }
@@ -130,9 +132,32 @@ export function ActivityRating() {
       })
       //const detailsArray = Array.isArray(gradeDetail) ? gradeDetail : Object.entries(gradeDetail || {})
 
-      const handleNoteChange = (studentId, RAId, value) => {
+      const handleNoteChange = (studentId, RAId, version_id, value) => {
+        
+        console.log("Student ID:", studentId) // Verificar el ID del estudiante
+        console.log("RA ID:", RAId)  // Verificar el ID del Resultado de Aprendizaje (R.A.)
+        console.log("FilteredByActivities:", filteredByActivities)
+         // Crear el JSON cuando se modifica la nota
+        const updatedGrade = filteredByActivities.find((detail) => {
+          return detail.enrolled_course.student.id === studentId &&
+                detail.activity_evaluation_detail.version_evaluation_detail.id === version_id
+        })
+        console.log('Update grade: ', updatedGrade)
+
+        if (updatedGrade) {
+          const jsonPayload = {
+            enrolled_course_id: updatedGrade.enrolled_course.id, // Obtener el enrolled_course_id
+            activity_evaluation_detail_id: updatedGrade.activity_evaluation_detail.id, // Obtener el activity_evaluation_detail_id
+            grade: parseFloat(value) // La nueva nota modificada
+          }
+
+          console.log('JSON Payload:', jsonPayload) // Puedes enviarlo o procesarlo aquí
+          // Aquí puedes enviar este JSON a una API o guardarlo de alguna forma
+        }
+
         const newNotes = notes.map((note) => {
-          if (note.id === studentId) {
+          //console.log('note id:',note.student_id)
+          if (note.student_id === studentId) {
             const updatedNote = {
               ...note,
               [RAId]: parseFloat(value), // Actualiza la nota para el RA específico
@@ -198,7 +223,7 @@ export function ActivityRating() {
                   max={5}
                   value={notes.find(note => note.id === detail.id)?.[outcome.id] || ""}
                   onChange={(e) =>
-                    handleNoteChange(detail.id, outcome.id, e.target.value)
+                    handleNoteChange(detail.enrolled_course.student.id, outcome.id, outcome.version_id, e.target.value)
                   }
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 /> 

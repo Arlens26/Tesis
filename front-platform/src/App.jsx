@@ -19,6 +19,7 @@ import { Activity } from './components/Activity.jsx';
 import { ScheduledCourseProvider } from './context/scheduledCourse.jsx';
 import { BreadCrumb } from './components/BreadCrumb.jsx';
 import { ActivityRating } from './components/ActivityRating.jsx';
+import { EnrolledStudent } from './components/EnrolledStudent.jsx';
 import { RadarChart } from './components/RadarChart';
 
 function App() {
@@ -167,6 +168,7 @@ function App() {
                 <li><Link to="/code">Code</Link></li>
                 <li><Link to="/course-list">Courses</Link></li>
                 <li><Link to="/course">Create Course</Link></li>
+                <li><Link to="/grade-detail">Grade detail</Link></li>
                 <li><Link to="/enrolled-student">Enrolled student</Link></li>
                 <li><Link to="/radar">Radar</Link></li>
             </ul>
@@ -185,7 +187,8 @@ function App() {
               <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
               <Route path='/scheduled-course/' element={<ScheduledCourse/>} />
               <Route path='course-list/activity/' element={<Activity/>} />
-              <Route path='enrolled-student' element={<ActivityRating/>} />
+              <Route path='grade-detail' element={<ActivityRating/>} />
+              <Route path='enrolled-student' element={<EnrolledStudent/>} />
               <Route path='radar' element={<RadarChart/>} />
             </Routes>
           </main>

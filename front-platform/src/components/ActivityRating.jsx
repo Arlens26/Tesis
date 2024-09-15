@@ -30,8 +30,8 @@ export function ActivityRating() {
 
     const [max, setMax] = useState(0)
     const [notes, setNotes] = useState([])
-    console.log('Notes: ',notes)
-    const [isInitialized, setIsInitialized] = useState(false)
+    console.log('Notes: ', notes)
+    //const [isInitialized, setIsInitialized] = useState(false)
 
     // Calcular el total de porcentaje y luego hayar el máximo
     useEffect(() => {
@@ -57,7 +57,7 @@ export function ActivityRating() {
     }, [])
 
       useEffect(() => {
-        if (filteredByActivities.length > 0 && !isInitialized) {
+        if (filteredByActivities.length > 0) {
           const initialNotes = uniqueStudents.map((studentDetail) => {
           const studentNotes = {}
           
@@ -85,16 +85,16 @@ export function ActivityRating() {
             }
           })
           setNotes(initialNotes)
-          setIsInitialized(true)
+          //setIsInitialized(true)
         }
-      }, [filteredByActivities, uniqueStudents, isInitialized])
+      }, [selectedActivityId])
 
       useEffect(() => {
-        if (gradeDetail && gradeDetail.length > 0) {
+        if (gradeDetail && gradeDetail.length > 0 && !selectedActivityId) {
           setSelectedActivityId(gradeDetail[0].activity_evaluation_detail.activities.id)
           console.log("Activity ID seleccionado:", selectedActivityId)
         }
-      }, [gradeDetail])
+      }, [gradeDetail, selectedActivityId])
 
       
       
@@ -127,32 +127,40 @@ export function ActivityRating() {
 
           console.log('JSON Grade detail:', jsonGradeDetailLearningOutCome) 
           updateGradeDetail(updatedGrade.id, jsonGradeDetailLearningOutCome)
-          toast.success(`Al estudiante ${updatedGrade.enrolled_course.student.name} se le cambió la calificación en el ${updatedGrade.activity_evaluation_detail.version_evaluation_detail.learning_outcome}`)
+          .then(() => {
+            getGradeDetail()
+            const newNotes = notes.map((note) => {
+              //console.log('note id:',note.student_id)
+              if (note.student_id === studentId) {
+                const updatedNote = {
+                  ...note,
+                  [RAId]: parseFloat(value), // Actualiza la nota para el RA específico
+                }
+          
+                // Calcular la nota acumulada basándose en los pesos de los resultados de aprendizaje
+                const accumulatedNote = learningOutComes.reduce((acc, outcome) => {
+                  const outcomeId = outcome.id;
+                  const outcomeWeight = outcome.weight;
+                  const studentOutcomeNote = updatedNote[outcomeId] || 0
+                  return acc + (studentOutcomeNote * outcomeWeight) / 100
+                }, 0)
+          
+                updatedNote.accNote = accumulatedNote
+          
+                return updatedNote
+              }
+              return note
+            })
+            setNotes(newNotes)
+            toast.success(`Al estudiante ${updatedGrade.enrolled_course.student.name} se le cambió la calificación en el ${updatedGrade.activity_evaluation_detail.version_evaluation_detail.learning_outcome}`)
+          })
+          .catch(error => {
+            console.log('Error al actualizar la nota detalle: ', error)
+            toast.error('Error al actualizar la nota detalle: ', error)
+          })    
         }
 
-        const newNotes = notes.map((note) => {
-          //console.log('note id:',note.student_id)
-          if (note.student_id === studentId) {
-            const updatedNote = {
-              ...note,
-              [RAId]: parseFloat(value), // Actualiza la nota para el RA específico
-            }
-      
-            // Calcular la nota acumulada basándose en los pesos de los resultados de aprendizaje
-            const accumulatedNote = learningOutComes.reduce((acc, outcome) => {
-              const outcomeId = outcome.id;
-              const outcomeWeight = outcome.weight;
-              const studentOutcomeNote = updatedNote[outcomeId] || 0
-              return acc + (studentOutcomeNote * outcomeWeight) / 100
-            }, 0)
-      
-            updatedNote.accNote = accumulatedNote
-      
-            return updatedNote
-          }
-          return note
-        })
-        setNotes(newNotes)
+        
       }
       
 

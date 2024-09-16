@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail
+from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail, StudentEnrolledCourse
 
 class CourseSerializer(serializers.ModelSerializer):
     #period = serializers.StringRelatedField()
@@ -62,6 +62,40 @@ class EvaluationVersionDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluationVersionDetail
         fields = '__all__'
+
+class StudentEnrolledCourseSerializer(serializers.ModelSerializer):
+    scheduled_course = serializers.SerializerMethodField()
+
+    def get_scheduled_course(self, obj):
+        scheduled_course = obj.scheduled_course
+
+        return {
+                'id': scheduled_course.id,
+                'academic_period': {
+                    'id': scheduled_course.period.id,
+                    'year': scheduled_course.period.year,
+                    'semester': scheduled_course.period.semester,
+                },
+                'group': scheduled_course.group,
+                'evaluation_version': {
+                    'id': scheduled_course.evaluation_version_id,
+                    'course': {
+                        'id': scheduled_course.evaluation_version.course.id,
+                        'name': scheduled_course.evaluation_version.course.name,
+                        'code': scheduled_course.evaluation_version.course.code,
+                    }
+                },
+                'professor': {
+                    'id': scheduled_course.professor_id,
+                    'first_name': scheduled_course.professor.first_name,
+                    'last_name': scheduled_course.professor.last_name,
+                }
+        }
+    
+    class Meta:
+        model = StudentEnrolledCourse
+        fields = ['id', 'scheduled_course']
+
 
 #class ScheduledCourseDetailSerializer(serializers.ModelSerializer):
   #  evaluation_details = serializers.SerializerMethodField()

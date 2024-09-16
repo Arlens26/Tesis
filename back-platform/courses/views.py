@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 #from rest_framework.views import APIView
-from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer, EvaluationVersionDetailSerializer
-from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail
+from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer, EvaluationVersionDetailSerializer, StudentEnrolledCourseSerializer
+from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail, StudentEnrolledCourse
 #from django.http import JsonResponse
 from datetime import datetime
 from decimal import Decimal
@@ -202,3 +202,7 @@ class ScheduledCourseVersionDetailView(viewsets.ViewSet):
             return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class StudentEnrolledCourseView(viewsets.ModelViewSet):
+    serializer_class = StudentEnrolledCourseSerializer
+    queryset = StudentEnrolledCourse.objects.all()

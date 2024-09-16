@@ -2,23 +2,37 @@ import { useState } from "react";
 
 export function useEnrolledStudent() {
     
-    const STUDENTS_ENDPOINT = `http://127.0.0.1:8000/authentication/students/`
+    //const STUDENTS_ENDPOINT = `http://127.0.0.1:8000/authentication/students/`
     const GRADE_DETAIL_LEARNING_OTUCOME = `http://localhost:8000/activities/all/grade-detail-learning-outcome/`
+    const STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/student-enrolled-course/`
 
-    const [students, setStudent] = useState([])
-    console.log(students)
+    //const [students, setStudent] = useState([])
+    //console.log(students)
     const [gradeDetail, setGradeDetail] = useState([])
     console.log(gradeDetail)
+    const [studentEnrolledCourse, setStudentEnrolledCourse] = useState([])
+    console.log(studentEnrolledCourse)
 
-    const getStudents = () => {
+    /*const getStudents = () => {
         fetch(STUDENTS_ENDPOINT)
         .then(res => res.json())
         .then(json => {
             return setStudent(json)
         })
         .catch(error => {
-          console.error('Error fetching students:', error);
-      });
+          console.error('Error fetching students:', error)
+      })
+    }*/
+
+    const getStudentEnrolledCourse = () => {
+        fetch(STUDENT_ENROLLED_COURSE)
+        .then(res => res.json())
+        .then(json => {
+            return setStudentEnrolledCourse(json)
+        })
+        .catch(error => {
+            console.error('Error feching student enrolled course', error)
+        })
     }
 
     const getGradeDetail = () => {
@@ -28,8 +42,8 @@ export function useEnrolledStudent() {
             return setGradeDetail(json)
         })
         .catch(error => {
-          console.error('Error fetching students:', error);
-      });
+          console.error('Error fetching students:', error)
+      })
     }
 
     const updateGradeDetail = (gradeId, data) => {
@@ -51,5 +65,5 @@ export function useEnrolledStudent() {
         })
     }
 
-    return { getStudents, students, getGradeDetail, gradeDetail, updateGradeDetail }
+    return { getGradeDetail, gradeDetail, updateGradeDetail, getStudentEnrolledCourse, studentEnrolledCourse }
 }

@@ -4,6 +4,8 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
+#from django.db.models.signals import pre_save
+from django.db.models.signals import post_save
 
 # Courses models.
 
@@ -64,11 +66,9 @@ class ScheduledCourse(models.Model):
         verbose_name_plural = 'scheduled_course'
         db_table = 'scheduled_course'
 
-@receiver(pre_save, sender=ScheduledCourse)
+@receiver(post_save, sender=ScheduledCourse)
 def validate_professor_group(sender, instance, **kwargs):
-    if instance.professor.groups.filter(name='professor').exists():
-        return
-    else:
+    if not instance.professor.groups.filter(name='professor').exists():
         raise ValidationError(_('The selected professor must belong to the professor group.'))
 
 class LearningOutCome(models.Model):
@@ -126,9 +126,20 @@ class StudentEnrolledCourse(models.Model):
         verbose_name_plural = 'student_enrolled_course'
         db_table = 'student_enrolled_course'
 
-@receiver(pre_save, sender=ScheduledCourse)
+
+@receiver(pre_save, sender=StudentEnrolledCourse)
 def validate_student_group(sender, instance, **kwargs):
-    if instance.student.groups.filter(name='student').exists():
-        return
-    else:
-        raise ValidationError(_('The selected student must belong to the student group.'))
+    if not instance.student.groups.filter(name='student').exists():
+        raise ValidationError(_('The selected user must belong to the student group.'))
+
+#@receiver(post_save, sender=ScheduledCourse)
+#def validate_student_group(sender, instance, **kwargs):
+#    if not instance.student.groups.filter(name='student').exists():
+#        raise ValidationError(_('The selected student must belong to the student group.'))
+    
+#@receiver(pre_save, sender=ScheduledCourse)
+#def validate_student_group(sender, instance, **kwargs):
+#    if instance.student.groups.filter(name='student').exists():
+#        return
+#    else:
+#        raise ValidationError(_('The selected student must belong to the student group.'))

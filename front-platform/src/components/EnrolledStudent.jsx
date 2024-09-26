@@ -6,8 +6,11 @@ export function EnrolledStudent() {
     const [students, setStudents] = useState([])
     const { getStudentEnrolledCourse, studentEnrolledCourse } = useEnrolledStudent()
 
-    const [selectedPeriodId, setSelectPeriodId] = useState(null)
+    const [selectedPeriodId, setSelectedPeriodId] = useState(null)
     //console.log('Selected period id: ', selectedPeriodId)
+    const [selectedScheduledCourseId, setSelectedScheduledCourseId] = useState(null)
+
+    const [professorName, setProfessorName] = useState('')
 
     // Verificar que el cursos programados sean únicos
     const uniqueScheduledCourse = Array.from(
@@ -34,10 +37,46 @@ export function EnrolledStudent() {
 
     useEffect(() => {
         if (uniqueScheduledCourse && uniqueScheduledCourse.length > 0 && !selectedPeriodId) {
-          setSelectPeriodId(uniqueScheduledCourse[0].scheduled_course.academic_period.id)
+          setSelectedPeriodId(uniqueScheduledCourse[0].scheduled_course.academic_period.id)
           console.log("Academic Period ID seleccionado:", selectedPeriodId)
         }
       }, [uniqueAcademicPeriod, selectedPeriodId])
+
+      useEffect(() => {
+        if (filteredByAcademicPeriod && filteredByAcademicPeriod.length > 0 && !selectedScheduledCourseId) {
+          setSelectedScheduledCourseId(filteredByAcademicPeriod[0].scheduled_course.id)
+          console.log("Curso programado ID seleccionado:", selectedScheduledCourseId)
+        }
+      }, [filteredByAcademicPeriod, selectedScheduledCourseId])
+
+
+      useEffect(() => {
+        if (filteredByAcademicPeriod.length > 0) {
+            const selectedCourse = filteredByAcademicPeriod.find(detail => detail.scheduled_course.id === selectedScheduledCourseId)
+            if (selectedCourse) {
+                const professor = selectedCourse.scheduled_course.professor
+                setProfessorName(`${professor.first_name} ${professor.last_name}`)
+            } else {
+                setProfessorName('') // Limpiar si no se encuentra
+            }
+        }
+    }, [filteredByAcademicPeriod, selectedScheduledCourseId])
+
+    const handleScheduledCourseChange = (e) => {
+        const selectedCourseId = Number(e.target.value)
+        setSelectedScheduledCourseId(selectedCourseId)
+    
+        // Buscar el curso programado seleccionado
+        const selectedCourse = filteredByAcademicPeriod.find(detail => detail.scheduled_course.id === selectedCourseId)
+        
+        // Si se encuentra, actualizar el nombre del profesor
+        if (selectedCourse) {
+            const professor = selectedCourse.scheduled_course.professor
+            setProfessorName(`${professor.first_name} ${professor.last_name}`)
+        } else {
+            setProfessorName('') // Limpiar si no se encuentra
+        }
+    }
 
     const handleFileChange = (event) => {
         const file = event.target.files[0]
@@ -81,7 +120,7 @@ export function EnrolledStudent() {
             id="academic_period" 
             name='academic_periods' 
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={(e) => setSelectPeriodId(e.target.value)}
+            onChange={(e) => setSelectedPeriodId(e.target.value)}
           >
             <option disabled>Seleccione un periodo académico</option>
             {uniqueAcademicPeriod &&
@@ -94,7 +133,34 @@ export function EnrolledStudent() {
                 </option>
             ))}
           </select>
-
+        <label className="text-sm">Curso programado:</label>
+          <select 
+            id="academic_period" 
+            name='academic_periods' 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            onChange={handleScheduledCourseChange}
+          >
+            <option disabled>Seleccione el curso programado</option>
+            {filteredByAcademicPeriod &&
+                filteredByAcademicPeriod.map((detail) => (
+                <option
+                    key={`set_scheduled_course_${detail.scheduled_course.id}`}
+                    value={detail.scheduled_course.id}
+                >
+                    {`${detail.scheduled_course.group}-${detail.scheduled_course.evaluation_version.course.name}`}
+                </option>
+            ))}
+          </select>
+          <label className="text-sm">Profesor:</label>
+          <input type="text" placeholder='' name='name_course' value={professorName} disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+          <div className='p-4'>
+            {filteredByAcademicPeriod.map((detail) => (
+                <div key={`activityGrade_${detail.id}`}>
+                    <span>Academic period selected: {selectedPeriodId} - </span>
+                    <span>Scheduled course selected: {selectedScheduledCourseId}</span>
+                </div>
+            ))}
+          </div>
             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                 Cargar el archivo
             </label>

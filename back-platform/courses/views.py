@@ -122,14 +122,17 @@ class CreateScheduledCourseView(viewsets.ViewSet):
         group = request.data.get('group')
         professor_id = request.data.get('professor_id')
 
+        # Validar que todos los campos requeridos
+        if not version_id or not academic_period_data or not professor_id or not group:
+            return Response({'error': 'Faltan datos requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Verificar si existe un periodo académico
         year = academic_period_data.get('year')
         semester = academic_period_data.get('semester')
         existing_academic_period = AcademicPeriod.objects.filter(year=year, semester=semester).first()
-        #existing_academic_period = AcademicPeriod.objects.filter(id=academic_period_data['id']).first()
 
         if not existing_academic_period:
-            academic_period_serializer = AcademicPeriodSerializer(data={'year':year, 'semester':semester})
+            academic_period_serializer = AcademicPeriodSerializer(data={'year': year, 'semester': semester})
             if academic_period_serializer.is_valid():
                 # Crear instancia de AcademicPeriod
                 academic_period_instance = academic_period_serializer.save()
@@ -138,15 +141,28 @@ class CreateScheduledCourseView(viewsets.ViewSet):
         else:
             academic_period_instance = existing_academic_period
 
-        print(User.objects.filter(id=professor_id))
-        print(professor_id)
+        # Obtener el profesor y verificar que pertenece al grupo de profesores
         try:
             professor = User.objects.get(id=professor_id, groups__name='professor')
-            print(professor)
         except User.DoesNotExist:
-            return Response({'error':'User is not a professor'}, status=status.HTTP_400_BAD_REQUEST)
-        except User.MultipleObjectsReturned:
-            return Response({'error': 'Multiple users with the same ID'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User is not a professor'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Obtener la instancia de EvaluationVersion
+        try:
+            evaluation_version = EvaluationVersion.objects.get(id=version_id)
+        except EvaluationVersion.DoesNotExist:
+            return Response({'error': 'Evaluation version not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear el ScheduledCourse directamente usando los IDs
+        scheduled_course = ScheduledCourse.objects.create(
+            group=group,
+            evaluation_version=evaluation_version,  # Instancia de EvaluationVersion
+            period=academic_period_instance,        # Instancia de AcademicPeriod
+            professor=professor                     # Instancia de Profesor
+        )
+
+        # Devolver una respuesta exitosa
+        return Response({'message': 'Scheduled course created successfully'}, status=status.HTTP_201_CREATED)
 
         # Crear instancias de EvaluationVersion
         #evaluation_version_serializer = EvaluationVersionSerializer(data=evaluation_version_data)
@@ -156,20 +172,20 @@ class CreateScheduledCourseView(viewsets.ViewSet):
             #evaluation_version_instance = evaluation_version_serializer.save()
 
         # Crear el ScheduledCourse usando las instancias creadas
-        scheduled_course_serializer = ScheduledCourseSerializer(data={
-            'group': group, 
-            'evaluation_version': version_id,
-            'period': academic_period_instance.pk,
-            'professor': professor_id
-        })
-
+        #scheduled_course_serializer = ScheduledCourseSerializer(data={
+        #    'group': group, 
+        #    'evaluation_version': evaluation_version.pk,
+        #    'period': academic_period_instance,
+        #    'professor': professor.pk
+        #})
+#
         # Validar y guardar el ScheduledCourse
-        if scheduled_course_serializer.is_valid():
-            scheduled_course_serializer.save()                
+        #if scheduled_course_serializer.is_valid():
+        #    scheduled_course_serializer.save()                
 
-            return Response({'message': 'Scheduled course created successfully'}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'error': scheduled_course_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        #    return Response({'message': 'Scheduled course created successfully'}, status=status.HTTP_201_CREATED)
+        #else:
+        #    return Response({'error': scheduled_course_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         #else:
             # Manejar errores de validación
             #errors = {}

@@ -8,6 +8,7 @@ export function useScheduledCourse(){
     //const ACADEMIC_PERIODS_ENDPOINT = `http://localhost:8000/courses/all/academic-periods/`
     const PROFESSORS_ENDPOINT = `http://127.0.0.1:8000/authentication/professors/`
     const CREATE_SCHEDULED_COURSE_ENDPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
+    const SCHEDULED_COURSE = `http://127.0.0.1:8000/courses/all/scheduled-course/`
     const EVALUATION_VERSION_DETAIL_ENDPOINT = `http://localhost:8000/courses/all/scheduled-course-detail/get_details_by_evaluation_version/?evaluation_version_id=`
     const LEARNING_OUTCOME_ENDPOINT = `http://localhost:8000/courses/all/learning-outcome/`
     const PERCENTAGE_ENDPOINT = `http://localhost:8000/courses/all/percentage/`
@@ -19,6 +20,7 @@ export function useScheduledCourse(){
     const { scheduledCourse, setScheduledCourse } = useContext(ScheduledCourseContext)
     //console.log(scheduledCourse)
     const [professors, setProfessor] = useState([])
+    const [allScheduledCourse, setAllScheduledCourse] = useState([])
     const [evaluationVersionDetail, setEvaluationVersionDetail] = useState({})
     //console.log(evaluationVersionDetail)
     const [learningOutComes, setLearningOutComes] = useState({})
@@ -42,6 +44,23 @@ export function useScheduledCourse(){
         .catch(error => {
           console.error('Error fetching professors:', error);
       });
+    }
+
+    const getAllScheduledCourse = () => {
+      fetch(SCHEDULED_COURSE, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${user.token}`,
+          'Content-Type': 'application/json' 
+        },
+      })
+      .then(res => res.json())
+      .then(json => {
+          return setAllScheduledCourse(json)
+      })
+      .catch(error => {
+        console.error('Error fetching scheduled course', error)
+      })
     }
 
     const createScheduledCourse = (fields) => {
@@ -162,6 +181,7 @@ export function useScheduledCourse(){
     }
 
     return { getProfessors, professors, createScheduledCourse, getEvaluationVersionDetail,
-              learningOutComes, percentages, scheduledCourse, evaluationVersionDetail
+              learningOutComes, percentages, scheduledCourse, evaluationVersionDetail,
+              getAllScheduledCourse, allScheduledCourse
      }
 }

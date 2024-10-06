@@ -29,11 +29,22 @@ export function EnrolledStudent() {
     }, [])
 
     useEffect(() => {
-        if (uniqueAcademicPeriod && uniqueAcademicPeriod.length > 0 && !selectedPeriodId) {
-          setSelectedPeriodId(uniqueAcademicPeriod[0].period.id)
-          console.log("Academic Period ID seleccionado:", selectedPeriodId)
+        if (uniqueAcademicPeriod && uniqueAcademicPeriod.length > 0) {
+            if (!selectedPeriodId) {
+                setSelectedPeriodId(uniqueAcademicPeriod[0].period.id)
+            } else {
+                // Filtrar los cursos disponibles en el nuevo periodo
+                const newFilteredCourses = allScheduledCourse.filter(detail => detail.period.id === Number(selectedPeriodId))
+                // Verificar si el curso previamente seleccionado sigue disponible
+                const isCourseAvailable = newFilteredCourses.some(course => course.id === selectedScheduledCourseId)
+    
+                if (!isCourseAvailable) {
+                    // Si el curso no está disponible, seleccionar el primero o null
+                    setSelectedScheduledCourseId(newFilteredCourses.length > 0 ? newFilteredCourses[0].id : null)
+                }
+            }
         }
-    }, [uniqueAcademicPeriod, selectedPeriodId])
+    }, [uniqueAcademicPeriod, selectedPeriodId, allScheduledCourse])
 
     /*useEffect(() => {
         if (filteredByAcademicPeriod && filteredByAcademicPeriod.length > 0 && selectedScheduledCourseId !== filteredByAcademicPeriod[0].id) {

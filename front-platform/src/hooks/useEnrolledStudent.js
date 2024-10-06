@@ -5,6 +5,7 @@ export function useEnrolledStudent() {
     //const STUDENTS_ENDPOINT = `http://127.0.0.1:8000/authentication/students/`
     const GRADE_DETAIL_LEARNING_OTUCOME = `http://localhost:8000/activities/all/grade-detail-learning-outcome/`
     const STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/student-enrolled-course/`
+    const CREATE_STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/create-student-enrolled-course/`
 
     //const [students, setStudent] = useState([])
     //console.log(students)
@@ -65,5 +66,28 @@ export function useEnrolledStudent() {
         })
     }
 
-    return { getGradeDetail, gradeDetail, updateGradeDetail, getStudentEnrolledCourse, studentEnrolledCourse }
+    const createStudentEnrolledCourse = (fields) => {
+
+        return fetch(CREATE_STUDENT_ENROLLED_COURSE, {
+          method: 'POST', 
+          headers: {
+            'Content-Type' : 'application/json'
+          },
+          body : JSON.stringify(fields)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error al enviar los datos');
+          }
+          return response.json() 
+        })
+        .then(data => {
+          console.log('Datos enviados exitosamente', data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        })
+      }
+
+    return { getGradeDetail, gradeDetail, updateGradeDetail, getStudentEnrolledCourse, studentEnrolledCourse, createStudentEnrolledCourse }
 }

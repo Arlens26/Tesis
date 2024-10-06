@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { useScheduledCourse } from '../hooks/useSheduledCourse'
+import { useEnrolledStudent } from '../hooks/useEnrolledStudent'
+import { toast } from "sonner"
 
 export function EnrolledStudent() {
     const [students, setStudents] = useState([])
     const { getAllScheduledCourse, allScheduledCourse } = useScheduledCourse()
-
+    const { createStudentEnrolledCourse } = useEnrolledStudent()
     const [selectedPeriodId, setSelectedPeriodId] = useState(null)
     const [selectedScheduledCourseId, setSelectedScheduledCourseId] = useState(null)
     const [professorName, setProfessorName] = useState('')
@@ -33,19 +35,26 @@ export function EnrolledStudent() {
         }
     }, [uniqueAcademicPeriod, selectedPeriodId])
 
-    useEffect(() => {
+    /*useEffect(() => {
         if (filteredByAcademicPeriod && filteredByAcademicPeriod.length > 0 && selectedScheduledCourseId !== filteredByAcademicPeriod[0].id) {
           setSelectedScheduledCourseId(filteredByAcademicPeriod[0].id)
           console.log("Curso programado ID seleccionado:", selectedScheduledCourseId)
         } else if (filteredByAcademicPeriod.length === 0 && selectedScheduledCourseId !== null) {
             setSelectedScheduledCourseId(null) // Resetear si no hay cursos
         }
-    }, [filteredByAcademicPeriod, selectedScheduledCourseId])
+    }, [filteredByAcademicPeriod, selectedScheduledCourseId])*/
+
+    useEffect(() => {
+        if (filteredByAcademicPeriod.length > 0 && !selectedScheduledCourseId) {
+            setSelectedScheduledCourseId(filteredByAcademicPeriod[0].id)
+        }
+    }, [filteredByAcademicPeriod])
 
     useEffect(() => {
         if (filteredByAcademicPeriod.length > 0) {
-            const selectedCourse = filteredByAcademicPeriod.find(detail => detail.id === selectedScheduledCourseId)
+            const selectedCourse = filteredByAcademicPeriod.find(detail => detail.id === Number(selectedScheduledCourseId))
             console.log('Select course: ', selectedCourse)
+            //console.log('Select scheduled: ',selectedScheduledCourseId)
             if (selectedCourse) {
                 const professor = selectedCourse.professor
                 setProfessorName(`${professor.first_name} ${professor.last_name}`)
@@ -57,6 +66,7 @@ export function EnrolledStudent() {
 
     const handleScheduledCourseChange = (e) => {
         const selectedCourseId = Number(e.target.value)
+        console.log('Selected course ID: ',selectedCourseId)
         setSelectedScheduledCourseId(selectedCourseId)
 
         // Buscar el curso programado seleccionado
@@ -104,6 +114,43 @@ export function EnrolledStudent() {
             }
             reader.readAsArrayBuffer(file)
         }
+    }
+
+    // Crear el JSON con el scheduled_course_id seleccionado y la lista de estudiantes
+    const createStudentEnrolledData = () => {
+        if (!selectedScheduledCourseId) {
+            console.error('No se ha seleccionado un curso programado.');
+            return
+        }
+
+        const studentEnrolledData = {
+            scheduled_course_id: selectedScheduledCourseId,
+            students: students.map(student => ({
+                first_name: student.first_name,
+                last_name: student.last_name,
+                email: student.email,
+                code_schedule: student.code_schedule,
+                code: student.code,
+                password: student.password
+            }))
+        }
+
+        if (studentEnrolledData.students.length === 0) {
+            toast.error('No se ha cargado información de estudiantes')
+            return
+        }
+
+        console.log('JSON Scheduled course and students:', studentEnrolledData)
+        createStudentEnrolledCourse(studentEnrolledData)
+            .then(() => {
+                //console.log('Estudiantes matriculados correctamente')
+                toast.success('Estudiantes matriculados correctamente')
+            .catch((error) => {
+                //console.error('Error al matricular los estudiantes:', error)
+                toast.error('Error al matricular los estudiantes:', error)
+            })
+         })
+        return studentEnrolledData
     }
 
     return(
@@ -179,17 +226,69 @@ export function EnrolledStudent() {
         <div className="mt-4">
             <h2 className="text-lg font-bold">Lista de Estudiantes</h2>
             {students.length > 0 ? (
-                <ul className="list-disc pl-5">
-                    {students.map((student, index) => (
-                        <li key={index}>
-                            {student.first_name} {student.last_name} - ID: {student.identification} - Email: {student.email} - Código programa: {student.code_schedule} - Código: {student.code} - Contraseña: {student.password}
-                        </li>
-                    ))}
-                </ul>
+                <>
+                    <ul className="list-disc pl-5">
+                        {students.map((student, index) => (
+                            <li key={index}>
+                                {student.first_name} {student.last_name} - ID: {student.identification} - Email: {student.email} - Código programa: {student.code_schedule} - Código: {student.code} - Contraseña: {student.password}
+                            </li>
+                        ))}
+                    </ul>
+                    
+
+<div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" className="px-6 py-3">
+                    Estudiante
+                </th>
+                <th scope="col" className="px-6 py-3">
+                    Identificación
+                </th>
+                <th scope="col" className="px-6 py-3">
+                    Email
+                </th>
+                <th scope="col" className="px-6 py-3">
+                    Código programa
+                </th>
+                <th scope="col" className="px-6 py-3">
+                    Código
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {students.map((student, index) => (
+                <>
+                <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        {student.first_name} {student.last_name}
+                    </th>
+                    <td className="px-6 py-4">
+                        {student.identification}
+                    </td>
+                    <td className="px-6 py-4">
+                        {student.email}
+                    </td>
+                    <td className="px-6 py-4">
+                        {student.code_schedule}
+                    </td>
+                    <td className="px-6 py-4">
+                        {student.code}
+                    </td>
+                </tr>
+                </>
+            ))}
+        </tbody>
+    </table>
+</div>
+
+                </>
             ) : (
                 <p>No hay estudiantes para mostrar.</p>
             )}
         </div>
+        <button onClick={createStudentEnrolledData} type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
         </>
     )
 }

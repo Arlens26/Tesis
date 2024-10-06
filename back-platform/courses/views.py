@@ -8,6 +8,7 @@ from datetime import datetime
 from decimal import Decimal
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 
 # Create your views here.
 class CourseView(viewsets.ModelViewSet):
@@ -222,3 +223,50 @@ class ScheduledCourseVersionDetailView(viewsets.ViewSet):
 class StudentEnrolledCourseView(viewsets.ModelViewSet):
     serializer_class = StudentEnrolledCourseSerializer
     queryset = StudentEnrolledCourse.objects.all()
+
+class CreateStudentEnrolledCourseView(viewsets.ModelViewSet):
+    serializer_class = StudentEnrolledCourseSerializer
+
+    def create(self, request):
+        scheduled_course_id = request.data.get('scheduled_course_id')
+        students_data = request.data.get('students')
+
+        # Validar si el curso programado existe
+        try:
+            scheduled_course = ScheduledCourse.objects.get(id=scheduled_course_id)
+        except ScheduledCourse.DoesNotExist:
+            return Response({'error': 'Scheduled course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Obtener o crear el grupo 'student'
+        student_group, created = Group.objects.get_or_create(name='student')
+
+        for student_data in students_data:
+            # Crear o recuperar el usuario basado en el email
+            user, created = User.objects.get_or_create(
+                username=student_data['email'],
+                defaults={
+                    'first_name': student_data['first_name'],
+                    'last_name': student_data['last_name'],
+                    'email': student_data['email'],
+                }
+            )
+            user.set_password(student_data['password'])  
+            user.save()
+
+            # Si es un usuario nuevo, asignarlo al grupo 'student'
+            if created:
+                user.groups.add(student_group)
+
+            # Crear la instancia de StudentEnrolledCourse
+            StudentEnrolledCourse.objects.create(
+                student=user,
+                scheduled_course=scheduled_course#
+            )
+            #serializer = StudentEnrolledCourseSerializer(data=enrolled_data)
+            
+            #if serializer.is_valid():
+            #    serializer.save()
+            #else:
+            #    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'message': 'Students enrolled successfully'}, status=status.HTTP_201_CREATED)

@@ -13,6 +13,7 @@ router.register(r'learning-outcome', views.LearningOutComeView, 'learning-outcom
 router.register(r'percentage', views.PercentageView, 'percentage')
 router.register(r'scheduled-course-detail', views.ScheduledCourseVersionDetailView, 'scheduled-course-detail')
 router.register(r'student-enrolled-course', views.StudentEnrolledCourseView, 'student-enrolled-course')
+router.register(r'create-student-enrolled-course', views.CreateStudentEnrolledCourseView, 'create-student-enrolled-course')
 
 urlpatterns = [
     path('all/', include(router.urls))

@@ -21,6 +21,7 @@ import { BreadCrumb } from './components/BreadCrumb.jsx';
 import { ActivityRating } from './components/ActivityRating.jsx';
 import { EnrolledStudent } from './components/EnrolledStudent.jsx';
 import { RadarChart } from './components/RadarChart';
+import { StudentEnrolledCourseList } from './components/StudentEnrolledCourseList.jsx';
 
 function App() {
 
@@ -170,6 +171,7 @@ function App() {
                 <li><Link to="/course">Create Course</Link></li>
                 <li><Link to="/grade-detail">Grade detail</Link></li>
                 <li><Link to="/enrolled-student">Enrolled student</Link></li>
+                <li><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
                 <li><Link to="/radar">Radar</Link></li>
             </ul>
           </aside>
@@ -189,6 +191,7 @@ function App() {
               <Route path='course-list/activity/' element={<Activity/>} />
               <Route path='grade-detail' element={<ActivityRating/>} />
               <Route path='enrolled-student' element={<EnrolledStudent/>} />
+              <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
               <Route path='radar' element={<RadarChart/>} />
             </Routes>
           </main>

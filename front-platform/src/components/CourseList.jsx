@@ -29,6 +29,22 @@ function BtnCreateCourse() {
     )
 }
 
+function BtnStudentEnrolledCourseList() {
+  const navigate = useNavigate()
+  const handleCheckStudentEnrolledCourse = () => {
+      navigate('/student-enrolled-course-list')
+    }
+
+  return (
+  <div className='flex justify-end items-center'> 
+    <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+    onClick={handleCheckStudentEnrolledCourse}>
+        <span>Consultar programación</span>
+    </button>
+  </div>
+  )
+}
+
 const BtnSemesterGroup = ({ onSelectSemester }) => {
   const currentYear = new Date().getFullYear()
   const currentSemester = new Date().getMonth() < 6 ? 1 : 2
@@ -225,7 +241,10 @@ export function CourseList() {
           <BtnSemesterGroup onSelectSemester={handleSelectSemester}/>
         ) :  null}
         {role === 'director' ? (
-          <BtnCreateCourse/>
+          <div className="flex justify-end gap-2">
+            <BtnCreateCourse/>
+            <BtnStudentEnrolledCourseList/>
+          </div>
         ) : null}
           {coursesToRender.filter((curso, index, self) => {
             return self.findIndex((c) => c.id === curso.id) === index

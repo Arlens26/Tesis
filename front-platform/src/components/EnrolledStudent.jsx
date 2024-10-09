@@ -20,6 +20,13 @@ export function EnrolledStudent() {
     })
     console.log('Unique Academic Period: ', uniqueAcademicPeriod)
 
+    const sortedAcademicPeriods = uniqueAcademicPeriod.sort((a, b) => {
+        if(b.period.year !== a.period.year){
+            return b.period.year - a.period.year
+        }
+        return b.period.semester - a.period.semester
+    })
+
     const filteredByAcademicPeriod = allScheduledCourse
         .filter(detail => detail.period.id === Number(selectedPeriodId))
     console.log('Filtered by Academic Period: ', filteredByAcademicPeriod)
@@ -29,9 +36,9 @@ export function EnrolledStudent() {
     }, [])
 
     useEffect(() => {
-        if (uniqueAcademicPeriod && uniqueAcademicPeriod.length > 0) {
+        if (sortedAcademicPeriods && sortedAcademicPeriods.length > 0) {
             if (!selectedPeriodId) {
-                setSelectedPeriodId(uniqueAcademicPeriod[0].period.id)
+                setSelectedPeriodId(sortedAcademicPeriods[0].period.id)
             } else {
                 // Filtrar los cursos disponibles en el nuevo periodo
                 const newFilteredCourses = allScheduledCourse.filter(detail => detail.period.id === Number(selectedPeriodId))
@@ -44,7 +51,7 @@ export function EnrolledStudent() {
                 }
             }
         }
-    }, [uniqueAcademicPeriod, selectedPeriodId, allScheduledCourse])
+    }, [sortedAcademicPeriods, selectedPeriodId, allScheduledCourse])
 
     /*useEffect(() => {
         if (filteredByAcademicPeriod && filteredByAcademicPeriod.length > 0 && selectedScheduledCourseId !== filteredByAcademicPeriod[0].id) {
@@ -175,8 +182,8 @@ export function EnrolledStudent() {
             onChange={(e) => setSelectedPeriodId(e.target.value)}
         >
             <option disabled>Seleccione un periodo académico</option>
-            {uniqueAcademicPeriod &&
-                uniqueAcademicPeriod.map((detail) => (
+            {sortedAcademicPeriods &&
+                sortedAcademicPeriods.map((detail) => (
                 <option
                     key={`set_academic_period_${detail.period.id}`}
                     value={detail.period.id}

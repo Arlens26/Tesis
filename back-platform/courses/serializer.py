@@ -74,6 +74,7 @@ class EvaluationVersionDetailSerializer(serializers.ModelSerializer):
 
 class StudentEnrolledCourseSerializer(serializers.ModelSerializer):
     scheduled_course = serializers.SerializerMethodField()
+    student = serializers.SerializerMethodField()
 
     def get_scheduled_course(self, obj):
         scheduled_course = obj.scheduled_course
@@ -92,6 +93,7 @@ class StudentEnrolledCourseSerializer(serializers.ModelSerializer):
                         'id': scheduled_course.evaluation_version.course.id,
                         'name': scheduled_course.evaluation_version.course.name,
                         'code': scheduled_course.evaluation_version.course.code,
+                        'credit': scheduled_course.evaluation_version.course.credit
                     }
                 },
                 'professor': {
@@ -100,10 +102,18 @@ class StudentEnrolledCourseSerializer(serializers.ModelSerializer):
                     'last_name': scheduled_course.professor.last_name,
                 }
         }
+
+    def get_student(self, obj):
+        student = {
+                'id': obj.student.id,
+                'first_name': obj.student.first_name,
+                'last_name': obj.student.last_name,
+        }
+        return student
     
     class Meta:
         model = StudentEnrolledCourse
-        fields = ['id', 'scheduled_course']
+        fields = ['id', 'scheduled_course', 'student']
 
 
 #class ScheduledCourseDetailSerializer(serializers.ModelSerializer):

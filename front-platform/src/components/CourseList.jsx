@@ -69,6 +69,7 @@ const BtnSemesterGroup = ({ onSelectSemester }) => {
 
 export function CourseList() { 
     const { courses, getCourse, deleteCourse } = useCourses()
+    console.log('Lista de cursos: ', courses)
     const [accordionStates, setAccordionStates] = useState({})
     //const { responseEvaluationVersion } = useEvaluationVersionCourse()
     const { evaluationVersion, hasEvaluationVersion } = useEvaluationVersionCourse()
@@ -150,6 +151,10 @@ export function CourseList() {
     const handleActivity = (courseId) => {
       navigate('/course-list/activity/', {state: {course_id: courseId}})
     }
+
+    const handleActivityRaiting = (courseId, versionId) => {
+      navigate('/grade-detail', {state: {course_id: courseId, version_id: versionId}})
+    }
     
     const handleSelectSemester = (semester) => {
       setSelectedSemester(semester)
@@ -191,7 +196,7 @@ export function CourseList() {
     const coursesToRender = search ? filteredCourses : (role === 'professor'
     ? (selectedSemester === 'current' ? currentSemesterCourses : previousSemesterCourses)
     : courses)
-    console.log(coursesToRender)
+    console.log('Courses to render: ', coursesToRender)
 
     //console.log(courses.length)
     if (!courses || courses.length === 0) {
@@ -349,16 +354,37 @@ export function CourseList() {
                     ): null}
 
                     {role === 'professor' ? (
-                      <button 
-                        className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          console.log(curso.id)
-                          handleActivity(curso.id)
-                        }}>
-                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
-                        <span>Configurar evaluación</span>
-                      </button>  
+                      <div className="flex gap-2">
+                        <button 
+                          className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                          onClick={(e) =>{
+                            e.stopPropagation();
+                            console.log(curso.id)
+                            handleActivity(curso.id)
+                          }}>
+                          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
+                          <span>Configurar evaluación</span>
+                        </button>  
+                        <button 
+                          className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                          onClick={(e) =>{
+                            e.stopPropagation();
+                            //console.log(curso.id)
+                            handleActivityRaiting(curso.id, curso.evaluation_version_id)
+                          }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-list-check">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M3.5 5.5l1.5 1.5l2.5 -2.5" />
+                            <path d="M3.5 11.5l1.5 1.5l2.5 -2.5" />
+                            <path d="M3.5 17.5l1.5 1.5l2.5 -2.5" />
+                            <path d="M11 6l9 0" />
+                            <path d="M11 12l9 0" />
+                            <path d="M11 18l9 0" />
+                          </svg>
+                          <span>Calificaciones</span>
+                        </button>
+                      </div>
                     ): null}
                   </div>
                 </div>

@@ -1,14 +1,24 @@
 import { useEffect, useState } from "react"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
+import { useLocation } from "react-router-dom"
 
 export function ActivityRating() {
 
+    const location = useLocation()
+
     const { getGradeDetail, gradeDetail, updateGradeDetail } = useEnrolledStudent()
+    console.log('Grade datail: ', gradeDetail)
     const [selectedActivityId, setSelectedActivityId] = useState(null)
 
+    const version_id = location.state.version_id
+    console.log('Version id: ', version_id)
+    
+    const filteredByVersion = gradeDetail
+      .filter(detail => detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version === Number(version_id))
+      console.log('Filtered by evaluation version: ', filteredByVersion)
 
-    const filteredByActivities = gradeDetail
+    const filteredByActivities = filteredByVersion      
       .filter(detail => detail.activity_evaluation_detail.activities.id === Number(selectedActivityId))
     console.log('Filtered by activities: ', filteredByActivities)
     
@@ -53,7 +63,12 @@ export function ActivityRating() {
     console.log('Learnig outcomes: ', learningOutComes)
 
     useEffect(() => {
+        const course_id = location.state.course_id
+        console.log('Course id: ', course_id)
         getGradeDetail()
+        /*const filteredByCourse = gradeDetail
+        .filter(detail => detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version === Number(version_id))
+          console.log('Filtered by course: ', filteredByCourse)*/
     }, [])
 
       useEffect(() => {
@@ -100,10 +115,11 @@ export function ActivityRating() {
       
       // Verificar que las actividades sean unicas en el combo box
       const uniqueActivities = Array.from(
-        new Set(gradeDetail.map((detail) => detail.activity_evaluation_detail.activities.id))
+        new Set(filteredByVersion.map((detail) => detail.activity_evaluation_detail.activities.id))
       ).map((id) => {
-        return gradeDetail.find((detail) => detail.activity_evaluation_detail.activities.id === id)
+        return filteredByVersion.find((detail) => detail.activity_evaluation_detail.activities.id === id)
       })
+      console.log('Unique Activities: ', uniqueActivities)
 
       const handleNoteChange = (studentId, RAId, version_id, value) => {
         
@@ -237,42 +253,46 @@ export function ActivityRating() {
     return(
       <>
         <span>Calificicaciones</span>
+        {filteredByVersion != 0 ? 
         <div>
-          <label className="text-sm">Actividades:</label>
-          <select 
-            id="activity_course" 
-            name='activities' 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={(e) => setSelectedActivityId(e.target.value)}
-          >
-                      <option disabled>Seleccione una actividad</option>
-          {uniqueActivities &&
-            uniqueActivities.map((detail) => (
-              <option
-                key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
-                value={detail.activity_evaluation_detail.activities.id}
-              >
-                {`${detail.activity_evaluation_detail.activities.name}`}
-              </option>
-                      ))}
-          </select>
-    <div>
-      {gradeDetail.map((detail) => (
-        <div key={`activityGrade_${detail.id}`}>
-          <span>Activity selected: {selectedActivityId} - </span>
-          <span>{detail.id} - {detail.grade} - {detail.enrolled_course.student.name} - </span>
-          <span>{detail.activity_evaluation_detail.activities.name} - {detail.activity_evaluation_detail.percentage}% - </span>
-          <span>{detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome} - </span>        
-        </div>
-      ))}
-    </div>
-        </div>
-        <form className='form flex flex-col gap-4 mt-4'>
+        <label className="text-sm">Actividades:</label>
+        <select 
+          id="activity_course" 
+          name='activities' 
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          onChange={(e) => setSelectedActivityId(e.target.value)}
+        >
+                    <option disabled>Seleccione una actividad</option>
+        {uniqueActivities &&
+          uniqueActivities.map((detail) => (
+            <option
+              key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
+              value={detail.activity_evaluation_detail.activities.id}
+            >
+              {`${detail.activity_evaluation_detail.activities.name}`}
+            </option>
+                    ))}
+        </select>
+  <div>
+    {filteredByVersion.map((detail) => (
+      <div key={`activityGrade_${detail.id}`}>
+        <span>Activity selected: {selectedActivityId} - </span>
+        <span>{detail.id} - {detail.grade} - {detail.enrolled_course.student.name} - </span>
+        <span>{detail.activity_evaluation_detail.activities.name} - {detail.activity_evaluation_detail.percentage}% - </span>
+        <span>{detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome} - </span>  
+        <span>Versión id: {detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version}</span>      
+      </div>
+    ))}
+  </div>
+  <form className='form flex flex-col gap-4 mt-4'>
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             {renderTableHeaders()}
             {renderTableRows()}
             </table>
         </form>
+      </div>
+      : <div><span>Aún no hay actividades programadas para este curso</span></div>  
+      }
       </>
     )
 }

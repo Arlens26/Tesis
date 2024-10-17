@@ -37,9 +37,9 @@ class GradeDetailLearningOutComeSerializer(serializers.ModelSerializer):
                 'id': enrolled_course.student.id,
                 'name': enrolled_course.student.first_name,
             },
-            'course': {
+            'scheduled_course': {
                 'id': enrolled_course.scheduled_course.id, 
-                'name': enrolled_course.scheduled_course.group,
+                'group': enrolled_course.scheduled_course.group,
             }
         }
 
@@ -56,6 +56,7 @@ class GradeDetailLearningOutComeSerializer(serializers.ModelSerializer):
             'version_evaluation_detail' : {
                 'id': activity_evaluation_detail.version_evaluation_detail_id,
                 'learning_outcome': activity_evaluation_detail.version_evaluation_detail.learning_outcome.code,
+                'evaluation_version': activity_evaluation_detail.version_evaluation_detail.evaluation_version_id,
             },
         }
     

@@ -22,6 +22,7 @@ import { ActivityRating } from './components/ActivityRating.jsx';
 import { EnrolledStudent } from './components/EnrolledStudent.jsx';
 import { RadarChart } from './components/RadarChart';
 import { StudentEnrolledCourseList } from './components/StudentEnrolledCourseList.jsx';
+import { EnrolledStudentList } from './components/EnrolledStudentList.jsx';
 
 function App() {
 
@@ -191,6 +192,7 @@ function App() {
               <Route path='course-list/activity/' element={<Activity/>} />
               <Route path='grade-detail' element={<ActivityRating/>} />
               <Route path='enrolled-student' element={<EnrolledStudent/>} />
+              <Route path='enrolled-student-list' element={<EnrolledStudentList/>} />
               <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
               <Route path='radar' element={<RadarChart/>} />
             </Routes>

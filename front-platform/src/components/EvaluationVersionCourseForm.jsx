@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { DeleteIcon } from "./Icons"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
@@ -7,6 +7,7 @@ import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 export function EvaluationVersionCourseForm() {
     const location = useLocation()
     const { createEvaluationVersionCourse } = useEvaluationVersionCourse()
+    const navigate = useNavigate()
   
     // Extraer el curso del estado de ubicación
     useEffect(() => {
@@ -18,7 +19,7 @@ export function EvaluationVersionCourseForm() {
            document.querySelector('textarea[name="description"]').value = description
            document.querySelector('input[name="credit"]').value = credit
          }
-       };
+       }
    
        loadCourseData()
      }, [location.state])
@@ -46,20 +47,26 @@ export function EvaluationVersionCourseForm() {
           id: location.state.course.id,
         },
         learning_outcome: buildLearningOutcomesList()
-      };
+      }
       console.log(evaluationVersionData)
       // Función para validar los campos
       const validateRaList = (list) => {
         for (const item of list) {
             if (!item.description || !item.percentage) {
                 toast.error('Por favor, completa todos los campos requeridos')
-                console.log('falta campos')
+                //console.log('falta campos')
                 return
             }
         }
-        // Si todos los campos son válidos, puedes continuar con tu lógica
-        console.log('Todos los campos están completos')
-        createEvaluationVersionCourse(evaluationVersionData)
+        //console.log('Learning outcome prueba: ', evaluationVersionData.learning_outcome)
+        if(evaluationVersionData.learning_outcome.length !== 0){
+          // Si todos los campos son válidos, puedes continuar con tu lógica
+          console.log('Todos los campos están completos')
+          createEvaluationVersionCourse(evaluationVersionData)
+          navigate('/course-list')
+        }else{
+          toast.info('Falta agregar los RAs')
+        }
       }
       validateRaList(raList)
     }
@@ -120,14 +127,14 @@ export function EvaluationVersionCourseForm() {
       const newNumbers = numbers.filter(number => number !== deleteNumber)
       setNumbers(newNumbers)
     }
+
+    const handleReturn = () => {
+      navigate('/course-list')
+  }
   
     return (
       <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
           <h1 className="text-xl">Creación evaluación versión curso</h1>
-          {/*<select id="countries" name='period_id' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  <option disabled>Periodo académico</option>
-          </select> 
-    <input type="text" placeholder='Grupo' name='group' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">*/}
           <label className="text-sm">Nombre del curso</label>
           <input type="text" placeholder='' name='name' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           <label className="text-sm">Código del curso</label>
@@ -221,6 +228,7 @@ export function EvaluationVersionCourseForm() {
                             </tbody>
             </table>
             <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
+            <button type='button' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' onClick={handleReturn}>Volver</button>
           </div>
       </form>
     )

@@ -60,7 +60,7 @@ class CreateEvaluationVersionCourseView(viewsets.ViewSet):
         learning_outcome_data = request.data.get('learning_outcome')
         print(request)
         # Validar si existe una evaluacion de versión del curso
-        existing_evaluation_version = EvaluationVersion.objects.filter(course_id=course_data['id']).order_by('-initial_date').first()
+        existing_evaluation_version = EvaluationVersion.objects.filter(course_id=course_data['id'], end_date__isnull=True).order_by('-initial_date').first()
         print(existing_evaluation_version)
         if existing_evaluation_version:
             existing_evaluation_version.end_date = datetime.now().date()

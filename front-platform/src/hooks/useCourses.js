@@ -17,7 +17,7 @@ export function useCourses() {
 
     useEffect(() => {
       getCourses()
-    }, [role]);
+    }, [role])
 
     const courses = course
     console.log(courses)
@@ -69,9 +69,9 @@ export function useCourses() {
               credit: scheduledCourse.course.credit,
               group: scheduledCourse.group,
               period: scheduledCourse.period,
-              professor_id: scheduledCourse.professor_id,
+              professor_id: scheduledCourse.professor.id,
               evaluation_version_id: scheduledCourse.evaluation_version_id
-            }));
+            }))
             setCourse(courses)
             const evaluationVersionIds = json.map(version => version.evaluation_version_id);
 
@@ -82,7 +82,7 @@ export function useCourses() {
                   console.log(json)
                   setEvaluationVersion(json)
                 })
-            ));
+            ))
             //return courses
           } if(role === 'student') {
             // Falta estudiantes
@@ -93,12 +93,12 @@ export function useCourses() {
         .catch(error => {
           console.error("Error fetching courses:", error)
           throw error
-        });
+        })
     }
 
     const getCourse = (courseId) => {
       // Busca el curso dentro de los cursos ya cargados
-      const existingCourse = courses.find(course => course.id === courseId);
+      const existingCourse = courses.find(course => course.id === courseId)
   
       // Si el curso ya está cargado, devuelve directamente el curso
       if (existingCourse) {
@@ -137,7 +137,7 @@ export function useCourses() {
       })
       .catch(error => {
         console.error('Error:', error);
-      });
+      })
     }
 
     const deleteCourse = (courseId) => {

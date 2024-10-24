@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
 import { useLocation } from "react-router-dom"
+import { AuthContext } from "../context/user"
 
 export function ActivityRating() {
 
+    const { user } = useContext(AuthContext)
     const location = useLocation()
 
     const { getGradeDetail, gradeDetail, updateGradeDetail } = useEnrolledStudent()
@@ -16,6 +18,7 @@ export function ActivityRating() {
     
     const filteredByVersion = gradeDetail
       .filter(detail => detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version === Number(version_id))
+      .filter(detail => detail.enrolled_course.scheduled_course.professor_id === Number(user.id))
       console.log('Filtered by evaluation version: ', filteredByVersion)
 
     const filteredByActivities = filteredByVersion      

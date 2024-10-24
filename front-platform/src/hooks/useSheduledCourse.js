@@ -1,7 +1,7 @@
 import { useState, useContext } from "react"
 import { AuthContext } from '../context/user';
 import { VersionContext } from "../context/evaluationVersion";
-import { ScheduledCourseContext } from "../context/scheduledCourse";
+//import { ScheduledCourseContext } from "../context/scheduledCourse";
 
 export function useScheduledCourse(){
     
@@ -16,24 +16,28 @@ export function useScheduledCourse(){
     const { user } = useContext(AuthContext)
     //console.log(user)
     const { evaluationVersion } = useContext(VersionContext)
-    //console.log(evaluationVersion)
-    const { scheduledCourse, setScheduledCourse } = useContext(ScheduledCourseContext)
-    //console.log(scheduledCourse)
+    console.log('Evaluation vesion: ', evaluationVersion)
+    //const { scheduledCourse, setScheduledCourse } = useContext(ScheduledCourseContext)
+    //console.log('Use scheduled course: ', scheduledCourse)
+    const [newScheduledCourse, setNewScheduledCourse] = useState([])
+    console.log('New scheduled course estado: ', newScheduledCourse)
     const [professors, setProfessor] = useState([])
     const [allScheduledCourse, setAllScheduledCourse] = useState([])
+    console.log('All scheduled course: ', allScheduledCourse)
     const [evaluationVersionDetail, setEvaluationVersionDetail] = useState({})
     //console.log(evaluationVersionDetail)
     const [learningOutComes, setLearningOutComes] = useState({})
     const [percentages, setPercentages] = useState({})
 
-    const versions = Array.isArray(evaluationVersion) ? evaluationVersion : [];
-    const mappedVersions = versions?.map(version => ({
-        id: version.id,
-        initial_date: version.initial_date,
-        end_date: version.end_date,
-        course_id: version.course
+    const versions = evaluationVersion ? [evaluationVersion] : []
+    console.log('versions: ', versions)
+    const mappedVersions = versions.map(version => ({
+      id: version.id,
+      initial_date: version.initial_date,
+      end_date: version.end_date,
+      course_id: version.course
     }))
-    //console.log(mappedVersions)
+    console.log('mapped versions: ', mappedVersions)
 
     const getProfessors = () => {
         fetch(PROFESSORS_ENDPOINT)
@@ -42,8 +46,8 @@ export function useScheduledCourse(){
             return setProfessor(json)
         })
         .catch(error => {
-          console.error('Error fetching professors:', error);
-      });
+          console.error('Error fetching professors:', error)
+      })
     }
 
     const getAllScheduledCourse = () => {
@@ -74,31 +78,31 @@ export function useScheduledCourse(){
         })
         .then(response => {
           if (!response.ok) {
-            throw new Error('Error al enviar los datos');
+            throw new Error('Error al enviar los datos')
           }
-          return response.json(); // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
+          return response.json() // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
         })
         .then(data => {
-          console.log('Datos enviados exitosamente', data);
+          console.log('Datos enviados exitosamente', data)
         })
         .catch(error => {
-          console.error('Error:', error);
-        });
+          console.error('Error:', error)
+        })
       }
 
-    const getEvaluationVersionDetail = (courseId) => {
+    const getEvaluationVersionDetail = (courseId, versionId) => {
       console.log(courseId)
       // Busca el curso id dentro del evaluation version ya cargados
-      const existingVersionCourse = mappedVersions.find(version => version.course_id === courseId)
-      console.log(existingVersionCourse)
+      /*const existingVersionCourse = mappedVersions.find(version => version.course_id === courseId)
+      console.log('Existing version course: ', existingVersionCourse)
       if (!existingVersionCourse) {
           console.error(`No se encontró una versión de evaluación para el curso id ${courseId}`)
-          return;
+          return
       }
-      //console.log(existingVersionCourse.id);
-      const versionId = existingVersionCourse.id;
-      console.log(versionId)
-      return fetch(`${EVALUATION_VERSION_DETAIL_ENDPOINT}${versionId}`, {
+      console.log('Existing version course id: ', existingVersionCourse.id)
+      const version_id = existingVersionCourse.id
+      console.log('version_id:', version_id)*/
+      return fetch(`${EVALUATION_VERSION_DETAIL_ENDPOINT}${Number(versionId)}`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${user.token}`,
@@ -109,14 +113,17 @@ export function useScheduledCourse(){
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`)
         }
-        return response.json();
+        return response.json()
       })
       .then(json => {
-        console.log(json)
+        console.log('Preview json:',json)
         const { scheduled_courses } = json
-        const newScheduledCorses = scheduled_courses.filter(element => element.professor_id === user.id)
-        setScheduledCourse(newScheduledCorses)
+        console.log('Json: ', json)
+        const newScheduledCorses = scheduled_courses.filter(element => element.professor.id === Number(user.id))
+        console.log('New scheduled courses: ', newScheduledCorses)
+        setNewScheduledCourse(newScheduledCorses)
         const { evaluation_version_details } = json
+        console.log('New evaluation version detail: ', evaluation_version_details)
         setEvaluationVersionDetail(evaluation_version_details)
         if(evaluation_version_details && evaluation_version_details.length > 0){
           evaluation_version_details.forEach(detail => {
@@ -129,7 +136,7 @@ export function useScheduledCourse(){
       .catch(error => {
         console.error("Error fetching evaluation version detail:", error)
         throw error
-      });
+      })
     }
 
     const getLearningOutCome = (learningOutComeId) => {
@@ -181,7 +188,7 @@ export function useScheduledCourse(){
     }
 
     return { getProfessors, professors, createScheduledCourse, getEvaluationVersionDetail,
-              learningOutComes, percentages, scheduledCourse, evaluationVersionDetail,
-              getAllScheduledCourse, allScheduledCourse
+              learningOutComes, percentages, evaluationVersionDetail,
+              getAllScheduledCourse, allScheduledCourse, newScheduledCourse
      }
 }

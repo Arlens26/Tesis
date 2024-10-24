@@ -1,28 +1,27 @@
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
-import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import { useActivities } from "../hooks/useActivities"
-//import { ActivityForm } from "./ActivityForm"
-import { useCourses } from "../hooks/useCourses"
 import { DeleteIcon } from "./Icons"
 import { toast } from "sonner"
+//import { useCourses } from "../hooks/useCourses"
 
 export function Activity() {
 
-    const { getEvaluationVersionDetail, learningOutComes, percentages, scheduledCourse, evaluationVersionDetail } = useScheduledCourse()   
-    //console.log(scheduledCourse)
+    const { getEvaluationVersionDetail, learningOutComes, percentages, scheduledCourse, evaluationVersionDetail, newScheduledCourse } = useScheduledCourse()   
+    console.log('Scheduled course: ', scheduledCourse)
+    console.log('New scheduled course prueba: ', newScheduledCourse)
     //console.log(percentages)
-    console.log(evaluationVersionDetail)
+    console.log('Evaluation version detail activity: ', evaluationVersionDetail)
     const { getActivityDetail, activityDetail } = useActivities()
     //console.log(activities)
-    console.log(activityDetail)
-    const { getCourse } = useCourses()
+    console.log('Activity detail: ', activityDetail)
     const location = useLocation()
+   // const { getCourse } = useCourses()
     
-    const { evaluationVersion } = useEvaluationVersionCourse()
-    const [activityDetailList, setActivityDetailList] = useState([])
-    console.log(activityDetailList)
+    //const { evaluationVersion } = useEvaluationVersionCourse()
+    //const [activityDetailList, setActivityDetailList] = useState([])
+    //console.log(activityDetailList)
     const [newActivities, setNewActivities] = useState([])
     console.log(newActivities)
     const [raSums, setRaSums] = useState({})
@@ -33,24 +32,31 @@ export function Activity() {
     useEffect(() =>{
         getActivityDetail()
         const course_id = location.state.course_id
-        console.log(course_id)
-        const course = getCourse(course_id)
+        console.log('Course id: ', course_id)
+        const version_id = location.state.version_id
+        console.log('Version id: ', version_id)
+        /*const course = getCourse(course_id)
         course.then(course => {
           const newRoute = `/${course.name}/activity/`
           history.pushState({}, '', newRoute)
           console.log(newRoute)
-        })
+        })*/
         //console.log(evaluationVersion)
         if (course_id) {
-            getEvaluationVersionDetail(course_id)
+            getEvaluationVersionDetail(course_id, version_id)
+            /*.then(() => {
+              console.log('Detalle de versión de evaluación encontrada')
+            .catch((error) => {
+              console.error('Error al encontrar Detalle de versión de evaluación:', error);
+            })})*/
         } else {
             console.error("No se proporcionó un course_id en el estado de la ubicación.")
         }
-        if(scheduledCourse && scheduledCourse.length > 0){
-          setSelectedScheduledId(scheduledCourse[0].id)
+        if(newScheduledCourse && newScheduledCourse.length > 0){
+          setSelectedScheduledId(newScheduledCourse[0].id)
           console.log('Scheduled ID seleccionado:', selectedScheduledId)
         }
-    }, [location.state?.course_id, evaluationVersion])
+    }, [])
 
     const handleSubmit = (event) => {
       event.preventDefault()
@@ -146,11 +152,11 @@ export function Activity() {
                     percentages: { ...activity.percentages, [versionId]: value } 
                 } : activity
             )
-        );
+        )
         setRaSums(prevSums => ({
             ...prevSums,
             [learningOutcomeId]: newSum
-        }));
+        }))
     } else {
         toast.info(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
         console.log(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
@@ -163,8 +169,9 @@ export function Activity() {
 
 // Inicializar el estado
 const [activities, setActivities] = useState([])
+console.log('Activities: ', activities)
 const filteredActivities = activities.filter(activity => activity.scheduled_course_id === Number(selectedScheduledId))
-console.log(filteredActivities)
+console.log('Filtered Activities: ', filteredActivities)
 //const [totalPercentage, setTotalPercentage] = useState(0)
 
 const calculatePercentageActivity = (activity) => {
@@ -183,23 +190,23 @@ useEffect(() => {
               };
           }
           acc[activity.id].percentages[detail.version_evaluation_detail_id] = detail.percentage;
-          return acc;
-      }, {});
+          return acc
+      }, {})
       
       setActivities(Object.values(groupedActivities));
 
       // Inicializa raSums con los porcentajes existentes en activityDetail
       const initialRaSums = activityDetail.reduce((acc, detail) => {
-          const learningOutcomeId = detail.version_evaluation_detail_id;
-          acc[learningOutcomeId] = (acc[learningOutcomeId] || 0) + parseInt(detail.percentage || 0);
-          return acc;
-      }, {});
+          const learningOutcomeId = detail.version_evaluation_detail_id
+          acc[learningOutcomeId] = (acc[learningOutcomeId] || 0) + parseInt(detail.percentage || 0)
+          return acc
+      }, {})
       
-      setRaSums(initialRaSums);
+      setRaSums(initialRaSums)
   } else {
-      console.error('ActivityDetail is not an array:', activityDetail);
+      console.error('ActivityDetail is not an array:', activityDetail)
   }
-}, [activityDetail]);
+}, [activityDetail])
 
   if (!Array.isArray(activityDetail)) {
     console.error('ActivityDetail is not an array:', activityDetail)
@@ -364,7 +371,7 @@ useEffect(() => {
           onChange={(e) => setSelectedScheduledId(e.target.value)}
         >
                     <option disabled>Grupos</option>
-                    {scheduledCourse && scheduledCourse.map(scheduled => (
+                    {newScheduledCourse &&newScheduledCourse.map(scheduled => (
                           <option key={`set_activity_${scheduled.id}`} value={scheduled.id}>
                              {`${scheduled.group}`}
                           </option>

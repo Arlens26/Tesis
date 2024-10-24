@@ -3,6 +3,7 @@ import { useCourses } from "../hooks/useCourses"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import { useState, useEffect } from "react"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
+import { toast } from "sonner"
 
 export function ScheduledCourse(){
     const { periods, getAcademicPeriods } = useEvaluationVersionCourse()
@@ -43,14 +44,22 @@ export function ScheduledCourse(){
             semester: fields.period.split('-')[1]
         }
         fields.academic_period = academic_period
-        console.log(fields);
+        //console.log('Fields: ', fields)
+        const { period, group, professor_id, version_id } = fields
+        if (!period || !group || !professor_id || !version_id) {
+            toast.error('Por favor, completa todos los campos requeridos')
+            return
+        }
         createScheduledCourse(fields)
          .then(() => {
-            console.log('Se creo el curso programado de manera correcta');
+            toast.success('Se creo el curso programado de manera correcta')
+            navigate('/course-list')
+            //console.log('Se creo el curso programado de manera correcta')
          })
          .catch((error) => {
-            console.error('Error al crear curso programado:', error);
-         });
+            toast.error('Error al crear curso programado:',  error)
+            //console.error('Error al crear curso programado:', error)
+         })
     }
 
     const handleReturn = () => {

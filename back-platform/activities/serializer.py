@@ -40,6 +40,7 @@ class GradeDetailLearningOutComeSerializer(serializers.ModelSerializer):
             'scheduled_course': {
                 'id': enrolled_course.scheduled_course.id, 
                 'group': enrolled_course.scheduled_course.group,
+                'professor_id': enrolled_course.scheduled_course.professor_id,
             }
         }
 

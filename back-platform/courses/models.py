@@ -116,6 +116,7 @@ class EvaluationVersionDetail(models.Model):
 class StudentEnrolledCourse(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='students')
     scheduled_course = models.ForeignKey(ScheduledCourse, on_delete=models.CASCADE, related_name='scheduled_courses')
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.student) + '-' + str(self.scheduled_course)

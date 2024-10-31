@@ -199,24 +199,35 @@ class ScheduledCourseVersionDetailView(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def get_details_by_evaluation_version(self, request):
-        evaluation_version_id = request.query_params.get('evaluation_version_id', None)
+        evaluation_version_ids = request.query_params.get('evaluation_version_ids', None)
 
-        if evaluation_version_id is None:
-            return Response({'error': 'evaluation_version_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not evaluation_version_ids:
+            return Response({'error': 'evaluation_version_ids parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            scheduled_courses = ScheduledCourse.objects.filter(evaluation_version__id=evaluation_version_id)
-            evaluation_version_details = EvaluationVersionDetail.objects.filter(evaluation_version__id=evaluation_version_id)
-
+            # Convertir los ids a una lista de enteros
+            evaluation_version_ids = [int(id.strip()) for id in evaluation_version_ids.split(',')]
+            
+            # Obtener los scheduled courses relacionados con las evaluation versions
+            scheduled_courses = ScheduledCourse.objects.filter(evaluation_version_id__in=evaluation_version_ids).prefetch_related('professor', 'period')
+            
+            # Serializar los scheduled courses
             serialized_scheduled_courses = ScheduledCourseSerializer(scheduled_courses, many=True).data
+            
+            # Obtener y serializar los detalles de las evaluation versions
+            evaluation_version_details = EvaluationVersionDetail.objects.filter(evaluation_version_id__in=evaluation_version_ids).prefetch_related('learning_outcome', 'percentage')
             serialized_evaluation_version_details = EvaluationVersionDetailSerializer(evaluation_version_details, many=True).data
 
+            # Construir la respuesta
             response_data = {
                 'scheduled_courses': serialized_scheduled_courses,
                 'evaluation_version_details': serialized_evaluation_version_details
             }
 
             return Response(response_data, status=status.HTTP_200_OK)
+        
+        except ValueError:
+            return Response({'error': 'Invalid evaluation version IDs provided'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         

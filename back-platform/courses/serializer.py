@@ -68,9 +68,30 @@ class PercentageSerializer(serializers.ModelSerializer):
         fields = ['id','initial_date', 'end_date', 'percentage', 'learning_outcome_id']
 
 class EvaluationVersionDetailSerializer(serializers.ModelSerializer):
+    learning_outcome = serializers.SerializerMethodField()
+    percentage = serializers.SerializerMethodField()
+
+    def get_learning_outcome(self, obj):
+        learning_outcome = obj.learning_outcome
+
+        return {
+            'id': learning_outcome.id,
+            'code': learning_outcome.code,
+            'description': learning_outcome.description,
+        }
+    
+    def get_percentage(self, obj):
+        percentage = obj.percentage
+
+        return { 
+            'id': percentage.id,
+            'initial_date': percentage.initial_date,
+            'percentage': percentage.percentage,
+        }
+
     class Meta:
         model = EvaluationVersionDetail
-        fields = '__all__'
+        fields = ['id', 'evaluation_version_id', 'learning_outcome', 'percentage']
 
 class StudentEnrolledCourseSerializer(serializers.ModelSerializer):
     scheduled_course = serializers.SerializerMethodField()
@@ -113,7 +134,7 @@ class StudentEnrolledCourseSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = StudentEnrolledCourse
-        fields = ['id', 'scheduled_course', 'student']
+        fields = ['id', 'scheduled_course', 'student', 'active']
 
 
 #class ScheduledCourseDetailSerializer(serializers.ModelSerializer):

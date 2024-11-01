@@ -3,60 +3,70 @@ import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { useActivities } from "../hooks/useActivities"
 import { DeleteIcon } from "./Icons"
-import { toast } from "sonner"
-//import { useCourses } from "../hooks/useCourses"
+//import { toast } from "sonner"
 
 export function Activity() {
 
-    const { getEvaluationVersionDetail, learningOutComes, percentages, scheduledCourse, evaluationVersionDetail, newScheduledCourse } = useScheduledCourse()   
-    console.log('Scheduled course: ', scheduledCourse)
-    console.log('New scheduled course prueba: ', newScheduledCourse)
-    //console.log(percentages)
-    console.log('Evaluation version detail activity: ', evaluationVersionDetail)
-    const { getActivityDetail, activityDetail } = useActivities()
-    //console.log(activities)
-    console.log('Activity detail: ', activityDetail)
+    const { getEvaluationVersionDetail,
+      evaluationVersionDetail, newScheduledCourse, getAllScheduledCourse } = useScheduledCourse()
+    const { getActivityEvaluationVersionDetail, activityEvaluationDetail } = useActivities()
+    console.log('Activity evaluation detail: ', activityEvaluationDetail)
+    console.log('New scheduled course estado: ', newScheduledCourse)
+    console.log('Evaluation version detail: ', evaluationVersionDetail) 
     const location = useLocation()
-   // const { getCourse } = useCourses()
-    
-    //const { evaluationVersion } = useEvaluationVersionCourse()
-    //const [activityDetailList, setActivityDetailList] = useState([])
-    //console.log(activityDetailList)
     const [newActivities, setNewActivities] = useState([])
-    console.log(newActivities)
-    const [raSums, setRaSums] = useState({})
+    console.log('New activities estado: ', newActivities)
 
     const [selectedScheduledId, setSelectedScheduledId] = useState(null)
-    console.log(selectedScheduledId)
+    console.log('Selected scheduled id: ', selectedScheduledId)
+    const [selectedVersionId, setSelectedVersionId] = useState(null)
+    console.log('Selected version id: ', selectedVersionId)
+    const groupedCourse = location.state?.course || []
+    console.log('Grouped course: ', groupedCourse) 
+    const [evaluationDetailIds, setEvaluationDetailIds] = useState([])
+    console.log('Ids evaluation version detail: ', evaluationDetailIds)
+
+    const [totalPercentageByActivity, setTotalPercentageByActivity] = useState(0)
+
     
+    const [filteredPercentages, setFilteredPercentages] = useState([])
+    console.log('Filtered percentages: ', filteredPercentages)
+
+    const filteredDetails = Object.values(evaluationVersionDetail).filter(detail => detail.evaluation_version_id === selectedVersionId)
+    console.log('Filtered Details: ', filteredDetails)
+
     useEffect(() =>{
-        getActivityDetail()
-        const course_id = location.state.course_id
-        console.log('Course id: ', course_id)
-        const version_id = location.state.version_id
-        console.log('Version id: ', version_id)
-        /*const course = getCourse(course_id)
-        course.then(course => {
-          const newRoute = `/${course.name}/activity/`
-          history.pushState({}, '', newRoute)
-          console.log(newRoute)
-        })*/
-        //console.log(evaluationVersion)
-        if (course_id) {
-            getEvaluationVersionDetail(course_id, version_id)
-            /*.then(() => {
-              console.log('Detalle de versión de evaluación encontrada')
-            .catch((error) => {
-              console.error('Error al encontrar Detalle de versión de evaluación:', error);
-            })})*/
-        } else {
-            console.error("No se proporcionó un course_id en el estado de la ubicación.")
-        }
-        if(newScheduledCourse && newScheduledCourse.length > 0){
-          setSelectedScheduledId(newScheduledCourse[0].id)
-          console.log('Scheduled ID seleccionado:', selectedScheduledId)
-        }
-    }, [])
+        getAllScheduledCourse()
+        const evaluationVersionIds = groupedCourse.flatMap(course => 
+            course.details.map(detail => detail.evaluation_version_id)
+        )
+        const filteredEvaluationVersionIds = evaluationVersionIds.filter(id => id !== undefined)
+        console.log('Filtered evaluation version ids: ', filteredEvaluationVersionIds)
+        console.log('course period', groupedCourse[0].period)
+        getEvaluationVersionDetail(filteredEvaluationVersionIds, groupedCourse[0].period)
+        getActivityEvaluationVersionDetail(evaluationDetailIds)
+    }, [selectedScheduledId])
+
+    useEffect(() => {
+      if(newScheduledCourse && newScheduledCourse.length > 0 && selectedScheduledId == null){
+        setSelectedScheduledId(newScheduledCourse[0].id)
+        console.log('Scheduled course ID seleccionado:', selectedScheduledId)
+      }
+    }, [newScheduledCourse])
+
+    const handleSelectChange = (e) => {
+      const selectedId = e.target.value
+      console.log('Selected Id: ', selectedId)
+      const selectedDetail = newScheduledCourse.find(detail => detail.id === parseInt(selectedId))
+  
+      setSelectedScheduledId(selectedId)
+  
+      if (selectedDetail) {
+          setSelectedVersionId(selectedDetail.evaluation_version_id)
+          const filteredEvaluationVersionDetailIds = evaluationVersionDetail.map(detail => detail.id)
+          setEvaluationDetailIds(filteredEvaluationVersionDetailIds)
+      }
+    }
 
     const handleSubmit = (event) => {
       event.preventDefault()
@@ -76,92 +86,44 @@ export function Activity() {
 
     const handleActivity = () => {
       setNewActivities([...newActivities, { name: '', description: '', percentages: [] }])
-      console.log(newActivities)
+      console.log('New Activities: ', newActivities)
     }
 
-    const handlePercentage = (activityIndex, learningOutComeIndex, newPercentage, isNewActivity = false) => {
-      const learningOutcomeId = Object.keys(learningOutComes)[learningOutComeIndex];
-      const maxPercentage = parseInt(percentages[learningOutcomeId]?.percentage);
-      
-      // Obtener la suma actual del RA desde raSums (actividades existentes)
-      const existingSum = raSums[learningOutcomeId] || 0;
-  
-      // Sumar todos los porcentajes de las nuevas actividades para este RA
-      const sumNewActivities = newActivities.reduce((sum, activity) => {
-        const currentPercentage = parseInt(activity.percentages[learningOutComeIndex]) || 0;
-        return sum + currentPercentage;
-    }, 0);
-  
-      // Calcular la suma total con la nueva entrada
-      const currentActivityPercentage = isNewActivity
-          ? parseInt(newActivities[activityIndex]?.percentages[learningOutComeIndex] || 0)
-          : 0;
-  
-      const newSum = existingSum + sumNewActivities - currentActivityPercentage + parseInt(newPercentage)
-      console.log(newSum)
-      /*console.log(sumNewActivities)
-      console.log(existingSum)
-      console.log(newSum)
-      console.log(maxPercentage)*/
-      if (newSum <= maxPercentage) {
-        //console.log('se ejecuta')
-          if (isNewActivity) {
-              const updatedNewActivities = [...newActivities];
-              if (!updatedNewActivities[activityIndex].percentages) {
-                  updatedNewActivities[activityIndex].percentages = [];
-              }
-              updatedNewActivities[activityIndex].percentages[learningOutComeIndex] = newPercentage;
-              setNewActivities(updatedNewActivities);
-          }
-  
-          // Actualizar la suma en el estado `raSums`
-          setRaSums(prevSums => ({
-              ...prevSums,
-              [learningOutcomeId]: newSum
-          }));
-      } else {
-          toast.info(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
-          console.log(`El porcentaje total para el RA ${learningOutComes[learningOutcomeId]?.code} no puede exceder ${maxPercentage}%.`);
+    useEffect(() => {
+      if(filteredPercentages){
+        const initialTotals = filteredPercentages.reduce((acc, item) => {
+          acc[item.activity_id] = (acc[item.activity_id] || 0) + item.percentage
+          return acc
+        }, {})
+        setTotalPercentageByActivity(initialTotals)
       }
-  };
-  
-  
-  
-  
+    }, [filteredPercentages])
 
-
-  const handlePercentageChange = (activityId, versionId, value) => {
-    const newPercentage = parseFloat(value) || 0
-    const learningOutcomeId = versionId // Mapea correctamente el RA
-    const currentSum = raSums[learningOutcomeId] || 0
-    const maxPercentage = parseFloat(percentages[learningOutcomeId]?.percentage)
-
-    // Busca la actividad actual
-    const activity = activities.find(activity => activity.id === activityId)
-    const currentActivityPercentage = parseFloat(activity.percentages[versionId]) || 0
-    
-    // Calcula la nueva suma potencial
-    const newSum = currentSum - currentActivityPercentage + newPercentage
-    console.log(newSum)
-
-    if (newSum <= maxPercentage) {
-        setActivities(prevActivities => 
-            prevActivities.map(activity =>
-                activity.id === activityId ? { 
-                    ...activity, 
-                    percentages: { ...activity.percentages, [versionId]: value } 
-                } : activity
-            )
-        )
-        setRaSums(prevSums => ({
-            ...prevSums,
-            [learningOutcomeId]: newSum
-        }))
-    } else {
-        toast.info(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
-        console.log(`La suma de los porcentajes para el RA ${learningOutcomeId} no puede exceder ${maxPercentage}%`)
+    const handlePercentageChange = (activityId, versionDetailId, value, newPercentage) => {
+      setTotalPercentageByActivity(prevState => ({
+        ...prevState,
+        [activityId]: (prevState[activityId] || 0) + newPercentage,
+      }))
+      setFilteredPercentages((prevPercentages) => {
+        // Crear una copia del estado actual de los porcentajes para evitar mutaciones
+        const updatedPercentages = prevPercentages.map((percentage) => {
+          // Verificar si el `activityId` y `versionDetailId` coinciden con el detalle que se está editando
+          if (
+            percentage.activity_id === activityId &&
+            percentage.version_evaluation_detail_id === versionDetailId
+          ) {
+            // Retornar el objeto actualizado con el nuevo valor de porcentaje
+            return {
+              ...percentage,
+              percentage: parseFloat(value) || 0, // Convertir a float o establecer en 0 si el valor es inválido
+            }
+          }
+          // Retornar el objeto sin cambios si no coincide con los ids
+          return percentage
+        })
+        return updatedPercentages
+      })
     }
-}
 
     const calculateTotalPercentage = (percentages) => {
       return percentages.reduce((acc, percentage) => acc + parseInt(percentage || 0), 0)
@@ -170,48 +132,38 @@ export function Activity() {
 // Inicializar el estado
 const [activities, setActivities] = useState([])
 console.log('Activities: ', activities)
-const filteredActivities = activities.filter(activity => activity.scheduled_course_id === Number(selectedScheduledId))
-console.log('Filtered Activities: ', filteredActivities)
-//const [totalPercentage, setTotalPercentage] = useState(0)
+const filteredActivityEvaluationDetail = Object.values(activityEvaluationDetail).filter(detail => 
+  detail.activity.scheduled_course_id === Number(selectedScheduledId))
+console.log('Filtered Activity evaluation detail: ', filteredActivityEvaluationDetail)
 
-const calculatePercentageActivity = (activity) => {
-  return Object.values(activity.percentages).reduce((sum, val) => sum + parseFloat(val || 0), 0)
+const uniqueActivities = Array.from(
+    new Set(filteredActivityEvaluationDetail.map((detail) => detail.activity.id))
+  ).map((id) => {
+    return filteredActivityEvaluationDetail.find((detail) => detail.activity.id === id)
+})
+console.log('Unique Activities: ', uniqueActivities)
+
+
+const generateFilteredPercentages = () => {
+  const percentages = filteredActivityEvaluationDetail.filter(detail => {
+    // Compara el id de filteredDetails con version_evaluation_detail_id
+    return filteredDetails.some(filteredDetail => 
+      filteredDetail.id === detail.version_evaluation_detail_id
+    )
+  }).map(detail => {
+    return {
+      activity_id: detail.activity.id || null,
+      version_evaluation_detail_id: detail.version_evaluation_detail_id, 
+      percentage: parseFloat(detail.percentage) || 0 
+    }
+  })
+
+  setFilteredPercentages(percentages)
 }
 
-// Asegurarse que activityDetail sea una matriz y agrupar las actividades
 useEffect(() => {
-  if (Array.isArray(activityDetail)) {
-      const groupedActivities = activityDetail.reduce((acc, detail) => {
-          const { activity } = detail;
-          if (!acc[activity.id]) {
-              acc[activity.id] = {
-                  ...activity,
-                  percentages: {},
-              };
-          }
-          acc[activity.id].percentages[detail.version_evaluation_detail_id] = detail.percentage;
-          return acc
-      }, {})
-      
-      setActivities(Object.values(groupedActivities));
-
-      // Inicializa raSums con los porcentajes existentes en activityDetail
-      const initialRaSums = activityDetail.reduce((acc, detail) => {
-          const learningOutcomeId = detail.version_evaluation_detail_id
-          acc[learningOutcomeId] = (acc[learningOutcomeId] || 0) + parseInt(detail.percentage || 0)
-          return acc
-      }, {})
-      
-      setRaSums(initialRaSums)
-  } else {
-      console.error('ActivityDetail is not an array:', activityDetail)
-  }
-}, [activityDetail])
-
-  if (!Array.isArray(activityDetail)) {
-    console.error('ActivityDetail is not an array:', activityDetail)
-    return null 
-  }
+  generateFilteredPercentages()
+}, [selectedScheduledId])
 
   // Handle input changes
   const handleInputChange = (activityId, field, value) => {
@@ -237,8 +189,8 @@ useEffect(() => {
       <tr>
         <th scope="col" className="px-6 py-3">Actividad</th>
         <th scope="col" className="px-6 py-3">Descripción</th>
-        {Object.keys(learningOutComes).map(id => (
-          <th key={id} scope="col" className="px-6 py-3">{learningOutComes[id]?.code || 'Cargando...'}</th>
+        {filteredDetails.map((detail) =>(
+          <th key={detail.learning_outcome.id} scope="col" className="px-6 py-3">{detail.learning_outcome.code || 'Cargando...'}</th>
         ))}
         <th scope="col" className="px-6 py-3">Porcentaje</th>
         <th scope="col" className="px-6 py-3">Acciones</th>
@@ -249,36 +201,46 @@ useEffect(() => {
   // Render table rows
   const renderTableRows = () => (
     <tbody>
-      {filteredActivities.map((activity) => (
-        <tr key={activity.id} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+      {uniqueActivities.map((activityDetail) => (
+        <tr key={activityDetail.activity.id} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
           <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
             <input
               type="text"
-              value={activity.name}
-              onChange={(e) => handleInputChange(activity.id, 'name', e.target.value)}
+              value={activityDetail.activity.name}
+              onChange={(e) => handleInputChange(activityDetail.activity.id, 'name', e.target.value)}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
           </td>
           <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
             <textarea
-              value={activity.description}
-              onChange={(e) => handleInputChange(activity.id, 'description', e.target.value)}
+              value={activityDetail.activity.description}
+              onChange={(e) => handleInputChange(activityDetail.activity.id, 'description', e.target.value)}
               rows="1"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
           </td>
-          {Object.keys(learningOutComes).map(id => (
-            <td key={id} className="px-6 py-4">
-              <input
-                type="text"
-                value={parseFloat(activity.percentages[id]).toFixed(0) || ''}
-                onChange={(e) => handlePercentageChange(activity.id, id, e.target.value)}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
-            </td>
-          ))}
+          {Object.values(filteredDetails).map((detail) => {
+          // Buscar el porcentaje correspondiente en filteredPercentages
+          const matchingPercentage = filteredPercentages.find(
+            (percentage) => percentage.version_evaluation_detail_id === detail.id &&
+            percentage.activity_id === activityDetail.activity.id
+          )
+          // Obtener el valor del porcentaje o establecer un valor por defecto
+          const percentageValue = matchingPercentage ? parseFloat(matchingPercentage.percentage).toFixed(0) : ''
+
+            return (
+              <td key={detail.id} className="px-6 py-4">
+                <input
+                  type="number"
+                  value={percentageValue}
+                  onChange={(e) => handlePercentageChange(activityDetail.activity.id, detail.id, e.target.value, percentageValue)}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                />
+              </td>
+            )
+          })}
           <td className="px-6 py-4">
-            {calculatePercentageActivity(activity)}%
+            {/*calculatePercentageActivity(activity)*/}{totalPercentageByActivity[activityDetail.activity.id] || 0}%
           </td>
           <td className="px-6 py-4">
             <button type='button'
@@ -299,12 +261,12 @@ useEffect(() => {
                                     </td>
                                     <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                         <textarea value={activity.description} placeholder='Descripción' name={`new_description_${activityIndex}`} rows="1" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => {
-                                            const updatedActivities = [...newActivities];
-                                            updatedActivities[activityIndex].description = e.target.value;
-                                            setNewActivities(updatedActivities);
+                                            const updatedActivities = [...newActivities]
+                                            updatedActivities[activityIndex].description = e.target.value
+                                            setNewActivities(updatedActivities)
                                         }} />
                                     </td>
-                                    {Object.entries(learningOutComes).map((learningOutcomeId, learningOutComeIndex) => (
+                                    {/*Object.entries(learningOutComes).map((learningOutcomeId, learningOutComeIndex) => (
                                         <td key={learningOutcomeId} className="px-6 py-4">
                                             <input
                                                 name={`new_learning_percentage${learningOutComeIndex}_${learningOutcomeId}`}
@@ -322,7 +284,7 @@ useEffect(() => {
                                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             />
                                         </td>
-                                    ))}
+                                    ))*/}
                                     <td className="px-6 py-4">
                                         {calculateTotalPercentage(activity.percentages || [])}%
                                     </td>
@@ -343,13 +305,11 @@ useEffect(() => {
                                     <td className="px-6 py-4">
                                       
                                     </td>
-                                    {
-                                      Object.keys(percentages).map(id => (
-                                      <td key={id} className="px-6 py-4">
-                                        {parseFloat(percentages[id]?.percentage).toFixed(0)}%
-                                      </td>
-                                    ))
-                                  }
+                                    {filteredDetails.map((detail) =>(
+                                        <td key={detail.percentage.id} className="px-6 py-4">
+                                        {parseFloat(detail.percentage.percentage).toFixed(0)}%
+                                        </td>
+                                    ))}
                                     <td className="px-6 py-4">
                                         100%
                                     </td>
@@ -362,18 +322,18 @@ useEffect(() => {
 
     return(
       <div className="flex flex-col gap-4">
-        <span>Configuración evaluación</span>
+        <span>Configuración evaluación del curso {groupedCourse[0].name}</span>
         <label className="text-sm">Grupos:</label>
         <select 
           id="scheduled_course" 
           name='scheduled_course' 
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          onChange={(e) => setSelectedScheduledId(e.target.value)}
+          onChange={handleSelectChange}
         >
                     <option disabled>Grupos</option>
-                    {newScheduledCourse &&newScheduledCourse.map(scheduled => (
-                          <option key={`set_activity_${scheduled.id}`} value={scheduled.id}>
-                             {`${scheduled.group}`}
+                    {newScheduledCourse && newScheduledCourse.map(detail => (
+                          <option key={`set_activity_${detail.id}`} value={detail.id}>
+                             {`${detail.group}`}
                           </option>
                     ))}
         </select>

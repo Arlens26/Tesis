@@ -53,6 +53,7 @@ export function StudentEnrolledCourseList(){
     .reduce((acc, detail) => {
         const courseName = detail.scheduled_course.evaluation_version.course.name
         const groupId = detail.scheduled_course.group
+        const status = detail.active
         //const studentId = detail.student
         
         //console.log('detail grouped students: ', courseId, groupId, studentId)
@@ -65,7 +66,7 @@ export function StudentEnrolledCourseList(){
         }
 
         // Agregamos los estudiantes matriculados en el curso y grupo
-        acc[courseName][groupId].push(detail.student)
+        acc[courseName][groupId].push({...detail.student, status})
         
         return acc
     }, {})
@@ -100,36 +101,6 @@ export function StudentEnrolledCourseList(){
             if (firstPeriodId) setSelectedPeriodId(firstPeriodId)
         }
     }, [studentEnrolledCourse])
-
-    //const [selectedCourseGroup, setSelectedCourseGroup] = useState(null)
-    //console.log('selected course group: ', selectedCourseGroup)
-    
-    /*const EnrolledStudentList = ({ courseName, groupId, students }) => {
-        return (
-            <table key={groupId} className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">Curso: {courseName}</th>
-                        <th scope="col" className="px-6 py-3">Grupo: {groupId}</th>
-                    </tr>
-                    <tr>
-                        <th scope="col" className="px-6 py-3">Nombre del Estudiante</th>
-                        <th scope="col" className="px-6 py-3">ID del Estudiante</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {students?.map((student, index) => (
-                        <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                {student.first_name} {student.last_name}
-                            </td>
-                            <td className="px-6 py-4">{student.id}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        )
-    }*/
     
     return(
         <div className="grid gap-2">
@@ -199,10 +170,6 @@ export function StudentEnrolledCourseList(){
                             </td>
                             <button className='bg-btn-edit opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
                                onClick={() => {
-                               /* setSelectedCourseGroup({
-                                    courseName: course.name,
-                                    groupId: groupDetail.group
-                                })*/
                                 navigate('/enrolled-student-list', { state: { courseName: course.name, groupId: groupDetail.group, students: groupedStudents[course.name][groupDetail.group] } })
                             }} 
                             >
@@ -222,63 +189,8 @@ export function StudentEnrolledCourseList(){
                     ))}
                 </tbody>
             </table>
-            
-            {/*Object.entries(groupedStudents).map(([courseName, groups]) => (
-                Object.entries(groups).map(([groupId, students]) => ( 
-                    <table key={groupId} className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                        <th scope="col" className="px-6 py-3">
-                            Curso: {courseName}
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Grupo: {groupId}
-                        </th>
-                        </tr>
-                        <tr>
-                        <th scope="col" className="px-6 py-3">
-                            Nombre del Estudiante
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            ID del Estudiante
-                        </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {students?.map((student, index) => ( // Iterando sobre los estudiantes del grupo
-                        <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {student.first_name} {student.last_name}
-                            </td>
-                            <td className="px-6 py-4">
-                            {student.id}
-                            </td>
-                        </tr>
-                        ))}
-                    </tbody>
-                    </table>
-                ))
-            ))*/}
-
-
             </>
-                
         ))} 
-        {/*selectedCourseGroup &&
-                        Object.entries(groupedStudents)
-                            .filter(([courseName]) => courseName === selectedCourseGroup.courseName)
-                            .map(([courseName, groups]) =>
-                                Object.entries(groups)
-                                    .filter(([groupId]) => groupId === selectedCourseGroup.groupId)
-                                    .map(([groupId, students]) => (
-                                        <EnrolledStudentList
-                                            key={groupId}
-                                            courseName={courseName}
-                                            groupId={groupId}
-                                            students={students}
-                                        />
-                                    ))
-        )*/} 
         </div>
     )
 }

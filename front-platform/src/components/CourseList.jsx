@@ -148,8 +148,8 @@ export function CourseList() {
       navigate('/scheduled-course/', {state: {course_id: courseId, version_id: versionId}})
     }
 
-    const handleActivity = (courseId, versionId) => {
-      navigate('/course-list/activity/', {state: {course_id: courseId, version_id: versionId}})
+    const handleActivity = (course) => {
+      navigate('/course-list/activity/', {state: {course: course}})
     }
 
     const handleActivityRaiting = (courseId, versionId) => {
@@ -360,7 +360,39 @@ export function CourseList() {
                           onClick={(e) =>{
                             e.stopPropagation();
                             console.log(curso.id)
-                            handleActivity(curso.id, curso.evaluation_version_id)
+                            const selectedCourse = coursesToRender.filter(course => course.id === curso.id)
+                            const groupedCourse = selectedCourse.reduce((acc, curso) => {
+                              // Busca si ya existe un curso con el mismo id
+                              const existingCourse = acc.find(item => item.id === curso.id)
+                              
+                              if (existingCourse) {
+                                // Si existe, añade la variación al arreglo os detalles
+                                existingCourse.details.push({
+                                  evaluation_version_id: curso.evaluation_version_id,
+                                  group: curso.group,
+                                  period: curso.period
+                                })
+                              } else {
+                                // Si no existe, crea un nuevo objeto con los detalles
+                                acc.push({
+                                  code: curso.code,
+                                  credit: curso.credit,
+                                  description: curso.description,
+                                  id: curso.id,
+                                  name: curso.name,
+                                  professor_id: curso.professor_id,
+                                  period: curso.period,
+                                  details: [{
+                                    evaluation_version_id: curso.evaluation_version_id,
+                                    group: curso.group,
+                                    //period: curso.period
+                                  }]
+                                })
+                              }
+                            
+                              return acc
+                            }, [])
+                            handleActivity(groupedCourse)
                           }}>
                           <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
                           <span>Configurar evaluación</span>

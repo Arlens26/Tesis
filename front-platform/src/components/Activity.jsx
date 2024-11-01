@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { useActivities } from "../hooks/useActivities"
 import { DeleteIcon } from "./Icons"
-//import { toast } from "sonner"
+import { toast } from "sonner"
 
 export function Activity() {
 
@@ -27,6 +27,8 @@ export function Activity() {
     console.log('Ids evaluation version detail: ', evaluationDetailIds)
 
     const [totalPercentageByActivity, setTotalPercentageByActivity] = useState(0)
+    const [totalPercentageByLearningOutCome, setTotalPercentageByLearningOutCome] = useState({})
+    console.log('Total percentage by learning outcome: ', totalPercentageByLearningOutCome)
 
     
     const [filteredPercentages, setFilteredPercentages] = useState([])
@@ -100,34 +102,52 @@ export function Activity() {
     }, [filteredPercentages])
 
     const handlePercentageChange = (activityId, versionDetailId, value, newPercentage) => {
-      setTotalPercentageByActivity(prevState => ({
-        ...prevState,
-        [activityId]: (prevState[activityId] || 0) + newPercentage,
-      }))
-      setFilteredPercentages((prevPercentages) => {
-        // Crear una copia del estado actual de los porcentajes para evitar mutaciones
-        const updatedPercentages = prevPercentages.map((percentage) => {
-          // Verificar si el `activityId` y `versionDetailId` coinciden con el detalle que se está editando
-          if (
-            percentage.activity_id === activityId &&
-            percentage.version_evaluation_detail_id === versionDetailId
-          ) {
-            // Retornar el objeto actualizado con el nuevo valor de porcentaje
+      const updatedPercentage = parseFloat(value) || 0
+      const maxAllowedPercentage = filteredDetails.find(detail => detail.id === versionDetailId)?.percentage || 0
+      console.log('Max allowed percentage: ', maxAllowedPercentage)
+    
+      setFilteredPercentages(prevPercentages => {
+        const updatedPercentages = prevPercentages.map(percentage => {
+          if (percentage.activity_id === activityId && percentage.version_evaluation_detail_id === versionDetailId) {
             return {
               ...percentage,
-              percentage: parseFloat(value) || 0, // Convertir a float o establecer en 0 si el valor es inválido
+              percentage: updatedPercentage,
             }
           }
-          // Retornar el objeto sin cambios si no coincide con los ids
           return percentage
         })
+    
+        const totalForLearningOutcome = updatedPercentages
+          .filter(item => item.version_evaluation_detail_id === versionDetailId)
+          .reduce((sum, item) => sum + item.percentage, 0)
+        console.log('Total for learingOutcome: ', totalForLearningOutcome)
+        if (totalForLearningOutcome > maxAllowedPercentage.percentage) {
+          toast.error(`La suma de los porcentajes para este RA no puede exceder ${maxAllowedPercentage.percentage}%`)
+          return prevPercentages // Evita la actualización si la suma excede el límite
+        }
+    
+        setTotalPercentageByLearningOutCome(prevState => ({
+          ...prevState,
+          [versionDetailId]: totalForLearningOutcome,
+        }))
+    
+        setTotalPercentageByActivity(prevState => ({
+          ...prevState,
+          [activityId]: (prevState[activityId] || 0) - newPercentage + updatedPercentage,
+        }))
+    
         return updatedPercentages
       })
     }
+    
 
-    const calculateTotalPercentage = (percentages) => {
+   /* const calculateTotalPercentage = (percentages) => {
       return percentages.reduce((acc, percentage) => acc + parseInt(percentage || 0), 0)
+    }*/
+    const calculateTotalPercentage = (percentages) => {
+        return Object.values(percentages).reduce((acc, curr) => acc + curr, 0)
     }
+    const totalPercentage = calculateTotalPercentage(totalPercentageByLearningOutCome)
 
 // Inicializar el estado
 const [activities, setActivities] = useState([])
@@ -305,13 +325,28 @@ useEffect(() => {
                                     <td className="px-6 py-4">
                                       
                                     </td>
-                                    {filteredDetails.map((detail) =>(
+                                    {filteredDetails.map((detail) => {
+                                      const detailId = detail.id
+                                      const detailPercentage = parseFloat(detail.percentage.percentage).toFixed(0)
+                                      const totalPercentage = totalPercentageByLearningOutCome[detailId]
+
+                                      return (
+                                          <td key={detailId} className="px-6 py-4">
+                                              <span style={{ color: totalPercentage < detailPercentage ? 'red' : 'inherit' }}>
+                                                  {detailPercentage}%
+                                              </span>
+                                          </td>
+                                      )
+                                    })}
+                                    {/*filteredDetails.map((detail) =>(
                                         <td key={detail.percentage.id} className="px-6 py-4">
                                         {parseFloat(detail.percentage.percentage).toFixed(0)}%
                                         </td>
-                                    ))}
+                                    ))*/}
                                     <td className="px-6 py-4">
-                                        100%
+                                      <span style={{color: totalPercentage < 100 ? 'red' : 'inherit'}}>
+                                        {totalPercentage}%
+                                      </span>
                                     </td>
                                     <td className="px-6 py-4">
                                     
@@ -342,6 +377,7 @@ useEffect(() => {
             className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
             onClick={handleActivity}
             type="button"
+            disabled={totalPercentage === 100}
             >
             <svg xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
             <span>Crear actividad</span>

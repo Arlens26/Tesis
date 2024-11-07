@@ -6,6 +6,7 @@ export function useEnrolledStudent() {
     const GRADE_DETAIL_LEARNING_OTUCOME = `http://localhost:8000/activities/all/grade-detail-learning-outcome/`
     const STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/student-enrolled-course/`
     const CREATE_STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/create-student-enrolled-course/`
+    const STUDENT_GRADE_REPORT = `http://127.0.0.1:8000/courses/all/student-report/`
 
     //const [students, setStudent] = useState([])
     //console.log(students)
@@ -13,6 +14,8 @@ export function useEnrolledStudent() {
     console.log(gradeDetail)
     const [studentEnrolledCourse, setStudentEnrolledCourse] = useState([])
     console.log(studentEnrolledCourse)
+    const [studentGradeReport, setStudentGradeReport] = useState([])
+    console.log('Student grade report use: ', studentGradeReport)
 
     /*const getStudents = () => {
         fetch(STUDENTS_ENDPOINT)
@@ -89,5 +92,17 @@ export function useEnrolledStudent() {
         })
       }
 
-    return { getGradeDetail, gradeDetail, updateGradeDetail, getStudentEnrolledCourse, studentEnrolledCourse, createStudentEnrolledCourse }
+      const getStudentGradeReport = () => {
+        fetch(STUDENT_GRADE_REPORT)
+        .then(res => res.json())
+        .then(json => {
+            return setStudentGradeReport(json)
+        })
+        .catch(error => {
+            console.error('Error feching student grade report', error)
+        })
+    }
+
+    return { getGradeDetail, gradeDetail, updateGradeDetail, getStudentEnrolledCourse, studentEnrolledCourse, 
+      createStudentEnrolledCourse, getStudentGradeReport, studentGradeReport }
 }

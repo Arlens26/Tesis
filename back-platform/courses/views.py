@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 #from rest_framework.views import APIView
-from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer, EvaluationVersionDetailSerializer, StudentEnrolledCourseSerializer
+from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer, EvaluationVersionDetailSerializer, StudentEnrolledCourseSerializer, StudentGradeReportSerializer
 from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail, StudentEnrolledCourse
 #from django.http import JsonResponse
 from datetime import datetime
@@ -9,6 +9,8 @@ from decimal import Decimal
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
+from django_pandas.io import read_frame
+import pandas as pd
 
 # Create your views here.
 class CourseView(viewsets.ModelViewSet):
@@ -281,3 +283,60 @@ class CreateStudentEnrolledCourseView(viewsets.ModelViewSet):
             #    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'message': 'Students enrolled successfully'}, status=status.HTTP_201_CREATED)
+    
+
+class StudentGradeReportView(viewsets.ModelViewSet):
+    serializer_class = StudentGradeReportSerializer
+    queryset = StudentEnrolledCourse.objects.all()  
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        
+        # Filtrar los objetos antes de serializarlos
+        filtered_queryset = []
+        for student_course in queryset:
+            serializer = self.get_serializer(student_course)
+            serialized_data = serializer.data
+            if serialized_data.get('activity_evaluation_detail') or serialized_data.get('grade_detail_learning_outcome'):
+                filtered_queryset.append(student_course)
+        
+        # Serializar sólo los objetos filtrados
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(filtered_queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='report')
+    def student_report(self, request):
+        # Verificar si el usuario pertenece al grupo "student"
+        user = request.user
+        if not user.groups.filter(name='student').exists():
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Filtrar los cursos en los que el estudiante está inscrito
+        enrolled_courses = StudentEnrolledCourse.objects.filter(student=user)
+
+        #enrolled_courses = StudentEnrolledCourse.objects.filter(
+            #student=user
+        #).exclude(grade_detail_learning_outcome=[]).exclude(activity_evaluation_detail=[])
+        
+        serializer = self.get_serializer(enrolled_courses, many=True)
+        report_data = serializer.data
+        print('report: ', report_data)
+
+        # Crear un DataFrame a partir de los datos serializados
+        df = pd.DataFrame(report_data)
+
+        #df = df[df['grade_detail_learning_outcome'].astype(bool)]
+        # Agrupar por 'scheduled_course' y conservar sólo la primera aparición para cada ID de curso programado
+        #grouped_df = df.groupby('student_enrolled_course__scheduled_course__id').first().reset_index()
+        df_grouped = df.groupby('scheduled_course').agg(list)
+        # Agrupar por 'scheduled_course' y contar la cantidad de estudiantes por curso
+        #grouped_df = df.groupby(['student_enrolled_course__scheduled_course__id', 
+        #                          'student_enrolled_course__scheduled_course__evaluation_version__course__name']).size().reset_index(name='student_count')
+
+        # Retornar el DataFrame agrupado como JSON
+        return Response(df_grouped.to_dict(orient="records"), status=status.HTTP_200_OK)

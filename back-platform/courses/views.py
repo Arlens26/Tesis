@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django_pandas.io import read_frame
 import pandas as pd
+from django.db import IntegrityError
 
 # Create your views here.
 class CourseView(viewsets.ModelViewSet):
@@ -253,6 +254,8 @@ class CreateStudentEnrolledCourseView(viewsets.ModelViewSet):
         # Obtener o crear el grupo 'student'
         student_group, created = Group.objects.get_or_create(name='student')
 
+        error_messages = []  
+
         for student_data in students_data:
             # Crear o recuperar el usuario basado en el email
             user, created = User.objects.get_or_create(
@@ -270,17 +273,17 @@ class CreateStudentEnrolledCourseView(viewsets.ModelViewSet):
             if created:
                 user.groups.add(student_group)
 
-            # Crear la instancia de StudentEnrolledCourse
-            StudentEnrolledCourse.objects.create(
-                student=user,
-                scheduled_course=scheduled_course#
-            )
-            #serializer = StudentEnrolledCourseSerializer(data=enrolled_data)
-            
-            #if serializer.is_valid():
-            #    serializer.save()
-            #else:
-            #    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Intentar crear la instancia de StudentEnrolledCourse
+            try:
+                StudentEnrolledCourse.objects.create(
+                    student=user,
+                    scheduled_course=scheduled_course
+                )
+            except IntegrityError:
+                error_messages.append(f"El estudiante {user.first_name} {user.last_name} ({user.username}) ya está matriculado en este curso.")
+
+        if error_messages:
+            return Response({'Conflict: Duplicate Enrollment': error_messages}, status=status.HTTP_409_CONFLICT)
 
         return Response({'message': 'Students enrolled successfully'}, status=status.HTTP_201_CREATED)
     

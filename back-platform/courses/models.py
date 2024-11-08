@@ -117,6 +117,7 @@ class StudentEnrolledCourse(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='students')
     scheduled_course = models.ForeignKey(ScheduledCourse, on_delete=models.CASCADE, related_name='scheduled_courses')
     active = models.BooleanField(default=True)
+    end_grade = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
     def __str__(self):
         return str(self.student) + '-' + str(self.scheduled_course)
@@ -126,7 +127,7 @@ class StudentEnrolledCourse(models.Model):
         verbose_name = 'student_enrolled_course'
         verbose_name_plural = 'student_enrolled_course'
         db_table = 'student_enrolled_course'
-
+        unique_together = ('student', 'scheduled_course')
 
 @receiver(pre_save, sender=StudentEnrolledCourse)
 def validate_student_group(sender, instance, **kwargs):

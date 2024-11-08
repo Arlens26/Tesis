@@ -66,7 +66,7 @@ export function StudentEnrolledCourseList(){
         }
 
         // Agregamos los estudiantes matriculados en el curso y grupo
-        acc[courseName][groupId].push({...detail.student, status})
+        acc[courseName][groupId].push({student: detail.student, status: status, scheduled_course: detail.scheduled_course})
         
         return acc
     }, {})

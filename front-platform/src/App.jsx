@@ -23,6 +23,7 @@ import { EnrolledStudent } from './components/EnrolledStudent.jsx';
 import { RadarChart } from './components/RadarChart';
 import { StudentEnrolledCourseList } from './components/StudentEnrolledCourseList.jsx';
 import { EnrolledStudentList } from './components/EnrolledStudentList.jsx';
+import { StudentGradeReport } from './components/StudentGradeReport.jsx';
 
 function App() {
 
@@ -173,6 +174,7 @@ function App() {
                 <li><Link to="/grade-detail">Grade detail</Link></li>
                 <li><Link to="/enrolled-student">Enrolled student</Link></li>
                 <li><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
+                <li><Link to="/student-grade-report">Student grade report</Link></li>
                 <li><Link to="/radar">Radar</Link></li>
             </ul>
           </aside>
@@ -194,6 +196,7 @@ function App() {
               <Route path='enrolled-student' element={<EnrolledStudent/>} />
               <Route path='enrolled-student-list' element={<EnrolledStudentList/>} />
               <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
+              <Route path='student-grade-report' element={<StudentGradeReport/>} />
               <Route path='radar' element={<RadarChart/>} />
             </Routes>
           </main>

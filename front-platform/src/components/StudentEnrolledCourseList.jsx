@@ -155,7 +155,7 @@ export function StudentEnrolledCourseList(){
                 </thead>
                 <tbody>
                 {groups.map((groupDetail) => (
-                        <tr key={groupDetail.id} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                        <tr key={`${course.id}-${groupDetail.id}`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                             <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                 {groupDetail.academic_period.year} - {groupDetail.academic_period.semester}
                             </th>
@@ -168,23 +168,24 @@ export function StudentEnrolledCourseList(){
                             <td className="px-6 py-4">
                                 
                             </td>
-                            <button className='bg-btn-edit opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-                               onClick={() => {
-                                navigate('/enrolled-student-list', { state: { courseName: course.name, groupId: groupDetail.group, students: groupedStudents[course.name][groupDetail.group] } })
-                            }} 
-                            >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-list">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M9 6l11 0" />
-                                        <path d="M9 12l11 0" />
-                                        <path d="M9 18l11 0" />
-                                        <path d="M5 6l0 .01" />
-                                        <path d="M5 12l0 .01" />
-                                        <path d="M5 18l0 .01" />
-                                    </svg>
-                                <span>Estudiantes</span>
-                            </button>
-                            
+                            <td className="px-6 py-4">
+                                <button className='bg-btn-edit opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                                onClick={() => {
+                                    navigate('/enrolled-student-list', { state: { courseName: course.name, groupId: groupDetail.group, students: groupedStudents[course.name][groupDetail.group] } })
+                                }} 
+                                >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-list">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M9 6l11 0" />
+                                            <path d="M9 12l11 0" />
+                                            <path d="M9 18l11 0" />
+                                            <path d="M5 6l0 .01" />
+                                            <path d="M5 12l0 .01" />
+                                            <path d="M5 18l0 .01" />
+                                        </svg>
+                                    <span>Estudiantes</span>
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

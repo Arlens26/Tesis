@@ -238,6 +238,25 @@ class StudentEnrolledCourseView(viewsets.ModelViewSet):
     serializer_class = StudentEnrolledCourseSerializer
     queryset = StudentEnrolledCourse.objects.all()
 
+    @action(detail=False, methods=['put'], url_path='update-status')
+    def update_status(self, request):
+        student_id = request.data.get('student_id')
+        scheduled_course_id = request.data.get('scheduled_course_id')
+
+        try:
+            enrolled_course = StudentEnrolledCourse.objects.get(
+                student_id=student_id,
+                scheduled_course_id=scheduled_course_id
+            )
+            # Invertir el estado del campo active
+            enrolled_course.active = not enrolled_course.active
+            enrolled_course.save()
+        
+            return Response({'message': 'Estado del estudiante actualizado exitosamente'}, status=status.HTTP_200_OK)
+
+        except StudentEnrolledCourse.DoesNotExist:
+            return Response({'error': 'Registro no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 class CreateStudentEnrolledCourseView(viewsets.ModelViewSet):
     serializer_class = StudentEnrolledCourseSerializer
 

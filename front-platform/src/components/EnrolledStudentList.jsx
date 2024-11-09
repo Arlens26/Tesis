@@ -1,6 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom"
+import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
+import { toast } from "sonner"
 
 export function EnrolledStudentList() {
+    
+    const { updateStudentEnrolledStatus } = useEnrolledStudent()
     const { state } = useLocation()
     const { courseName, groupId, students } = state || {}
     console.log('Students: ', students) 
@@ -10,7 +14,7 @@ export function EnrolledStudentList() {
         navigate('/student-enrolled-course-list')
     }
 
-    const updateStudentStatus = (studentId, scheduledCourseId, currentStatus) => {
+    const updateStudentStatus = (name, last_name, studentId, scheduledCourseId, currentStatus) => {
         const newStatus = !currentStatus
 
         const statusData = {
@@ -19,6 +23,13 @@ export function EnrolledStudentList() {
             active: newStatus,
         }
         console.log('Status data: ', statusData)
+        updateStudentEnrolledStatus(statusData)
+          .then(() => {
+            toast.success(`Estado actualizado exitosamente para el estudiante ${name} ${last_name}`)
+          })
+          .catch((error) => {
+            toast.error(`Error al actualizar estado del estudiante: ${name} ${last_name}`, error)
+          })
         //updateStatusStudentEnrolledCourse(statusData)
     }
 
@@ -51,10 +62,10 @@ export function EnrolledStudentList() {
                             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             <button 
                                 type="button" 
-                                className={`focus:outline-none text-white font-medium rounded-full text-sm px-5 py-1 me-2 mb-2 ${item.student.active ? 'bg-red-700 hover:bg-red-800 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900' : 'bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'}`}
-                                onClick={() => updateStudentStatus(item.student.id, item.scheduled_course.id, item.status)}
+                                className={`focus:outline-none text-white font-medium rounded-full text-sm px-5 py-1 me-2 mb-2 ${item.status ? 'bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' : 'bg-red-700 hover:bg-red-800 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900'}`}
+                                onClick={() => updateStudentStatus(item.student.first_name, item.student.last_name, item.student.id, item.scheduled_course.id, item.status)}
                             >
-                                {item.student.active ? 'Inactivo' : 'Activo'}
+                                {item.status ? 'Activo' : 'Inactivo' }
                             </button>
                             </td>
                         </tr>

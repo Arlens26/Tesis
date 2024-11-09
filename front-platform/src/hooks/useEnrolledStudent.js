@@ -5,6 +5,7 @@ export function useEnrolledStudent() {
     //const STUDENTS_ENDPOINT = `http://127.0.0.1:8000/authentication/students/`
     const GRADE_DETAIL_LEARNING_OTUCOME = `http://localhost:8000/activities/all/grade-detail-learning-outcome/`
     const STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/student-enrolled-course/`
+    const UPDATE_STATUS_STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/student-enrolled-course/update-status/`
     const CREATE_STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/create-student-enrolled-course/`
     const STUDENT_GRADE_REPORT = `http://127.0.0.1:8000/courses/all/student-report/`
 
@@ -17,17 +18,6 @@ export function useEnrolledStudent() {
     const [studentGradeReport, setStudentGradeReport] = useState([])
     console.log('Student grade report use: ', studentGradeReport)
 
-    /*const getStudents = () => {
-        fetch(STUDENTS_ENDPOINT)
-        .then(res => res.json())
-        .then(json => {
-            return setStudent(json)
-        })
-        .catch(error => {
-          console.error('Error fetching students:', error)
-      })
-    }*/
-
     const getStudentEnrolledCourse = () => {
         fetch(STUDENT_ENROLLED_COURSE)
         .then(res => res.json())
@@ -38,6 +28,25 @@ export function useEnrolledStudent() {
             console.error('Error feching student enrolled course', error)
         })
     }
+
+    const updateStudentEnrolledStatus = (data) => {
+
+      return fetch(`${UPDATE_STATUS_STUDENT_ENROLLED_COURSE}`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json'
+          }, 
+          body: JSON.stringify(data)
+      })
+      .then(response => {
+          if(response.ok){
+              console.log('Estado del estudiante actualizado exitosamente')
+          }
+          if(!response.ok){
+              throw new Error('Error al actualizar el estado del estudiante')
+          }
+      })
+    } 
 
     const getGradeDetail = () => {
         fetch(GRADE_DETAIL_LEARNING_OTUCOME)
@@ -104,5 +113,5 @@ export function useEnrolledStudent() {
     }
 
     return { getGradeDetail, gradeDetail, updateGradeDetail, getStudentEnrolledCourse, studentEnrolledCourse, 
-      createStudentEnrolledCourse, getStudentGradeReport, studentGradeReport }
+      createStudentEnrolledCourse, getStudentGradeReport, studentGradeReport, updateStudentEnrolledStatus }
 }

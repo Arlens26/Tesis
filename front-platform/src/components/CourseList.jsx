@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { EditIcon, DeleteIcon } from "./Icons"
-//import PropTypes from 'prop-types'
+import { CreateIcon, EditIcon, DeleteIcon, SearchListIcon, ListCheckIcon } from "./Icons"
 import { useUsers } from "../hooks/useUsers"
 import { useCourses } from "../hooks/useCourses"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
@@ -18,12 +17,8 @@ function BtnCreateCourse() {
     <div className='flex justify-end items-center'> 
       <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
       onClick={handleCreateCourse}>
-          <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-plus h-6 w-6 mr-2" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-              <path d="M12 5l0 14" />
-              <path d="M5 12l14 0" />
-          </svg>
-          <span>Crear curso</span>
+          <CreateIcon/>
+          <span className="ml-1">Crear curso</span>
       </button>
     </div>
     )
@@ -39,7 +34,8 @@ function BtnStudentEnrolledCourseList() {
   <div className='flex justify-end items-center'> 
     <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
     onClick={handleCheckStudentEnrolledCourse}>
-        <span>Consultar programación</span>
+        <SearchListIcon/>
+        <span className="ml-1">Consultar programación</span>
     </button>
   </div>
   )
@@ -286,7 +282,10 @@ export function CourseList() {
                           ) : null}
                         </>
                       ) : null}
-                      <span>{curso.name} - {curso.code}</span>
+                      <div className="flex flex-col">
+                        <span>{curso.name} - {curso.code}</span>
+                        <span className="text-xs">Créditos: {curso.credit}</span>
+                      </div>
                       </div>
                       <svg
                         data-accordion-icon
@@ -305,9 +304,9 @@ export function CourseList() {
                     className={`${accordionStates[curso.id] ? 'block' : 'hidden'}`}
                     aria-labelledby={`accordion-collapse-heading-${curso.id}`}
                   >
-                    <div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+                    {/*<div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                       <span>La cantidad de créditos es: {curso.credit}</span>
-                    </div>
+                    </div>*/}
                     {role === 'director' ? (
                       <>
                         <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">             
@@ -317,18 +316,14 @@ export function CourseList() {
                           e.stopPropagation();
                           handleCreateEvaluationVersion(curso.id)
                           }}>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-plus h-6 w-6 mr-2" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                              <path d="M12 5l0 14" />
-                              <path d="M5 12l14 0" />
-                          </svg>
-                          <span>Evaluación versión</span>
+                          <CreateIcon/>
+                          <span className="ml-1">Evaluación versión</span>
                       </button>
                       {hasEvaluationVersion && evaluationVersion.some(ev => ev.course === curso.id) ? (
-                      <>
+                      <div className="grid gap-2">
                         <EvaluationVersionList courseId={curso.id}/>
                         <button 
-                            className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                            className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
                             onClick={(e) =>{
                               e.stopPropagation();
                                // Filtrar las versiones para encontrar la última versión activa
@@ -344,10 +339,10 @@ export function CourseList() {
                                 console.log("No hay ninguna versión activa para este curso.");
                               }
                               }}>
-                              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
-                              <span>Programar curso</span>
+                              <CreateIcon/>
+                              <span className="ml-1">Programar curso</span>
                         </button>
-                      </>
+                      </div>
                     ) : null}
                     </div>
                       </>
@@ -394,8 +389,8 @@ export function CourseList() {
                             }, [])
                             handleActivity(groupedCourse)
                           }}>
-                          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
-                          <span>Configurar evaluación</span>
+                          <CreateIcon/>
+                          <span className="ml-1">Configurar evaluación</span>
                         </button>  
                         <button 
                           className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
@@ -404,17 +399,8 @@ export function CourseList() {
                             //console.log(curso.id)
                             handleActivityRaiting(curso.id, curso.evaluation_version_id)
                           }}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
-                          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-list-check">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M3.5 5.5l1.5 1.5l2.5 -2.5" />
-                            <path d="M3.5 11.5l1.5 1.5l2.5 -2.5" />
-                            <path d="M3.5 17.5l1.5 1.5l2.5 -2.5" />
-                            <path d="M11 6l9 0" />
-                            <path d="M11 12l9 0" />
-                            <path d="M11 18l9 0" />
-                          </svg>
-                          <span>Calificaciones</span>
+                          <ListCheckIcon/>
+                          <span className="ml-1">Calificaciones</span>
                         </button>
                       </div>
                     ): null}

@@ -4,6 +4,8 @@ import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import { useState, useEffect } from "react"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { toast } from "sonner"
+import { GoBackButton } from "./GoBackButton"
+import { SaveIcon } from "./Icons"
 
 export function ScheduledCourse(){
     const { periods, getAcademicPeriods } = useEvaluationVersionCourse()
@@ -61,11 +63,6 @@ export function ScheduledCourse(){
             //console.error('Error al crear curso programado:', error)
          })
     }
-
-    const handleReturn = () => {
-        navigate('/course-list')
-    }
-    
     
     return (
         <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
@@ -103,8 +100,14 @@ export function ScheduledCourse(){
                         </option>
                   ))}
             </select>
-            <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
-            <button type='button' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' onClick={handleReturn}>Volver</button>
+            <div className="flex justify-end gap-2">
+                <button type='submit' 
+                    className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+                        <SaveIcon/>
+                        <span className="ml-1">Guardar</span>
+                </button>
+                <GoBackButton label='Volver' route='/course-list/'/> 
+            </div>
         </form>
     )
 }

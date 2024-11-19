@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { useNavigate } from "react-router-dom"
+import { GoBackButton } from "./GoBackButton"
+import { ListIcon } from "./Icons"
 
 export function StudentEnrolledCourseList(){
     const navigate = useNavigate()
@@ -174,16 +176,8 @@ export function StudentEnrolledCourseList(){
                                     navigate('/enrolled-student-list', { state: { courseName: course.name, groupId: groupDetail.group, students: groupedStudents[course.name][groupDetail.group] } })
                                 }} 
                                 >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-list">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                            <path d="M9 6l11 0" />
-                                            <path d="M9 12l11 0" />
-                                            <path d="M9 18l11 0" />
-                                            <path d="M5 6l0 .01" />
-                                            <path d="M5 12l0 .01" />
-                                            <path d="M5 18l0 .01" />
-                                        </svg>
-                                    <span>Estudiantes</span>
+                                    <ListIcon/>    
+                                    <span className="ml-1">Estudiantes</span>
                                 </button>
                             </td>
                         </tr>
@@ -192,6 +186,9 @@ export function StudentEnrolledCourseList(){
             </table>
             </>
         ))} 
+        <div className="flex justify-end gap-2">
+            <GoBackButton label='Volver' route='/course-list'/>
+        </div>
         </div>
     )
 }

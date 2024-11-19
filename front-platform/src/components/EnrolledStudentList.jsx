@@ -1,6 +1,7 @@
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
+import { GoBackButton } from "./GoBackButton"
 
 export function EnrolledStudentList() {
     
@@ -8,11 +9,6 @@ export function EnrolledStudentList() {
     const { state } = useLocation()
     const { courseName, groupId, students } = state || {}
     console.log('Students: ', students) 
-    const navigate = useNavigate()
-
-    const handleReturn = () => {
-        navigate('/student-enrolled-course-list')
-    }
 
     const updateStudentStatus = (name, last_name, studentId, scheduledCourseId, currentStatus) => {
         const newStatus = !currentStatus
@@ -72,7 +68,9 @@ export function EnrolledStudentList() {
                     ))}
                 </tbody>
             </table>
-            <button type='button' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' onClick={handleReturn}>Volver</button>
+            <div className="flex justify-end gap-2">
+                <GoBackButton label='Volver' route='/student-enrolled-course-list/'/>
+            </div>
         </div>
     )
 }

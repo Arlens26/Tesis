@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { DeleteIcon } from "./Icons"
+import { CreateIcon, DeleteIcon, SaveIcon } from "./Icons"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
+import { GoBackButton } from "./GoBackButton"
 
 export function EvaluationVersionCourseForm() {
     const location = useLocation()
@@ -127,10 +128,6 @@ export function EvaluationVersionCourseForm() {
       const newNumbers = numbers.filter(number => number !== deleteNumber)
       setNumbers(newNumbers)
     }
-
-    const handleReturn = () => {
-      navigate('/course-list')
-  }
   
     return (
       <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
@@ -144,7 +141,7 @@ export function EvaluationVersionCourseForm() {
           <label className="text-sm">Créditos</label>
           <input type="text" placeholder='' name='credit' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           <div className="flex flex-col gap-2">
-                <div> 
+                <div className="grid gap-2"> 
                   <span className="text-sm">Porcentaje de RA:</span>
                   <input
                     type="number"
@@ -157,7 +154,10 @@ export function EvaluationVersionCourseForm() {
                   />
                   <button type='button' onClick={handleAddRa} 
                     disabled={totalPercentage === 100}
-                    className={`bg-btn-create ${totalPercentage === 100 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'} px-20 py-1 rounded-lg text-slate-100`}>Agregar RA</button>
+                    className={`bg-btn-create ${totalPercentage === 100 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'} w-fit px-4 py-1 rounded-lg flex items-center text-slate-100`}>
+                      <CreateIcon/>
+                      <span className="ml-1">Agregar RA</span>
+                  </button>
                   
                 </div>
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -227,8 +227,14 @@ export function EvaluationVersionCourseForm() {
                                   </tr>
                             </tbody>
             </table>
-            <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
-            <button type='button' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' onClick={handleReturn}>Volver</button>
+            <div className="flex justify-end gap-2">
+              <button type='submit' 
+                className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+                  <SaveIcon/>
+                  <span className="ml-1">Guardar</span>
+              </button>
+              <GoBackButton label='Volver' route='/course-list/'/>
+            </div>
           </div>
       </form>
     )

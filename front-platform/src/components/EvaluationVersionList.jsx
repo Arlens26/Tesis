@@ -1,24 +1,26 @@
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import PropTypes from 'prop-types'
+import { EyeIcon } from "./Icons"
 
 export function EvaluationVersionList({ courseId }){
     console.log(courseId)
     const { evaluationVersion } = useEvaluationVersionCourse()
-    console.log(evaluationVersion)
+    console.log('Evaluation version list: ', evaluationVersion)
 
     return(
-        <>
-        <h1>Evaluation Version Data</h1>
-        <div>
-            {evaluationVersion.filter(version => version.course == courseId).map(version => (
+        <div className="grid gap-3"> 
+        <h1>Lista de versiones de evaluación:</h1>
+        {/*<h1>Evaluation Version Data</h1>
+        <div>*/}
+            {/*evaluationVersion.filter(version => version.course == courseId).map(version => (
             <div key={version.id}>
                 <p>Course id prop: {courseId}</p>
                 <p>Version ID: {version.id}</p>
                 <p>Date: {version.initial_date}</p>
                 <p>Course ID: {version.course}</p>
             </div>
-            ))}
-        </div>
+            ))*/}
+        {/*</div>*/}
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
@@ -37,11 +39,7 @@ export function EvaluationVersionList({ courseId }){
                                     <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                         <div className="flex space-x-2">
                                             <button>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-eye">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                                    <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
-                                                    <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"></path>
-                                                </svg>
+                                                <EyeIcon/>
                                             </button>
                                         </div>
                                     </td>
@@ -49,7 +47,7 @@ export function EvaluationVersionList({ courseId }){
                             ))}
                     </tbody>
             </table>
-        </>
+        </div>
     )
 }
 

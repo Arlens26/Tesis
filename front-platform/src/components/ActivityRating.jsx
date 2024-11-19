@@ -3,6 +3,7 @@ import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
 import { useLocation } from "react-router-dom"
 import { AuthContext } from "../context/user"
+import { GoBackButton } from "./GoBackButton"
 
 export function ActivityRating() {
 
@@ -254,7 +255,7 @@ export function ActivityRating() {
   )
 
     return(
-      <>
+      <div className="grid gap-2">
         <span>Calificicaciones</span>
         {filteredByVersion != 0 ? 
         <div>
@@ -276,26 +277,29 @@ export function ActivityRating() {
             </option>
                     ))}
         </select>
-  <div>
-    {filteredByVersion.map((detail) => (
-      <div key={`activityGrade_${detail.id}`}>
-        <span>Activity selected: {selectedActivityId} - </span>
-        <span>{detail.id} - {detail.grade} - {detail.enrolled_course.student.name} - </span>
-        <span>{detail.activity_evaluation_detail.activities.name} - {detail.activity_evaluation_detail.percentage}% - </span>
-        <span>{detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome} - </span>  
-        <span>Versión id: {detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version}</span>      
-      </div>
-    ))}
-  </div>
-  <form className='form flex flex-col gap-4 mt-4'>
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            {renderTableHeaders()}
-            {renderTableRows()}
-            </table>
+        <div>
+          {/*filteredByVersion.map((detail) => (
+            <div key={`activityGrade_${detail.id}`}>
+              <span>Activity selected: {selectedActivityId} - </span>
+              <span>{detail.id} - {detail.grade} - {detail.enrolled_course.student.name} - </span>
+              <span>{detail.activity_evaluation_detail.activities.name} - {detail.activity_evaluation_detail.percentage}% - </span>
+              <span>{detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome} - </span>  
+              <span>Versión id: {detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version}</span>      
+            </div>
+          ))*/}
+        </div>
+        <form className='form flex flex-col gap-4 mt-4'>
+              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              {renderTableHeaders()}
+              {renderTableRows()}
+              </table>
         </form>
+        </div>
+        : <div><span>Aún no hay actividades programadas para este curso</span></div>  
+        }
+        <div className="flex justify-end gap-2">
+          <GoBackButton label='Volver' route='/course-list/'/>
+        </div>
       </div>
-      : <div><span>Aún no hay actividades programadas para este curso</span></div>  
-      }
-      </>
     )
 }

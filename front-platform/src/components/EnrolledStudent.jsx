@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx'
 import { useScheduledCourse } from '../hooks/useSheduledCourse'
 import { useEnrolledStudent } from '../hooks/useEnrolledStudent'
 import { toast } from "sonner"
+import { SaveIcon } from './Icons'
 
 export function EnrolledStudent() {
     const [students, setStudents] = useState([])
@@ -216,13 +217,13 @@ export function EnrolledStudent() {
         <input type="text" placeholder='' name='name_course' value={professorName} disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
         
         <div className='p-4'>
-            {filteredByAcademicPeriod.map((detail) => (
+            {/*filteredByAcademicPeriod.map((detail) => (
                 <div key={`activityGrade_${detail.id}`}>
                     <span>Academic period selected: {selectedPeriodId} - </span>
                     <span>Scheduled course selected: {selectedScheduledCourseId}</span>
                 </div>
-            ))}
-            {
+            ))*/}
+            {/*
                 allScheduledCourse.map((item, index) => (
                     <div key={index}>
                         <span>Grupo: {item.group}</span>
@@ -230,7 +231,7 @@ export function EnrolledStudent() {
                         <span> - Profesor: {item.professor.first_name}</span>
                     </div>
                 ))
-            }
+            */}
         </div>
         
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -306,7 +307,11 @@ export function EnrolledStudent() {
                 <p>No hay estudiantes para mostrar.</p>
             )}
         </div>
-        <button onClick={createStudentEnrolledData} type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Guardar</button>
+        <button onClick={createStudentEnrolledData} type='submit' 
+            className='bg-btn-create opacity-80 w-fit px-20 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+            <SaveIcon/>
+            <span className="ml-1">Guardar</span>
+        </button>
         </>
     )
 }

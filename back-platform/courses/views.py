@@ -362,3 +362,33 @@ class StudentGradeReportView(viewsets.ModelViewSet):
 
         # Retornar el DataFrame agrupado como JSON
         return Response(df_grouped.to_dict(orient="records"), status=status.HTTP_200_OK)
+
+class EvaluationVersionDetailView(viewsets.ModelViewSet):
+    serializer_class = EvaluationVersionDetailSerializer
+    queryset = EvaluationVersionDetail.objects.all()
+
+    @action(detail=False, methods=['get'])
+    def get_details_by_evaluation_version(self, request):
+        evaluation_version_id = request.query_params.get('evaluation_version_id', None)
+
+        if not evaluation_version_id:
+            return Response({'error': 'evaluation_version_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Obtener los detalles de evaluación relacionados con el evaluation version ID
+            evaluation_version_details = EvaluationVersionDetail.objects.filter(evaluation_version_id=evaluation_version_id).prefetch_related('learning_outcome', 'percentage')
+            
+            # Serializar los detalles de evaluación
+            serialized_evaluation_version_details = EvaluationVersionDetailSerializer(evaluation_version_details, many=True).data
+
+            # Construir la respuesta
+            response_data = {
+                'evaluation_version_details': serialized_evaluation_version_details
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    

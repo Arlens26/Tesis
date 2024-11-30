@@ -15,6 +15,7 @@ router.register(r'scheduled-course-detail', views.ScheduledCourseVersionDetailVi
 router.register(r'student-enrolled-course', views.StudentEnrolledCourseView, 'student-enrolled-course')
 router.register(r'create-student-enrolled-course', views.CreateStudentEnrolledCourseView, 'create-student-enrolled-course')
 router.register(r'student-report', views.StudentGradeReportView, basename='student-report')
+router.register(r'evaluation-version-detail', views.EvaluationVersionDetailView, basename='evaluation-version-detail')
 
 urlpatterns = [
     path('all/', include(router.urls))

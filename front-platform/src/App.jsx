@@ -24,6 +24,7 @@ import { RadarChart } from './components/RadarChart';
 import { StudentEnrolledCourseList } from './components/StudentEnrolledCourseList.jsx';
 import { EnrolledStudentList } from './components/EnrolledStudentList.jsx';
 import { StudentGradeReport } from './components/StudentGradeReport.jsx';
+import { EvaluationVersionCourseDetailView } from './components/EvaluationVersionCourseDetailView.jsx';
 
 function App() {
 
@@ -198,6 +199,7 @@ function App() {
               <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
               <Route path='student-grade-report' element={<StudentGradeReport/>} />
               <Route path='radar' element={<RadarChart/>} />
+              <Route path='evaluation-version-course-detail-view' element={<EvaluationVersionCourseDetailView/>} />
             </Routes>
           </main>
           <FooterPage />

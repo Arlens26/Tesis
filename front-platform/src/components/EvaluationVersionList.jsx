@@ -1,11 +1,17 @@
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import PropTypes from 'prop-types'
 import { EyeIcon } from "./Icons"
+import { useNavigate } from "react-router-dom"
 
 export function EvaluationVersionList({ courseId }){
     console.log(courseId)
     const { evaluationVersion } = useEvaluationVersionCourse()
     console.log('Evaluation version list: ', evaluationVersion)
+    const navigate = useNavigate()
+
+    const handleEvaluationVersionDetail = (courseId, versionId, initialDate) => {
+        navigate('/evaluation-version-course-detail-view/', {state: {course_id: courseId, version_id: versionId, initial_date: initialDate}})
+    }
 
     return(
         <div className="grid gap-3"> 
@@ -38,9 +44,9 @@ export function EvaluationVersionList({ courseId }){
                                     <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{ version.end_date == null ? 'Activo' : 'Inactivo' }</td>
                                     <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                         <div className="flex space-x-2">
-                                            <button>
-                                                <EyeIcon/>
-                                            </button>
+                                        <button onClick={() => handleEvaluationVersionDetail(courseId, version.id, version.initial_date)}>
+                                            <EyeIcon />
+                                        </button>
                                         </div>
                                     </td>
                                 </tr>

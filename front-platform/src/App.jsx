@@ -158,7 +158,7 @@ function App() {
     <VersionProvider>
       <ScheduledCourseProvider>
         <Toaster richColors closeButton />
-        <section className={`container ${menuChecked ? 'menu-open' : ''}, min-w-full`}>
+        <section className={`container ${menuChecked ? 'menu-open' : ''} min-w-full`}>
           <HeaderPage />
               <label className='btn-menu' htmlFor={menuCheckId}>
                 <MenuIcon />

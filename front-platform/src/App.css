@@ -1,9 +1,17 @@
+  /*#root {
+    display: grid;
+    min-height: 100dvh;
+    grid-template-rows: 45px 1fr 1fr;
+  }*/
+  
   .container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     /* grid-template-rows: repeat(3, minmax(10px, 1fr));*/
-    grid-template-rows: 45px 1fr 200px;
-    min-height: 100vh;
+    /*grid-template-rows: 45px 1fr 200px;*/
+    min-height: 100dvh;
+    grid-template-rows: 45px 1fr auto;
+    /*min-height: 100vh;*/
     grid-template-areas: 
         "header header sidebar"
         "content content content"
@@ -13,7 +21,7 @@
 
   @media (min-width : 600px) {
     .container {
-        grid-template-columns: 250px 1fr 1fr;
+        grid-template-columns: 250px 1fr auto;
         grid-template-areas: 
         "header header header"
         "sidebar content content"
@@ -41,6 +49,8 @@
   .container header {
     background: white;
     grid-area: header;
+    display: grid;
+    grid-template-rows: 45px 1fr auto; 
     /*display: flex;*/
     /*grid-column: 1/-1;*/
   }
@@ -133,7 +143,7 @@
   }
 
   .btn-menu ~ input:checked ~ .menu-list {
-    height: 100%;
+    height: 100dvh;
     display: none;
   }
 
@@ -154,13 +164,13 @@
     /*grid-column: 1/-1;*/
   }
 
-  footer .info {
+  /*footer .info {
     align-self: baseline;
-  }
+  }*/
 
-  footer .logo {
+  /*footer .logo {
     align-self: center;
-  }
+  }*/
 
   footer ul {
     list-style: none;

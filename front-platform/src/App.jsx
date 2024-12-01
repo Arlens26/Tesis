@@ -9,7 +9,7 @@ import { HeaderPage } from './pages/Header.jsx';
 import { Link, Routes, Route } from 'react-router-dom';
 import { LoginForm } from './components/LoginForm.jsx';
 import { CourseList } from './components/CourseList.jsx';
-import { CourseForm } from './components/CourseForm.jsx';
+import { CourseForm } from './courses/components/CourseForm.jsx';
 import { EvaluationVersionCourseForm } from './components/EvaluationVersionCourseForm.jsx';
 //import { useCourses } from './hooks/useCourses.js';
 import { ScheduledCourse } from './components/ScheduledCourse.jsx';

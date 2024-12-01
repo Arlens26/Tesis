@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useCourses } from "../hooks/useCourses"
+import { useCourses } from "../courses/hooks/useCourses"
 import { useLocation } from "react-router-dom"
 import { GoBackButton } from "./GoBackButton"
 import { useEvaluationVersionDetail } from "../hooks/useEvaluationVersionDetail"

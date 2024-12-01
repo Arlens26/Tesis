@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { CreateIcon, EditIcon, DeleteIcon, SearchListIcon, ListCheckIcon } from "./Icons"
 import { useUsers } from "../hooks/useUsers"
-import { useCourses } from "../hooks/useCourses"
+import { useCourses } from "../courses/hooks/useCourses"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import { EvaluationVersionList } from "./EvaluationVersionList"
 
@@ -64,7 +64,7 @@ const BtnSemesterGroup = ({ onSelectSemester }) => {
 }
 
 export function CourseList() { 
-    const { courses, getCourse, deleteCourse } = useCourses()
+    const { courses, getCourse, deleteCourse, getCourses } = useCourses()
     console.log('Lista de cursos: ', courses)
     const [accordionStates, setAccordionStates] = useState({})
     //const { responseEvaluationVersion } = useEvaluationVersionCourse()
@@ -126,6 +126,7 @@ export function CourseList() {
        deleteCourse(courseId)
        .then(() => {
          toast.success(`El curso ${courseName} ha sido eliminado`)
+         getCourses()
          navigate('/course-list')
         }
        )

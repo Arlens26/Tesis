@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom"
-import { useCourses } from "../hooks/useCourses"
+import { useCourses } from "../courses/hooks/useCourses"
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import { useState, useEffect } from "react"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"

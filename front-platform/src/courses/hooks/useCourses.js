@@ -1,14 +1,13 @@
 import { useEffect, useContext } from 'react';
-import { AuthContext } from '../context/user';
-import { VersionContext } from '../context/evaluationVersion';
+import { AuthContext } from '../../context/user';
+import { VersionContext } from '../../context/evaluationVersion';
+import { getCourseFetch, createCourse, deleteCourse, updateCourse } from '../services/courseService';
 //import responseCursos from '../mocks/curso.json';
 //import { json } from 'react-router-dom';
 
 export function useCourses() {
     
-    const COURSE_ENDPOINT = `http://localhost:8000/courses/all/courses/`
     const EVALUATION_VESION_ENDPOINT = `http://localhost:8000/courses/all/evaluation-version/`
-    
     const { user, course, setCourse, role } = useContext(AuthContext)
     console.log(user)
     const { evaluationVersion, setEvaluationVersion } = useContext(VersionContext)
@@ -103,78 +102,13 @@ export function useCourses() {
       // Si el curso ya está cargado, devuelve directamente el curso
       if (existingCourse) {
           console.log(existingCourse)
-          return Promise.resolve(existingCourse);
+          return Promise.resolve(existingCourse)
       } else {
           // Si el curso no está cargado, realiza la petición para obtenerlo
-          return fetch(`${COURSE_ENDPOINT}${courseId}`)
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error('Curso no obtenido');
-                  }
-                  return response.json();
-              });
+          getCourseFetch(courseId)
       }
   }
   
-
-    const createCourse = (fields) => {
-
-      return fetch(COURSE_ENDPOINT, {
-        method: 'POST', 
-        headers: {
-          'Content-Type' : 'application/json'
-        },
-        body : JSON.stringify(fields)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Error al enviar los datos');
-        }
-        return response.json(); // Resuelve la promesa y parsea el cuerpo de la respuesta como JSON
-      })
-      .then(data => {
-        console.log('Datos enviados exitosamente', data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      })
-    }
-
-    const deleteCourse = (courseId) => {
-
-        return fetch(`${COURSE_ENDPOINT}${courseId}`, {
-            method: 'DELETE'
-        })
-        .then(response => {
-            if(response.ok){
-                getCourses()
-                console.log('Curso eliminado exitosamente')
-            }
-            if(!response.ok){
-                throw new Error('Error al eliminar curso')
-            }
-        })
-    }
-
-    const updateCourse = (courseId, fields) => {
-
-        return fetch(`${COURSE_ENDPOINT}${courseId}/`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            }, 
-            body: JSON.stringify(fields)
-        })
-        .then(response => {
-            if(response.ok){
-                console.log('Curso actualizado exitosamente')
-            }
-            if(!response.ok){
-                throw new Error('Error al actualizar curso')
-            }
-        })
-    }
-
     return { 
         courses: course, getCourses, getCourse, createCourse, deleteCourse, updateCourse
      }

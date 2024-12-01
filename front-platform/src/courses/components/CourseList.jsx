@@ -1,28 +1,12 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { CreateIcon, EditIcon, DeleteIcon, SearchListIcon, ListCheckIcon } from "./Icons"
-import { useUsers } from "../hooks/useUsers"
-import { useCourses } from "../courses/hooks/useCourses"
-import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
-import { EvaluationVersionList } from "./EvaluationVersionList"
-
-function BtnCreateCourse() {
-    const navigate = useNavigate()
-    const handleCreateCourse = () => {
-        navigate('/course')
-      }
-
-    return (
-    <div className='flex justify-end items-center'> 
-      <button className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-      onClick={handleCreateCourse}>
-          <CreateIcon/>
-          <span className="ml-1">Crear curso</span>
-      </button>
-    </div>
-    )
-}
+import { CreateIcon, EditIcon, DeleteIcon, SearchListIcon, ListCheckIcon } from "../../components/Icons"
+import { useUsers } from "../../hooks/useUsers"
+import { useCourses } from "../hooks/useCourses"
+import { useEvaluationVersionCourse } from "../../hooks/useEvaluationVersionCourse"
+import { EvaluationVersionList } from "../../components/EvaluationVersionList"
+import { ButtonCreateCourse } from "./ButtonCreateCourse"
 
 function BtnStudentEnrolledCourseList() {
   const navigate = useNavigate()
@@ -244,7 +228,7 @@ export function CourseList() {
         ) :  null}
         {role === 'director' ? (
           <div className="flex justify-end gap-2">
-            <BtnCreateCourse/>
+            <ButtonCreateCourse/>
             <BtnStudentEnrolledCourseList/>
           </div>
         ) : null}
@@ -410,7 +394,7 @@ export function CourseList() {
             ))}
         </div>
       </section>
-    );
+    )
   }
 
   /*function NoCoursesResults(){

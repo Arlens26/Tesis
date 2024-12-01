@@ -8,7 +8,7 @@ import { FooterPage } from './pages/Footer.jsx';
 import { HeaderPage } from './pages/Header.jsx';
 import { Link, Routes, Route } from 'react-router-dom';
 import { LoginForm } from './components/LoginForm.jsx';
-import { CourseList } from './components/CourseList.jsx';
+import { CourseList } from './courses/components/CourseList.jsx';
 import { CourseForm } from './courses/components/CourseForm.jsx';
 import { EvaluationVersionCourseForm } from './components/EvaluationVersionCourseForm.jsx';
 //import { useCourses } from './hooks/useCourses.js';

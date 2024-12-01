@@ -1,5 +1,5 @@
 import { useEffect, useContext } from 'react';
-import { AuthContext } from '../../context/user';
+import { AuthContext } from '../../auth/context/user';
 import { VersionContext } from '../../context/evaluationVersion';
 import { getCourseFetch, createCourse, deleteCourse, updateCourse } from '../services/courseService';
 //import responseCursos from '../mocks/curso.json';

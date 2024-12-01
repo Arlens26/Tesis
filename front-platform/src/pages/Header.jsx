@@ -1,4 +1,4 @@
-import { useUsers } from "../hooks/useUsers"
+import { useUsers } from "../auth/hooks/useUsers"
 
 export function HeaderPage() {
   const { user, role } = useUsers()
@@ -10,7 +10,7 @@ export function HeaderPage() {
               <img className='logo-img' src="src/images/logo-univalle.png" alt="logo_univalle" />
             </div>
             <div className="col-end-7 col-span-2">
-              <span>{user ? <span>Rol: {role} Bienvenido, {user.username}.{' '}
+              <span>{user ? <span>Rol: {role} Bienvenido, {user.first_name} {user.last_name}.{' '}
                 {profile && (
                   <>
                     {profile.is_professor && <span>Profesor</span>}

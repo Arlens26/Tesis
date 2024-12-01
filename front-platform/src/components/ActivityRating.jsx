@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
 import { useLocation } from "react-router-dom"
-import { AuthContext } from "../context/user"
+import { AuthContext } from "../auth/context/user"
 import { GoBackButton } from "./GoBackButton"
 
 export function ActivityRating() {

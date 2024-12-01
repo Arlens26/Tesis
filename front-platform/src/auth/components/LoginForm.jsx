@@ -1,5 +1,5 @@
 import { useUsers } from '../hooks/useUsers'
-import { LogoUnivalleIcon} from './Icons'
+import { LogoUnivalleIcon} from '../../components/Icons'
 import { useNavigate } from "react-router-dom"
 import { toast } from 'sonner'
 

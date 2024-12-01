@@ -7,19 +7,16 @@ export function SelectRole(){
     const { user, setRole } = useUsers()
     const { profile } = user
     const navigate = useNavigate()
-    //const { getCourses } = useCourses()
 
     const handleClickDirector = () => {
         if(profile.is_director){
             setRole('director')
-            //getCourses()
             navigate('/course-list')
         }
     }
 
     const handleClickProfessor = () => {
         setRole('professor')
-        //getCourses()
         navigate('/course-list')
     }
 
@@ -47,7 +44,7 @@ export function SelectRole(){
                     </ul>
                 </div>
             </div>
-            <span className="grid justify-items-center py-2 text-sm text-gray-500 dark:text-gray-400">Hola, {user.first_name}</span>
+            <span className="grid justify-items-center py-2 text-sm text-gray-500 dark:text-gray-400">Hola, {user.first_name} {user.last_name}</span>
             {/* Contenido role */}
             <div className="grid grid-cols-2 items-center pb-10">
                 <div className="justify-self-center">

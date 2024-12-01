@@ -1,5 +1,5 @@
 import { useContext, useState } from "react"
-import { AuthContext } from "../context/user"
+import { AuthContext } from "../auth/context/user"
 
 export function useActivities(){
     const ACTIVITY_ENDPOINT = `http://localhost:8000/activities/all/activities/`

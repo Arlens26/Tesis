@@ -1,6 +1,6 @@
 import { useState, useContext } from "react"
 import { AuthContext } from '../auth/context/user';
-import { VersionContext } from "../context/evaluationVersion";
+import { VersionContext } from "../evaluation_version/context/evaluationVersion";
 
 export function useScheduledCourse(){
     

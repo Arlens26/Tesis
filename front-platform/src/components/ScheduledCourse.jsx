@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { useCourses } from "../courses/hooks/useCourses"
-import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
+import { useEvaluationVersionCourse } from "../evaluation_version/hooks/useEvaluationVersionCourse"
 import { useState, useEffect } from "react"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { toast } from "sonner"

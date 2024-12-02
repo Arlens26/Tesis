@@ -1,6 +1,6 @@
 import { useEffect, useContext } from 'react';
 import { AuthContext } from '../../auth/context/user';
-import { VersionContext } from '../../context/evaluationVersion';
+import { VersionContext } from '../../evaluation_version/context/evaluationVersion';
 import { getCourseFetch, createCourse, deleteCourse, updateCourse } from '../services/courseService';
 //import responseCursos from '../mocks/curso.json';
 //import { json } from 'react-router-dom';

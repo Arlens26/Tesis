@@ -1,6 +1,6 @@
 import { useEvaluationVersionCourse } from "../hooks/useEvaluationVersionCourse"
 import PropTypes from 'prop-types'
-import { EyeIcon } from "./Icons"
+import { EyeIcon } from "../../components/Icons"
 import { useNavigate } from "react-router-dom"
 
 export function EvaluationVersionList({ courseId }){

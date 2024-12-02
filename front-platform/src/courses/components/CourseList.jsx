@@ -4,8 +4,8 @@ import { toast } from "sonner"
 import { CreateIcon, EditIcon, DeleteIcon, SearchListIcon, ListCheckIcon } from "../../components/Icons"
 import { useUsers } from "../../auth/hooks/useUsers"
 import { useCourses } from "../hooks/useCourses"
-import { useEvaluationVersionCourse } from "../../hooks/useEvaluationVersionCourse"
-import { EvaluationVersionList } from "../../components/EvaluationVersionList"
+import { useEvaluationVersionCourse } from "../../evaluation_version/hooks/useEvaluationVersionCourse"
+import { EvaluationVersionList } from "../../evaluation_version/components/EvaluationVersionList"
 import { ButtonCreateCourse } from "./ButtonCreateCourse"
 
 function BtnStudentEnrolledCourseList() {

@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { CreateIcon, DeleteIcon, SaveIcon } from "../../components/Icons"
@@ -24,20 +24,28 @@ export function EvaluationVersionCourseForm() {
       handleDeleteRa
     } = useLearningOutComes()
   
-    // Extraer el curso del estado de ubicación
+    const [courseData, setCourseData] = useState({
+        name: '',
+        code: '',
+        description: '',
+        credit: ''
+    })
+
     useEffect(() => {
-       const loadCourseData = () => {
-         if (location.state && location.state.course) {
+       if (location.state && location.state.course) {
            const { name, code, description, credit } = location.state.course
-           document.querySelector('input[name="name"]').value = name
-           document.querySelector('input[name="code"]').value = code
-           document.querySelector('textarea[name="description"]').value = description
-           document.querySelector('input[name="credit"]').value = credit
-         }
+           setCourseData({ name, code, description, credit })
        }
-   
-       loadCourseData()
-     }, [location.state])
+    }, [location.state])
+
+    
+    const handleInputChange = (e) => {
+      const { name, value } = e.target
+      setCourseData(prevState => ({
+          ...prevState,
+          [name]: value
+      }))
+    }
   
   
     const handleSubmit = (event) => {
@@ -77,13 +85,41 @@ export function EvaluationVersionCourseForm() {
       <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
           <h1 className="text-xl">Creación evaluación versión curso</h1>
           <label className="text-sm">Nombre del curso</label>
-          <input type="text" placeholder='' name='name' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+          <input 
+            type="text" 
+            placeholder='' 
+            name='name' 
+            value={courseData.name} 
+            onChange={handleInputChange}
+            disabled 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           <label className="text-sm">Código del curso</label>
-          <input type="text" placeholder='' name='code' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+          <input 
+            type="text" 
+            placeholder='' 
+            name='code'
+            value={courseData.code} 
+            onChange={handleInputChange}  
+            disabled 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           <label className="text-sm">Descripción del curso</label>
-          <textarea type="text" placeholder='' name='description' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+          <textarea 
+            type="text" 
+            placeholder='' 
+            name='description'
+            value={courseData.description} 
+            onChange={handleInputChange} 
+            disabled 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           <label className="text-sm">Créditos</label>
-          <input type="text" placeholder='' name='credit' disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+          <input 
+            type="text" 
+            placeholder='' 
+            name='credit' 
+            value={courseData.credit} 
+            onChange={handleInputChange}
+            disabled 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           <div className="flex flex-col gap-2">
                 <div className="grid gap-2"> 
                   <span className="text-sm">Porcentaje de RA:</span>

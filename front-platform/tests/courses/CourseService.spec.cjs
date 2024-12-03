@@ -1,0 +1,64 @@
+const { test, expect } = require('@playwright/test')
+
+const COURSE_ENDPOINT = `http://127.0.0.1:8000/courses/all/courses/`
+
+test.describe('Course API CRUD', () =>{
+    let courseId
+
+    test.beforeAll(async ({ request }) =>{
+        const response = await request.post(COURSE_ENDPOINT, {
+            data: {
+                name: 'Curso de prueba',
+                code: '751175',
+                description: 'Descripción del curso de prueba',
+                credit: '2',
+            }
+        })
+
+        expect(response.ok()).toBeTruthy()
+        const data = await response.json()
+        if (!data.id) {
+            throw new Error('El curso no fue creado correctamente o no se devolvió el ID')
+        }
+        courseId = data.id
+        expect(data.name).toBe('Curso de prueba')
+    })
+
+    test('Obtener un curso', async ({ request }) => {
+        expect(courseId).toBeDefined()
+        const response = await request.get(`${COURSE_ENDPOINT}${courseId}/`)
+
+        expect(response.ok()).toBeTruthy()
+        const data = await response.json()
+        //console.log('Response get: ', data)
+        expect(data.id).toBe(courseId)
+    })
+
+    test('Actualizar un curso', async ({ request }) => {
+        expect(courseId).toBeDefined()
+        const response = await request.put(`${COURSE_ENDPOINT}${courseId}/`, {
+          data: {
+            name: 'Curso actualizado',
+            code: '751188',
+            description: 'Descripción actualizada',
+            credit: '4'
+          }
+        })
+        
+        expect(response.ok()).toBeTruthy()
+        const updatedData = await response.json()
+        expect(updatedData.name).toBe('Curso actualizado')
+      })
+
+      test('Eliminar un curso', async ({ request }) => {
+        expect(courseId).toBeDefined()
+        const response = await request.delete(`${COURSE_ENDPOINT}${courseId}/`)
+        
+        expect(response.ok()).toBeTruthy()
+        
+        // Verificar que el curso ya no existe
+        const getResponse = await request.get(`${COURSE_ENDPOINT}${courseId}/`)
+        expect(getResponse.status()).toBe(404) // Devuelve 404 si no se encuentra
+      })
+
+})

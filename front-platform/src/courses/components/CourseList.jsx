@@ -268,7 +268,7 @@ export function CourseList() {
                         </>
                       ) : null}
                       <div className="flex flex-col">
-                        <span>{curso.name} - {curso.code}</span>
+                        <span>{curso.code} - {curso.name} </span>
                         <span className="text-xs">Créditos: {curso.credit}</span>
                       </div>
                       </div>

@@ -1,0 +1,56 @@
+const ACTIVITY_ENDPOINT = `http://localhost:8000/activities/all/activities/`
+const ACTIVITY_DETAIL_ENDPOINT = `http://localhost:8000/activities/all/activity-evaluation-detail/`
+const ACTIVITY_EVALUATION_VERSION_DETAIL_ENDPOINT = `http://127.0.0.1:8000/activities/all/activity-version-detail/get_details_by_evaluation_version_detail/?evaluation_version_detail_ids=`
+
+export const activityFetch = () => {
+    return fetch(ACTIVITY_ENDPOINT)
+    .then(response => {
+        if(!response.ok){
+            throw new Error('Actividad no obtenida')
+        }
+        return response.json()
+    })
+}
+
+export const activityDetailFetch = () => {
+    return fetch(ACTIVITY_DETAIL_ENDPOINT)
+    .then(response => {
+        if(!response.ok){
+            throw new Error('Detalle de actividad no obtenida')
+        }
+        return response.json()
+    })
+}
+
+export const createActivityFetch = (fields) => {
+    return fetch(ACTIVITY_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json'
+        },
+        body: JSON.stringify(fields)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al enviar los datos de la actividad')
+        }
+        return response.json()
+    })
+}
+
+export const activityEvaluationVersionDetailFetch = (versionDetailIds, token) => {
+    const idsString = versionDetailIds.join(',')
+    return fetch(`${ACTIVITY_EVALUATION_VERSION_DETAIL_ENDPOINT}${idsString}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        return response.json()
+    })
+}

@@ -1,5 +1,5 @@
-import { useActivities } from "../hooks/useActivities"
-import { useScheduledCourse } from "../hooks/useSheduledCourse"
+import { useActivities } from "../../hooks/useActivities"
+import { useScheduledCourse } from "../../hooks/useSheduledCourse"
 
 export function ActivityForm() {
 

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
-import { useScheduledCourse } from "../hooks/useSheduledCourse"
+import { useScheduledCourse } from "../../hooks/useSheduledCourse"
 import { useActivities } from "../hooks/useActivities"
-import { DeleteIcon } from "./Icons"
+import { CreateIcon, DeleteIcon, SettingsCheckIcon } from "../../components/Icons"
 import { toast } from "sonner"
+import { GoBackButton } from "../../components/GoBackButton"
 
 export function Activity() {
 
@@ -29,6 +30,7 @@ export function Activity() {
     const [totalPercentageByActivity, setTotalPercentageByActivity] = useState(0)
     const [totalPercentageByLearningOutCome, setTotalPercentageByLearningOutCome] = useState({})
     console.log('Total percentage by learning outcome: ', totalPercentageByLearningOutCome)
+    const [totalPercentage, setTotalPercentage] = useState(0)
 
     
     const [filteredPercentages, setFilteredPercentages] = useState([])
@@ -36,6 +38,16 @@ export function Activity() {
 
     const filteredDetails = Object.values(evaluationVersionDetail).filter(detail => detail.evaluation_version_id === selectedVersionId)
     console.log('Filtered Details: ', filteredDetails)
+
+    // Calcular la suma de los porcentajes
+    /*useEffect(() => {
+      const total = filteredDetails.reduce((acc, detail) => {
+          const detailId = detail.id
+          const detailPercentage = parseFloat(detail.percentage.percentage) || 0
+          return acc + (totalPercentageByLearningOutCome[detailId] || 0) + detailPercentage
+      }, 0)
+      setTotalPercentage(total)
+    }, [filteredDetails, totalPercentageByLearningOutCome])*/
 
     useEffect(() =>{
         getAllScheduledCourse()
@@ -76,7 +88,8 @@ export function Activity() {
       const buildActivity = () => {
         return newActivities.map(activity => ({
           name: activity.name,
-          description: activity.description
+          description: activity.description,
+          activity_evaluation_detail: []
         }))
       }
 
@@ -87,7 +100,10 @@ export function Activity() {
     }
 
     const handleActivity = () => {
-      setNewActivities([...newActivities, { name: '', description: '', percentages: [] }])
+      setNewActivities([...newActivities, { 
+        name: '', description: '', scheduled_course_id: selectedScheduledId, 
+        activity_evaluation_detail: [] 
+      }])
       console.log('New Activities: ', newActivities)
     }
 
@@ -147,7 +163,9 @@ export function Activity() {
     const calculateTotalPercentage = (percentages) => {
         return Object.values(percentages).reduce((acc, curr) => acc + curr, 0)
     }
-    const totalPercentage = calculateTotalPercentage(totalPercentageByLearningOutCome)
+    //const totalPercentage = calculateTotalPercentage(totalPercentageByLearningOutCome)
+    //const total = calculateTotalPercentage(totalPercentageByLearningOutCome)
+    //setTotalPercentage(total)
 
 // Inicializar el estado
 const [activities, setActivities] = useState([])
@@ -165,18 +183,13 @@ console.log('Unique Activities: ', uniqueActivities)
 
 
 const generateFilteredPercentages = () => {
-  const percentages = filteredActivityEvaluationDetail.filter(detail => {
-    // Compara el id de filteredDetails con version_evaluation_detail_id
-    return filteredDetails.some(filteredDetail => 
-      filteredDetail.id === detail.version_evaluation_detail_id
-    )
-  }).map(detail => {
-    return {
-      activity_id: detail.activity.id || null,
-      version_evaluation_detail_id: detail.version_evaluation_detail_id, 
-      percentage: parseFloat(detail.percentage) || 0 
-    }
-  })
+  const percentages = filteredActivityEvaluationDetail.filter(detail => 
+    filteredDetails.some(filteredDetail => filteredDetail.id === detail.version_evaluation_detail_id)
+  ).map(detail => ({
+    activity_id: detail.activity.id || null,
+    version_evaluation_detail_id: detail.version_evaluation_detail_id, 
+    percentage: parseFloat(detail.percentage) || 0
+  }))
 
   setFilteredPercentages(percentages)
 }
@@ -329,7 +342,7 @@ useEffect(() => {
                                       const detailId = detail.id
                                       const detailPercentage = parseFloat(detail.percentage.percentage).toFixed(0)
                                       const totalPercentage = totalPercentageByLearningOutCome[detailId]
-
+                                      //setTotalPercentage(totalPercentage)
                                       return (
                                           <td key={detailId} className="px-6 py-4">
                                               <span style={{ color: totalPercentage < detailPercentage ? 'red' : 'inherit' }}>
@@ -374,19 +387,25 @@ useEffect(() => {
         </select>
         <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
           <button 
-            className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+            className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
             onClick={handleActivity}
             type="button"
             disabled={totalPercentage === 100}
             >
-            <svg xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-circle-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
-            <span>Crear actividad</span>
+            <CreateIcon/>
+            <span className="ml-1">Crear actividad</span>
           </button>
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             {renderTableHeaders()}
             {renderTableRows()}
-          </table>      
-          <button type='submit' className='bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Configurar Actividad</button>                      
+          </table> 
+          <div className="flex justify-end gap-2">
+            <button type='submit' className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+              <SettingsCheckIcon/>
+              <span className="ml-1">Configurar Actividad</span>
+            </button>                      
+            <GoBackButton label='Volver' route='/course-list/'/>          
+          </div>     
         </form>
       </div>
     )

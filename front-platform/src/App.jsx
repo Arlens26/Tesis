@@ -16,7 +16,7 @@ import { ScheduledCourse } from './scheduled_course/components/ScheduledCourse.j
 import { VersionProvider } from './evaluation_version/context/evaluationVersion.jsx';
 import { SelectRole } from './auth/components/SelectRole.jsx';
 import { Activity } from './activities/components/Activity.jsx';
-import { ScheduledCourseProvider } from './context/scheduledCourse.jsx';
+import { ScheduledCourseProvider } from './scheduled_course/context/scheduledCourse.jsx';
 import { BreadCrumb } from './components/BreadCrumb.jsx';
 import { ActivityRating } from './activities/components/ActivityRating.jsx';
 import { EnrolledStudent } from './components/EnrolledStudent.jsx';

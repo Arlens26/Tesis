@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { useScheduledCourse } from '../hooks/useSheduledCourse'
+import { useScheduledCourse } from '../scheduled_course/hooks/useSheduledCourse'
 import { useEnrolledStudent } from '../hooks/useEnrolledStudent'
 import { toast } from "sonner"
 import { SaveIcon } from './Icons'

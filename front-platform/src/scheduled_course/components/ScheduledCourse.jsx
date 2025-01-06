@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom"
-import { useCourses } from "../courses/hooks/useCourses"
-import { useEvaluationVersionCourse } from "../evaluation_version/hooks/useEvaluationVersionCourse"
+import { useCourses } from "../../courses/hooks/useCourses"
+import { useEvaluationVersionCourse } from "../../evaluation_version/hooks/useEvaluationVersionCourse"
 import { useState, useEffect } from "react"
 import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { toast } from "sonner"
-import { GoBackButton } from "./GoBackButton"
-import { SaveIcon } from "./Icons"
+import { GoBackButton } from "../../components/GoBackButton"
+import { SaveIcon } from "../../components/Icons"
 
 export function ScheduledCourse(){
     const { periods, getAcademicPeriods } = useEvaluationVersionCourse()
@@ -37,7 +37,7 @@ export function ScheduledCourse(){
     const handleSubmit = (event) => {
         event.preventDefault();
         const formData = new FormData(event.target)
-        const fields = Object.fromEntries(formData.entries());
+        const fields = Object.fromEntries(formData.entries())
         fields.version_id = versionId
 
         const academic_period = {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
-import { useScheduledCourse } from "../../hooks/useSheduledCourse"
+import { useScheduledCourse } from "../../scheduled_course/hooks/useSheduledCourse"
 import { useActivities } from "../hooks/useActivities"
 import { CreateIcon, DeleteIcon, SettingsCheckIcon } from "../../components/Icons"
 import { toast } from "sonner"

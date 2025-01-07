@@ -10,7 +10,9 @@ export function StudentGradeReport() {
     const [selectedScheduledCourseId, setSelectedScheduledCourseId] = useState(null)
     console.log('Select scheduled course id: ', selectedScheduledCourseId)
     //const scores = [20, 40, 80, 10]
-
+    const [selectedStudentId, setSelectedStudentId] = useState(null)
+    console.log('student id: ', selectedStudentId)
+    
     useEffect(() => {
         getStudentGradeReport()
     }, [])
@@ -19,6 +21,36 @@ export function StudentGradeReport() {
         .filter(detail => detail.student_enrolled_course.scheduled_course.academic_period.id === Number(selectedPeriodId))
     console.log('Filtered by Academic Period: ', filteredByAcademicPeriod)
 
+    const filteredByScheduledCourse = filteredByAcademicPeriod
+        .filter(detail => detail.student_enrolled_course.scheduled_course.id === Number(selectedScheduledCourseId))
+    console.log('Filtered by Scheduled course: ', filteredByScheduledCourse)
+
+    const uniqueScheduledCourses = Array.from(
+        new Set(filteredByScheduledCourse.map(detail => 
+            detail.student_enrolled_course.scheduled_course.id
+        ))
+    ).map(id => {
+        const courseDetail = filteredByScheduledCourse.find(
+            detail => detail.student_enrolled_course.scheduled_course.id === id
+        )
+        return {
+            id: courseDetail.student_enrolled_course.scheduled_course.id,
+            group: courseDetail.student_enrolled_course.scheduled_course.group,
+            courseName: courseDetail.student_enrolled_course.scheduled_course.evaluation_version.course.name
+        }
+    })
+    console.log('Unique scheduled course: ', uniqueScheduledCourses)
+
+    const uniqueStudents = filteredByScheduledCourse.map(detail => ({
+        id: detail.student_enrolled_course.student.id,
+        firstName: detail.student_enrolled_course.student.first_name,
+        lastName: detail.student_enrolled_course.student.last_name
+    }))
+    console.log('Unique students: ', uniqueStudents)
+    /*const filteredByStudents = filteredByAcademicPeriod
+        .filter(detail => detail.student_enrolled_course.scheduled_course.id === Number(selectedScheduledCourseId))
+    console.log('filtered students: ', filteredByStudents)*/
+
     useEffect(() => {
         if (filteredByAcademicPeriod.length > 0 && !selectedScheduledCourseId) {
             setSelectedScheduledCourseId(filteredByAcademicPeriod[0].id)
@@ -26,18 +58,10 @@ export function StudentGradeReport() {
     }, [filteredByAcademicPeriod])
 
     useEffect(() => {
-        if (filteredByAcademicPeriod.length > 0) {
-            const selectedCourse = filteredByAcademicPeriod.find(detail => detail.student_enrolled_course.scheduled_course.id === Number(selectedScheduledCourseId))
-            console.log('Select course: ', selectedCourse)
-            //console.log('Select scheduled: ',selectedScheduledCourseId)
-            /*if (selectedCourse) {
-                const professor = selectedCourse.professor
-                setProfessorName(`${professor.first_name} ${professor.last_name}`)
-            } else {
-                setProfessorName('') // Limpiar si no se encuentra
-            }*/
+        if (filteredByAcademicPeriod.length > 0 && !selectedScheduledCourseId) {
+            setSelectedScheduledCourseId(filteredByAcademicPeriod[0].student_enrolled_course.scheduled_course.id)
         }
-    }, [filteredByAcademicPeriod, selectedScheduledCourseId])
+    }, [filteredByAcademicPeriod])
 
     // Filtrar los cursos por periodo académico seleccionado
     const uniqueAcademicPeriod = Array.from(
@@ -142,13 +166,31 @@ const codes = Array.from(new Set(filteredByAcademicPeriod.flatMap(item =>
                 //onChange={handleScheduledCourseChange}
             >
                 <option disabled>Seleccione el curso programado</option>
-                {filteredByAcademicPeriod &&
-                    filteredByAcademicPeriod.map((detail, index) => (
+                {uniqueScheduledCourses.map((course) => (
                     <option
-                        key={`set_scheduled_course_${index}`}
-                        value={detail.student_enrolled_course.scheduled_course.id}
+                        key={`set_scheduled_course_${course.id}`}
+                        value={course.id}
                     >
-                        {`${detail.student_enrolled_course.scheduled_course.group} - ${detail.student_enrolled_course.scheduled_course.evaluation_version.course.name}`}
+                        {`${course.group} - ${course.courseName}`}
+                    </option>
+                ))}
+            </select>
+
+            <label className="text-sm">Estudiante:</label>
+            <select 
+                id="student" 
+                name='students'
+                value={selectedStudentId || ''}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={(e) => setSelectedStudentId(e.target.value)}
+            >
+                <option value="">Todos los estudiantes</option>
+                {uniqueStudents.map((student) => (
+                    <option
+                        key={`student_${student.id}`}
+                        value={student.id}
+                    >
+                        {`${student.firstName} ${student.lastName}`}
                     </option>
                 ))}
             </select>

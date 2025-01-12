@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import LineChart from "./LineChart"
+import RadarChart from "./RadarChart"
 
 export function StudentGradeReport() {
     const { getStudentGradeReport, studentGradeReport } = useEnrolledStudent()
@@ -24,6 +25,10 @@ export function StudentGradeReport() {
     const filteredByScheduledCourse = filteredByAcademicPeriod
         .filter(detail => detail.student_enrolled_course.scheduled_course.id === Number(selectedScheduledCourseId))
     console.log('Filtered by Scheduled course: ', filteredByScheduledCourse)
+
+    const filteredByStudent = filteredByScheduledCourse
+        .filter(detail => detail.student_enrolled_course.student.id === Number(selectedStudentId))
+    console.log('Filtered by Student: ', filteredByStudent)
 
     const uniqueScheduledCourses = Array.from(
         new Set(filteredByScheduledCourse.map(detail => 
@@ -101,22 +106,51 @@ export function StudentGradeReport() {
     //const dataPoints = filteredByAcademicPeriod[0].grade_detail_learning_outcome.map(item => item.grade)
 
     // Extraer todos los códigos únicos
-const codes = Array.from(new Set(filteredByAcademicPeriod.flatMap(item => 
+const codes = Array.from(new Set(filteredByScheduledCourse.flatMap(item => 
     item.grade_detail_learning_outcome.map(grade => grade.code)
   )))
+  // Asegurarse de que haya al menos 5 etiquetas
+const minLabels = 5
+const generateAdditionalLabels = (existingCodes, count) => {
+    const lastCode = existingCodes.length > 0 ? existingCodes[existingCodes.length - 1] : null
+    const base = lastCode ? lastCode.slice(0, lastCode.lastIndexOf('.') + 1) : '' // 'R.A.'
+    const start = lastCode ? parseInt(lastCode.split('.').pop()) + 1 : 1 // Siguiente número
+
+    return Array.from({ length: count }, (_, index) => `${base}${start + index}`)
+}
+
+// Si hay menos de 5 códigos, completar con etiquetas dinámicas
+if (codes.length < minLabels) {
+    const additionalCount = minLabels - codes.length
+    const additionalLabels = generateAdditionalLabels(codes, additionalCount)
+    codes.push(...additionalLabels)
+}
+
   console.log('codes: ', codes)
   
   // Crear un objeto que asocie cada código con las calificaciones de cada estudiante
-  const studentGrades = filteredByAcademicPeriod.map(item => {
+  const studentGrades = filteredByStudent.map(item => {
       const grades = {}
       item.grade_detail_learning_outcome.forEach(grade => {
           grades[grade.code] = grade.grade
       })
+      const activities = {}
+      item.activity_evaluation_detail.forEach(activity => {
+        activities[activity.activity_id] = activity.name
+      })
+      const average = {}
+      item.ra_statistics.forEach(ra => {
+        average[ra.learning_outcome_code] = ra.average
+      })
       return {
           studentName: `${item.student_enrolled_course.student.first_name} ${item.student_enrolled_course.student.last_name}`,
           grades: grades,
+          activity: activities,
+          average: average,
+          promedio: item.average,
       }
   })
+  console.log('student grades: ', studentGrades)
   
   // Crear datasets para cada código basado en las calificaciones de los estudiantes
   /*const datasets = codes.map(code => ({
@@ -126,14 +160,105 @@ const codes = Array.from(new Set(filteredByAcademicPeriod.flatMap(item =>
       data: studentGrades.map(student => student.grades[code] || 0), // Asignar 0 si no hay calificación
       fill: true,
   }))*/
-    const datasets = studentGrades.map(student => ({
+      const raMetrics = {}
+        const overallMetrics = {}
+
+        // Obtener estadísticas del estudiante
+        filteredByStudent.forEach(student => {
+            student.ra_statistics.forEach(stat => {
+                const raCode = stat.learning_outcome_code
+                if (!raMetrics[raCode]) {
+                    raMetrics[raCode] = {
+                        Promedio: 0,
+                        Media: 0,
+                        Mediana: 0,
+                        count: 0 // Para calcular el promedio si es necesario
+                    }
+                }
+                raMetrics[raCode].Promedio += stat.average
+                raMetrics[raCode].Media += stat.mean
+                raMetrics[raCode].Mediana += stat.median
+                raMetrics[raCode].count += 1 // Contar cuántas veces se sumó
+            });
+        })
+
+        // Calcular el promedio dividiendo por el conteo
+        Object.keys(raMetrics).forEach(raCode => {
+            raMetrics[raCode].Promedio /= raMetrics[raCode].count;
+            raMetrics[raCode].Media /= raMetrics[raCode].count;
+            raMetrics[raCode].Mediana /= raMetrics[raCode].count;
+        })
+
+        // Obtener estadísticas generales del grupo
+        filteredByScheduledCourse.forEach(detail => {
+            detail.overall_ra_statistics.forEach(stat => {
+                const raCode = stat.ra_code;
+                if (!overallMetrics[raCode]) {
+                    overallMetrics[raCode] = {
+                        Promedio: stat.average,
+                        Media: stat.mean,
+                        Mediana: stat.median,
+                    }
+                }
+            })
+        })
+        const metrics = ['Promedio', 'Media', 'Mediana']
+        const datasets = []
+        
+        // Agregar datasets para el estudiante
+        metrics.forEach(metric => {
+            const data = Object.keys(raMetrics).map(raCode => raMetrics[raCode][metric]);
+            datasets.push({
+                label: `${metric} - ${filteredByStudent.length > 0 ? filteredByStudent[0].student_enrolled_course.student.first_name : 'Estudiante'}`,
+                backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
+                borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
+                data,
+                fill: true,
+            })
+        })
+        
+        // Agregar datasets para el grupo
+        metrics.forEach(metric => {
+            const data = Object.keys(overallMetrics).map(raCode => overallMetrics[raCode][metric]);
+            datasets.push({
+                label: `Grupo - ${metric}`,
+                backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
+                borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
+                data,
+                fill: true,
+            })
+        })
+        
+    /*const datasets = studentGrades.map(student => ({
         label: student.studentName,
         backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
         borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
         data: codes.map(code => student.grades[code] || 0), // Asignar 0 si no hay calificación
         fill: true,
-    }))
+    }))*/
   console.log('datasets', datasets)
+
+   // Extraer todos las actividades únicas
+const activities = Array.from(new Set(filteredByScheduledCourse.flatMap(item => 
+    item.activity_evaluation_detail.map(activity => activity.description)
+  )))
+  console.log('activities: ', activities)
+
+  const minVertices = 5
+  const datasetRadar = activities.map(activity => {
+    const activityData = studentGrades.map(student => 
+        codes.map(code => student.grades[code] || 0)).flat()
+    const additionalData = Array(Math.max(0, minVertices - activityData.length)).fill(0)
+    const completeData = [...activityData, ...additionalData]
+    return {
+        label: activity, // Cada label será una de las métricas
+        backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
+        borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
+        data: completeData,
+        fill: true,
+    }
+})
+console.log('dataset radar: ', datasetRadar)
   
   //const labels = studentGrades.map(student => student.studentName)
 
@@ -196,6 +321,9 @@ const codes = Array.from(new Set(filteredByAcademicPeriod.flatMap(item =>
             </select>
             <div>
                 <LineChart labels={codes} datasets={datasets} />
+            </div>
+            <div>
+                <RadarChart labels={codes} datasets={datasetRadar} />
             </div>
         </>
     )

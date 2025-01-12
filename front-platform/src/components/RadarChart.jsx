@@ -1,14 +1,14 @@
 import { Radar } from 'react-chartjs-2'
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js'
-import { useEffect, useState } from 'react'
-import { useEnrolledStudent } from '../hooks/useEnrolledStudent'
+//import { useEffect, useState } from 'react'
+//import { useEnrolledStudent } from '../hooks/useEnrolledStudent'
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
-export function RadarChart() {
-  const { getStudents, students } = useEnrolledStudent()
+export function RadarChart({ labels, datasets }) {
+  //const { getStudents, students } = useEnrolledStudent()
 
-  const courses = [
+  /*const courses = [
     'IA',
     'Redes y servidores',
     'PLN',
@@ -16,21 +16,43 @@ export function RadarChart() {
     'Simulación computacional',
     'FLP',
     'KDD'
-  ]
+  ]*/
 
-  const exampleGrades = [
+  /*const exampleGrades = [
     [3.3, 4.0, 2.7, 3.8, 4.5, 3.2, 4.0],
     [2.8, 3.6, 4.2, 2.9, 3.7, 4.1, 3.3],
     [4.0, 3.9, 3.5, 4.2, 3.8, 3.7, 4.4]
-  ]
+  ]*/
 
-  const [chartData, setChartData] = useState(null)
+  /*const [chartData, setChartData] = useState(null)
 
   useEffect(() => {
     getStudents()
-  }, [])
+  }, [])*/
 
-  useEffect(() => {
+  const chartData = {
+    labels: labels,
+    datasets: datasets,
+  }
+
+  const options = {
+    elements: {
+      line: {
+        borderWidth: 3,
+      },
+    },
+    scales: {
+      r: {
+        angleLines: {
+          display: true,
+        },
+        suggestedMin: 0,
+        suggestedMax: 5,
+      },
+    },
+  }
+
+  /*useEffect(() => {
     if (students.length > 0) {
       const data = {
         labels: courses,
@@ -65,13 +87,16 @@ export function RadarChart() {
         suggestedMax: 5
       }
     }
-  }
+  }*/
 
   if (!chartData) return <div>Loading...</div>
 
   return (
     <div style={{ width: '500px', margin: '0 auto' }}>
+      <h2 style={{ textAlign: "center" }}>Gráfico de Radar</h2>
       <Radar data={chartData} options={options} />
     </div>
   )
 }
+
+export default RadarChart

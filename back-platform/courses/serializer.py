@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail, StudentEnrolledCourse
 from activities.serializer import ActivityEvaluationDetail, GradeDetailLearningOutCome
+from statistics import mean, median
 
 class CourseSerializer(serializers.ModelSerializer):
     #period = serializers.StringRelatedField()
@@ -139,71 +140,211 @@ class StudentEnrolledCourseSerializer(serializers.ModelSerializer):
 
 class StudentGradeReportSerializer(serializers.Serializer):
     student_enrolled_course = StudentEnrolledCourseSerializer(source='*')
-    #final_grade = serializers.DecimalField(max_digits=5, decimal_places=2)
     activity_evaluation_detail = serializers.SerializerMethodField()
     grade_detail_learning_outcome = serializers.SerializerMethodField()
+    ra_statistics = serializers.SerializerMethodField()
+    overall_ra_statistics = serializers.SerializerMethodField()
+    average = serializers.SerializerMethodField()
+    median = serializers.SerializerMethodField()
+    mean = serializers.SerializerMethodField()
+
+    def get_overall_ra_statistics(self, obj):
+        # Obtén todas las notas y detalles de aprendizaje para el curso programado
+        grade_details = GradeDetailLearningOutCome.objects.filter(
+            activity_evaluation_detail__activity__scheduled_course=obj.scheduled_course
+        )
+        
+        # Agrupar por código de RA
+        ra_statistics = {}
+        for grade_detail in grade_details:
+            ra_code = grade_detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome.code
+            percentage = grade_detail.activity_evaluation_detail.percentage
+            grade = grade_detail.grade
+            
+            if ra_code not in ra_statistics:
+                ra_statistics[ra_code] = {"grades": [], "percentages": []}
+            
+            ra_statistics[ra_code]["grades"].append(grade)
+            ra_statistics[ra_code]["percentages"].append(percentage)
+
+        # Calcular estadísticas por RA
+        overall_statistics = []
+        for ra_code, data in ra_statistics.items():
+            grades = data["grades"]
+            percentages = data["percentages"]
+            
+            # Promedio de notas por RA considerando el porcentaje
+            total_weighted = sum(grade * (percentage / 100) for grade, percentage in zip(grades, percentages))
+            total_percentage = sum(percentages) / 100  # Convertir a escala 1
+            
+            # Normalización al máximo posible
+            max_possible = total_percentage * 5
+            average = (total_weighted / max_possible) * 100 if max_possible > 0 else 0
+
+            # Calcular la mediana
+            normalized_grades = [(grade / 5) * percentage for grade, percentage in zip(grades, percentages)]
+            sorted_grades = sorted(normalized_grades)
+            median = (
+                sorted_grades[len(sorted_grades) // 2]
+                if len(sorted_grades) % 2 == 1
+                else (sorted_grades[len(sorted_grades) // 2 - 1] + sorted_grades[len(sorted_grades) // 2]) / 2
+            )
+            
+            # Calcular la media simple
+            mean = sum(normalized_grades) / len(normalized_grades) if normalized_grades else 0
+
+            overall_statistics.append({
+                "ra_code": ra_code,
+                "average": round(average, 2),
+                "median": round(median, 2),
+                "mean": round(mean, 2)
+            })
+
+        return overall_statistics
+
+    def get_ra_statistics(self, obj):
+        enrolled_course_id = obj.id
+        grade_details = GradeDetailLearningOutCome.objects.filter(enrolled_course_id=enrolled_course_id)
+        learning_outcomes_statistics = {}
+
+        # Organizar las notas por RA
+        for grade_detail in grade_details:
+            learning_outcome_code = grade_detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome.code
+            activity = grade_detail.activity_evaluation_detail.activity
+            percentage = grade_detail.activity_evaluation_detail.percentage / 100  # Convertir a decimal
+            
+            if learning_outcome_code not in learning_outcomes_statistics:
+                learning_outcomes_statistics[learning_outcome_code] = {
+                    "grades": [],
+                    "max_scores": [],
+                }
+
+            # Agregar notas y puntajes ponderados
+            learning_outcomes_statistics[learning_outcome_code]["grades"].append(grade_detail.grade * percentage)
+            learning_outcomes_statistics[learning_outcome_code]["max_scores"].append(5 * percentage)
+
+        # Calcular estadísticas para cada RA
+        learning_outcomes_results = []
+        for ra_code, stats in learning_outcomes_statistics.items():
+            grades = stats["grades"]
+            max_scores = stats["max_scores"]
+
+            if grades and max_scores:
+                average = sum(grades) / sum(max_scores) * 100  # Promedio ponderado como porcentaje
+                median_value = median([grade / max_score * 100 for grade, max_score in zip(grades, max_scores)])
+                mean_value = mean([grade / max_score * 100 for grade, max_score in zip(grades, max_scores)])
+            else:
+                average = median_value = mean_value = 0
+
+            learning_outcomes_results.append({
+                "learning_outcome_code": ra_code,
+                "average": round(average, 2),
+                "median": round(median_value, 2),
+                "mean": round(mean_value, 2),
+            })
+
+        return learning_outcomes_results
 
     def get_activity_evaluation_detail(self, obj):
-        # Obtener actividades y sus detalles de evaluación
         activity_evaluation_detail = ActivityEvaluationDetail.objects.filter(
             activity__scheduled_course=obj.scheduled_course
         )
-        
-        activities_data = []
-        for activity_detail in activity_evaluation_detail:
-            activities_data.append({
-                'id': activity_detail.id,
-                "activity_id": activity_detail.activity.id,
-                "name": activity_detail.activity.name,
-                "description": activity_detail.activity.description,
-                "learning_outcome": activity_detail.version_evaluation_detail.learning_outcome.code,
-                "percentage": activity_detail.percentage
-            })
-        
+        activities_data = [
+            {
+                'id': detail.id,
+                "activity_id": detail.activity.id,
+                "name": detail.activity.name,
+                "description": detail.activity.description,
+                "learning_outcome": detail.version_evaluation_detail.learning_outcome.code,
+                "percentage": detail.percentage
+            }
+            for detail in activity_evaluation_detail
+        ]
         return activities_data if activity_evaluation_detail else None
-    
+
     def get_grade_detail_learning_outcome(self, obj):
-        # Filtrar los detalles de calificación por enrolled_course_id
         enrolled_course_id = obj.id  
         grade_details = GradeDetailLearningOutCome.objects.filter(
             enrolled_course_id=enrolled_course_id
         )
         
-        # Construir una lista para almacenar los detalles de calificación
         grade_details_data = []
         for grade_detail in grade_details:
+            activity = grade_detail.activity_evaluation_detail.activity  # Relación con la actividad
             grade_details_data.append({
                 "activity_evaluation_detail_id": grade_detail.activity_evaluation_detail.id,
                 "grade": grade_detail.grade,
-                "code": grade_detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome.code, 
-            })
-        
+                "code": grade_detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome.code,
+                "activity": {
+                    "id": activity.id,
+                    "name": activity.name,
+                    "description": activity.description
+                }
+        })
         return grade_details_data if grade_details_data else None
-    
+
+    def get_average(self, obj):
+        grades, max_scores = self._get_grades_and_max_scores(obj)
+        if max_scores:
+            weighted_average = sum(grades) / sum(max_scores) * 100  # Escalado a porcentaje
+            return round(weighted_average, 2)  # Redondear a dos decimales
+        return 0
+
+    def get_median(self, obj):
+        grades, max_scores = self._get_grades_and_max_scores(obj)
+        if max_scores:
+            # Normalizar notas y calcular la mediana
+            normalized_grades = [grade / max_score * 100 for grade, max_score in zip(grades, max_scores)]
+            return round(median(normalized_grades), 2)  # Redondear a dos decimales
+        return 0
+
+    def get_mean(self, obj):
+        grades, max_scores = self._get_grades_and_max_scores(obj)
+        if max_scores:
+            # Normalizar notas y calcular la media
+            normalized_grades = [grade / max_score * 100 for grade, max_score in zip(grades, max_scores)]
+            return round(mean(normalized_grades), 2)  # Redondear a dos decimales
+        return 0
+
+    def _get_grades_and_max_scores(self, obj):
+        grades = []
+        max_scores = []
+        grade_details = self.get_grade_detail_learning_outcome(obj)
+        activity_details = self.get_activity_evaluation_detail(obj)
+        
+        if grade_details and activity_details:
+            # Crear un diccionario de actividades por ID para acceder rápidamente al porcentaje
+            activity_map = {activity['id']: activity for activity in activity_details}
+            
+            for grade_detail in grade_details:
+                activity_id = grade_detail['activity']['id']
+                percentage = activity_map[activity_id]['percentage'] / 100  # Convertir a decimal
+                
+                # Calcular la nota acumulada y el puntaje máximo
+                grades.append(grade_detail['grade'] * percentage)
+                max_scores.append(5 * percentage)  # 5 es la nota máxima por actividad
+        
+        return grades, max_scores
+
     def to_representation(self, instance):
-        # Llamamos a la representación predeterminada
         representation = super().to_representation(instance)
-        # Filtramos si están vacíos
         if not representation.get('activity_evaluation_detail'):
             representation.pop('activity_evaluation_detail', None)
         if not representation.get('grade_detail_learning_outcome'):
             representation.pop('grade_detail_learning_outcome', None)
         return representation
 
-    #def to_representation(self, instance):
-        ## Estructura el JSON final para consolidar toda la información
-       # representation = super().to_representation(instance)
-        
-        # Información adicional como el cálculo de la nota final puede realizarse aquí
-        #final_grade = GradeDetailLearningOutCome.objects.filter(
-        #    enrolled_course=instance
-        #).aggregate(final_grade=Sum('grade'))['final_grade']
-        
-        #representation['final_grade'] = final_grade
-        #return representation
-
     class Meta:
-        fields = ['student_enrolled_course', 'activity_evaluation_detail', 'grade_detail_learning_outcome']
+        fields = [
+            'student_enrolled_course',
+            'activity_evaluation_detail',
+            'grade_detail_learning_outcome',
+            'ra_statistics',
+            'overall_ra_statistics',
+            'average',
+            'median',
+            'mean',
+        ]
 
 
 #class ScheduledCourseDetailSerializer(serializers.ModelSerializer):

@@ -207,19 +207,26 @@ if (codes.length < minLabels) {
         
         // Agregar datasets para el estudiante
         metrics.forEach(metric => {
-            const data = Object.keys(raMetrics).map(raCode => raMetrics[raCode][metric]);
-            datasets.push({
-                label: `${metric} - ${filteredByStudent.length > 0 ? filteredByStudent[0].student_enrolled_course.student.first_name : 'Estudiante'}`,
-                backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
-                borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
-                data,
-                fill: true,
-            })
+            const data = Object.keys(raMetrics).map(raCode => raMetrics[raCode][metric])
+            
+            // Verifica si selectedStudentId es null o undefined y si hay estudiantes filtrados
+            const studentName = filteredByStudent.length > 0 ? filteredByStudent[0].student_enrolled_course.student.first_name : '';
+            const label = selectedStudentId != null && studentName ? `${metric} - ${studentName}` : ''
+        
+            if(label != ''){
+                datasets.push({
+                    label: label,
+                    backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
+                    borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
+                    data,
+                    fill: true,
+                })
+            }
         })
         
         // Agregar datasets para el grupo
         metrics.forEach(metric => {
-            const data = Object.keys(overallMetrics).map(raCode => overallMetrics[raCode][metric]);
+            const data = Object.keys(overallMetrics).map(raCode => overallMetrics[raCode][metric])
             datasets.push({
                 label: `Grupo - ${metric}`,
                 backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
@@ -240,23 +247,35 @@ if (codes.length < minLabels) {
 
    // Extraer todos las actividades únicas
 const activities = Array.from(new Set(filteredByScheduledCourse.flatMap(item => 
-    item.activity_evaluation_detail.map(activity => activity.description)
+    item.activity_evaluation_detail.map(activity => activity.name)
   )))
   console.log('activities: ', activities)
-
-  const minVertices = 5
-  const datasetRadar = activities.map(activity => {
-    const activityData = studentGrades.map(student => 
-        codes.map(code => student.grades[code] || 0)).flat()
-    const additionalData = Array(Math.max(0, minVertices - activityData.length)).fill(0)
-    const completeData = [...activityData, ...additionalData]
-    return {
-        label: activity, // Cada label será una de las métricas
-        backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
-        borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
-        data: completeData,
-        fill: true,
-    }
+  /*const activityNames = Array.from(new Set(filteredByScheduledCourse.flatMap(item => 
+    item.activity_evaluation_detail.map(activity => activity.name)
+    )))*/
+  //const minVertices = 5
+  const datasetRadar = filteredByStudent.flatMap(item => {
+    const activityGroups = item.activity_evaluation_detail.reduce((acc, activity) => {
+        acc[activity.name] = acc[activity.name] || {}
+        codes.forEach(code => {
+            const gradeDetail = item.grade_detail_learning_outcome.find(
+                grade => grade.activity.id === activity.activity_id && grade.code === code
+            )
+            acc[activity.name][code] = gradeDetail ? gradeDetail.grade : 0
+        })
+        return acc
+    }, {})
+    console.log('activity groups: ', activityGroups)
+    return Object.keys(activityGroups).map(activityName => {
+        const data = codes.map(code => activityGroups[activityName][code])
+        return {
+            label: activityName, // Nombre de la actividad
+            backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`,
+            borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`,
+            data,
+            fill: true,
+        }
+    })
 })
 console.log('dataset radar: ', datasetRadar)
   

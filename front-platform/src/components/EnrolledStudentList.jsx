@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
 import { GoBackButton } from "./GoBackButton"
+import { useEffect, useState } from "react"
 
 export function EnrolledStudentList() {
     
@@ -9,6 +10,14 @@ export function EnrolledStudentList() {
     const { state } = useLocation()
     const { courseName, groupId, students } = state || {}
     console.log('Students: ', students) 
+
+    const [localStudents, setLocalStudents] = useState([])
+
+    useEffect(() => {
+        if (students) {
+            setLocalStudents(students);
+        }
+    }, [students])
 
     const updateStudentStatus = (name, last_name, studentId, scheduledCourseId, currentStatus) => {
         const newStatus = !currentStatus
@@ -22,6 +31,13 @@ export function EnrolledStudentList() {
         updateStudentEnrolledStatus(statusData)
           .then(() => {
             toast.success(`Estado actualizado exitosamente para el estudiante ${name} ${last_name}`)
+            setLocalStudents(prevStudents =>
+                prevStudents.map(student =>
+                    student.student.id === studentId
+                        ? { ...student, status: newStatus }
+                        : student
+                )
+            )
           })
           .catch((error) => {
             toast.error(`Error al actualizar estado del estudiante: ${name} ${last_name}`, error)
@@ -49,7 +65,7 @@ export function EnrolledStudentList() {
                     </tr>
                 </thead>
                 <tbody>
-                    {students?.map((item, index) => (
+                    {localStudents?.map((item, index) => (
                         <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                             <td className="px-6 py-4">{item.student.id}</td>
                             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">

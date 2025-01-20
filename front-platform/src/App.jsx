@@ -23,7 +23,7 @@ import { EnrolledStudent } from './students/components/EnrolledStudent.jsx';
 import { RadarChart } from './components/RadarChart';
 import { StudentEnrolledCourseList } from './students/components/StudentEnrolledCourseList.jsx';
 import { EnrolledStudentList } from './students/components/EnrolledStudentList.jsx';
-import { StudentGradeReport } from './components/StudentGradeReport.jsx';
+import { StudentGradeReport } from './students/components/StudentGradeReport.jsx';
 import { EvaluationVersionCourseDetailView } from './components/EvaluationVersionCourseDetailView.jsx';
 
 function App() {

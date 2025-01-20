@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { useEnrolledStudent } from "../students/hooks/useEnrolledStudent"
-import LineChart from "./LineChart"
-import RadarChart from "./RadarChart"
+import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
+import LineChart from "../../components/LineChart"
+import RadarChart from "../../components/RadarChart"
 
 export function StudentGradeReport() {
     const { getStudentGradeReport, studentGradeReport } = useEnrolledStudent()
@@ -202,7 +202,7 @@ if (codes.length < minLabels) {
                 }
             })
         })
-        const metrics = ['Promedio', 'Media', 'Mediana']
+        const metrics = ['Promedio', 'Mediana']
         const datasets = []
         
         // Agregar datasets para el estudiante

@@ -45,3 +45,42 @@ class VersionDetailActivityEvaluationView(viewsets.ViewSet):
             return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)    
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ActivitySettingView(viewsets.ViewSet):
+    
+    @action(detail=False, methods=['post'])
+    def save_activities(self, request):
+        data = request.data
+        
+        for item in data:
+            activity_data = item.get('activities')
+            evaluation_data = item.get('activity_evaluation_detail')
+
+            activity_id = evaluation_data.get('activity_id', None)
+            
+            if activity_id is not None:
+                # Actualizar actividad existente
+                try:
+                    activity = Activity.objects.get(id=activity_id)
+                    activity.name = activity_data['name']
+                    activity.description = activity_data['description']
+                    activity.scheduled_course_id = activity_data['scheduled_course']
+                    activity.save()
+                except Activity.DoesNotExist:
+                    return Response({'error': f'Activity with id {activity_id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                # Crear nueva actividad
+                activity_serializer = ActivitySerializer(data=activity_data)
+                if activity_serializer.is_valid():
+                    activity = activity_serializer.save()
+                else:
+                    return Response(activity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            evaluation_detail = ActivityEvaluationDetail(
+                version_evaluation_detail_id=evaluation_data['version_evaluation_detail_id'],
+                activity=activity,
+                percentage=evaluation_data['percentage']
+            )
+            evaluation_detail.save()
+
+        return Response({'status': 'success'}, status=status.HTTP_201_CREATED)

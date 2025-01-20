@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { useScheduledCourse } from '../scheduled_course/hooks/useSheduledCourse'
+import { useScheduledCourse } from '../../scheduled_course/hooks/useSheduledCourse'
 import { useEnrolledStudent } from '../hooks/useEnrolledStudent'
 import { toast } from "sonner"
-import { SaveIcon } from './Icons'
+import { SaveIcon } from '../../components/Icons'
 
 export function EnrolledStudent() {
     const [students, setStudents] = useState([])

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
+import { useEnrolledStudent } from "../students/hooks/useEnrolledStudent"
 import LineChart from "./LineChart"
 import RadarChart from "./RadarChart"
 

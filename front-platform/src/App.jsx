@@ -17,12 +17,12 @@ import { VersionProvider } from './evaluation_version/context/evaluationVersion.
 import { SelectRole } from './auth/components/SelectRole.jsx';
 import { Activity } from './activities/components/Activity.jsx';
 import { ScheduledCourseProvider } from './scheduled_course/context/scheduledCourse.jsx';
-import { BreadCrumb } from './components/BreadCrumb.jsx';
+//import { BreadCrumb } from './components/BreadCrumb.jsx';
 import { ActivityRating } from './activities/components/ActivityRating.jsx';
-import { EnrolledStudent } from './components/EnrolledStudent.jsx';
+import { EnrolledStudent } from './students/components/EnrolledStudent.jsx';
 import { RadarChart } from './components/RadarChart';
-import { StudentEnrolledCourseList } from './components/StudentEnrolledCourseList.jsx';
-import { EnrolledStudentList } from './components/EnrolledStudentList.jsx';
+import { StudentEnrolledCourseList } from './students/components/StudentEnrolledCourseList.jsx';
+import { EnrolledStudentList } from './students/components/EnrolledStudentList.jsx';
 import { StudentGradeReport } from './components/StudentGradeReport.jsx';
 import { EvaluationVersionCourseDetailView } from './components/EvaluationVersionCourseDetailView.jsx';
 

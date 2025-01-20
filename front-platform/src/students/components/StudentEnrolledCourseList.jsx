@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { useNavigate } from "react-router-dom"
-import { GoBackButton } from "./GoBackButton"
-import { ListIcon } from "./Icons"
+import { GoBackButton } from "../../components/GoBackButton"
+import { ListIcon } from "../../components/Icons"
 //import useBreadCrumb from "../hooks/useBreadCrumb"
 
 export function StudentEnrolledCourseList(){

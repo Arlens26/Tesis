@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom"
 import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
-import { GoBackButton } from "./GoBackButton"
+import { GoBackButton } from "../../components/GoBackButton"
 import { useEffect, useState } from "react"
 
 export function EnrolledStudentList() {

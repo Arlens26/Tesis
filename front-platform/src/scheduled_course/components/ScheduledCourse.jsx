@@ -6,6 +6,7 @@ import { useScheduledCourse } from "../hooks/useSheduledCourse"
 import { toast } from "sonner"
 import { GoBackButton } from "../../components/GoBackButton"
 import { SaveIcon } from "../../components/Icons"
+//import useBreadCrumb from "../../hooks/useBreadCrumb"
 
 export function ScheduledCourse(){
     const { periods, getAcademicPeriods } = useEvaluationVersionCourse()
@@ -17,6 +18,8 @@ export function ScheduledCourse(){
     const [courseName, setCourseName] = useState('')
     const [courseCode, setCourseCode] = useState('')
     const navigate = useNavigate()
+
+    //useBreadCrumb('Programación curso', '/scheduled-course')
 
     useEffect(()=>{
         getAcademicPeriods()

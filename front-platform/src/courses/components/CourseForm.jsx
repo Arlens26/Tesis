@@ -4,6 +4,7 @@ import { useCourses } from "../hooks/useCourses"
 import { toast } from "sonner"
 import { GoBackButton } from "../../components/GoBackButton"
 import { SaveIcon, UpdateIcon } from "../../components/Icons"
+//import useBreadCrumb from "../../hooks/useBreadCrumb"
 
 export function CourseForm() {
 
@@ -19,6 +20,9 @@ export function CourseForm() {
         description: '',
         credit: ''
     })
+
+    
+    //useBreadCrumb(`${courseData.name ? 'Actualizar':'Crear'}` + ' curso', '/course')
 
     useEffect(() => {
       if (location.state && location.state.courseData) {
@@ -68,7 +72,7 @@ export function CourseForm() {
   
     return (
         <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
-          <span>{paramsId ? 'Actualizar curso':'Crear curso'}</span>
+          <span>{courseData.name ? 'Actualizar curso':'Crear curso'}</span>
           
           <input 
             type="text" 
@@ -100,8 +104,8 @@ export function CourseForm() {
           <div className="flex justify-end gap-2">
             <button type='submit' 
               className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg hover:opacity-100 flex items-center text-slate-100'>
-                {paramsId ? <UpdateIcon/> : <SaveIcon/>}
-                <span className="ml-1">{paramsId ? 'Actualizar':'Guardar'}</span>
+                {courseData.name ? <UpdateIcon/> : <SaveIcon/>}
+                <span className="ml-1">{courseData.name ? 'Actualizar':'Guardar'}</span>
             </button>
             <GoBackButton label='Volver' route='/course-list/'/>
           </div>

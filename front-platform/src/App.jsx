@@ -180,7 +180,7 @@ function App() {
             </ul>
           </aside>
           <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''}`}>
-            <BreadCrumb/>
+            {/*<BreadCrumb/>*/}
             <Routes>
               <Route path='/' element={<main/>} />
               <Route path='/login' element={<LoginForm/>} />

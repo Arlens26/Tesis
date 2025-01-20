@@ -7,6 +7,7 @@ import { useCourses } from "../hooks/useCourses"
 import { useEvaluationVersionCourse } from "../../evaluation_version/hooks/useEvaluationVersionCourse"
 import { EvaluationVersionList } from "../../evaluation_version/components/EvaluationVersionList"
 import { ButtonCreateCourse } from "./ButtonCreateCourse"
+//import useBreadCrumb from "../../hooks/useBreadCrumb"
 
 function BtnStudentEnrolledCourseList() {
   const navigate = useNavigate()
@@ -61,6 +62,9 @@ export function CourseList() {
     const { role } = useUsers()
   
     const navigate = useNavigate()
+
+    
+   // useBreadCrumb('Lista de cursos', '/course-list')
 
     //const hasEvaluationVersion = responseEvaluationVersion.length > 0
     console.log(hasEvaluationVersion)
@@ -207,7 +211,7 @@ export function CourseList() {
       const previousSemesterCourses = getPreviousSemesterCourses(courses)
       filterCourses(newSearch, currentSemesterCourses, previousSemesterCourses)
     }
-  
+    
     return (
       <section>
         <form className="max-w-md mx-auto m-2" onSubmit={handleSubmit}>   

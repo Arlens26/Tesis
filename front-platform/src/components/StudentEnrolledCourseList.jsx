@@ -3,12 +3,15 @@ import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { useNavigate } from "react-router-dom"
 import { GoBackButton } from "./GoBackButton"
 import { ListIcon } from "./Icons"
+//import useBreadCrumb from "../hooks/useBreadCrumb"
 
 export function StudentEnrolledCourseList(){
     const navigate = useNavigate()
     const { getStudentEnrolledCourse, studentEnrolledCourse } = useEnrolledStudent()
     console.log('Lista de student enrolled: ',studentEnrolledCourse)
     const [selectedPeriodId, setSelectedPeriodId] = useState()
+
+    //useBreadCrumb('Programación académica', '/student-enrolled-course-list')
 
     useEffect(() =>{
         getStudentEnrolledCourse()

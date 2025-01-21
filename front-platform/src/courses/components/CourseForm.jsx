@@ -73,13 +73,13 @@ export function CourseForm() {
     return (
       <div className="flex justify-center">
           <form className='form flex flex-col gap-4 max-w-md w-full p-0' onSubmit={handleSubmit}>
-              <span>{courseData.name ? 'Actualizar curso' : 'Crear curso'}</span>
+              <span>{paramsId ? 'Actualizar curso' : 'Crear curso'}</span>
 
               <input 
                   type="text" 
                   placeholder='Nombre del curso' 
                   name='name' 
-                  value={courseData.name}
+                  value={paramsId}
                   onChange={handleChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
@@ -111,8 +111,8 @@ export function CourseForm() {
               <div className="flex justify-end gap-2">
                   <button type='submit' 
                       className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg hover:opacity-100 flex items-center text-slate-100'>
-                      {courseData.name ? <UpdateIcon /> : <SaveIcon />}
-                      <span className="ml-1">{courseData.name ? 'Actualizar' : 'Guardar'}</span>
+                      {paramsId ? <UpdateIcon /> : <SaveIcon />}
+                      <span className="ml-1">{paramsId ? 'Actualizar' : 'Guardar'}</span>
                   </button>
                   <GoBackButton label='Volver' route='/course-list/'/>
               </div>

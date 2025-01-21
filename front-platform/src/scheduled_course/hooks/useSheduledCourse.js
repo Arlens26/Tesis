@@ -47,7 +47,7 @@ export function useScheduledCourse(){
     }
 
     const createScheduledCourse = (fields) => {
-      createScheduledCourseFetch(fields)
+      return createScheduledCourseFetch(fields)
         .then(data => console.log('Datos enviados exitosamente', data))
         .catch(error => {
            throw new Error('Error al crear un curso programado', error)

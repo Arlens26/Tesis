@@ -82,7 +82,7 @@ export function EvaluationVersionCourseForm() {
     }
   
     return (
-      <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
+      <form className='form flex flex-col gap-4 p-6' onSubmit={handleSubmit}>
           <h1 className="text-xl">Creación evaluación versión curso</h1>
           <label className="text-sm">Nombre del curso</label>
           <input 
@@ -120,7 +120,7 @@ export function EvaluationVersionCourseForm() {
             onChange={handleInputChange}
             disabled 
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
                 <div className="grid gap-2"> 
                   <span className="text-sm">Porcentaje de RA:</span>
                   <input
@@ -182,7 +182,7 @@ export function EvaluationVersionCourseForm() {
                                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     />
                                     </td>
-                                    <td className="flex items-center gap-1">
+                                    <td className="text-center">
                                       <button type='button' 
                                       onClick={ () => handleDeleteRa(index)}
                                       className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'>

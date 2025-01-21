@@ -20,7 +20,6 @@ import { ScheduledCourseProvider } from './scheduled_course/context/scheduledCou
 //import { BreadCrumb } from './components/BreadCrumb.jsx';
 import { ActivityRating } from './activities/components/ActivityRating.jsx';
 import { EnrolledStudent } from './students/components/EnrolledStudent.jsx';
-import { RadarChart } from './components/RadarChart';
 import { StudentEnrolledCourseList } from './students/components/StudentEnrolledCourseList.jsx';
 import { EnrolledStudentList } from './students/components/EnrolledStudentList.jsx';
 import { StudentGradeReport } from './students/components/StudentGradeReport.jsx';
@@ -160,7 +159,7 @@ function App() {
         <Toaster richColors closeButton />
         <section className={`container ${menuChecked ? 'menu-open' : ''} min-w-full`}>
           <HeaderPage />
-              <label className='btn-menu' htmlFor={menuCheckId}>
+              <label className='btn-menu mt-1 ml-4' htmlFor={menuCheckId}>
                 <MenuIcon />
               </label>
               <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
@@ -176,10 +175,9 @@ function App() {
                 <li><Link to="/enrolled-student">Enrolled student</Link></li>
                 <li><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
                 <li><Link to="/student-grade-report">Student grade report</Link></li>
-                <li><Link to="/radar">Radar</Link></li>
             </ul>
           </aside>
-          <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''}`}>
+          <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''} p-14`}>
             {/*<BreadCrumb/>*/}
             <Routes>
               <Route path='/' element={<main/>} />
@@ -198,7 +196,6 @@ function App() {
               <Route path='enrolled-student-list' element={<EnrolledStudentList/>} />
               <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
               <Route path='student-grade-report' element={<StudentGradeReport/>} />
-              <Route path='radar' element={<RadarChart/>} />
               <Route path='evaluation-version-course-detail-view' element={<EvaluationVersionCourseDetailView/>} />
             </Routes>
           </main>

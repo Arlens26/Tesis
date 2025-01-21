@@ -338,7 +338,7 @@ export function CourseList() {
                     ): null}
 
                     {role === 'professor' ? (
-                      <div className="flex gap-2">
+                      <div className="flex mt-4 mb-4 gap-2">
                         <button 
                           className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
                           onClick={(e) =>{

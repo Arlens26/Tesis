@@ -14,6 +14,7 @@ export default {
         'link' : '#cd1f32',
         'btn-create' : '#599876',
         'btn-edit' : '#3D5AA2',
+        'text-primary': '#C20E1A',
       }
     },
   },

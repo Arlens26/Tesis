@@ -74,15 +74,16 @@ export function CourseForm() {
       <div className="flex justify-center">
           <form className='form flex flex-col gap-4 max-w-md w-full p-0' onSubmit={handleSubmit}>
               <span>{paramsId ? 'Actualizar curso' : 'Crear curso'}</span>
-
+              <label className="text-sm">Nombre del curso</label>
               <input 
                   type="text" 
                   placeholder='Nombre del curso' 
                   name='name' 
-                  value={paramsId}
+                  value={courseData.name}
                   onChange={handleChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
+              <label className="text-sm">Código del curso</label>
               <input 
                   type="text" 
                   placeholder='Código del curso' 
@@ -91,6 +92,7 @@ export function CourseForm() {
                   onChange={handleChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
+              <label className="text-sm">Descripción</label>
               <textarea 
                   placeholder='Descripción' 
                   name='description' 
@@ -99,6 +101,7 @@ export function CourseForm() {
                   onChange={handleChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
+              <label className="text-sm">Créditos</label>
               <input 
                   type="number" 
                   placeholder='Créditos' 

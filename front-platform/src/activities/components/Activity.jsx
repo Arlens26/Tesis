@@ -3,8 +3,9 @@ import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../../scheduled_course/hooks/useSheduledCourse"
 import { useActivities } from "../hooks/useActivities"
 import { CreateIcon, DeleteIcon, SettingsCheckIcon } from "../../components/Icons"
-import { toast } from "sonner"
+//import { toast } from "sonner"
 import { GoBackButton } from "../../components/GoBackButton"
+import { useActivityPercentage } from "../hooks/useActivityPercentage"
 
 export function Activity() {
 
@@ -12,6 +13,7 @@ export function Activity() {
       evaluationVersionDetail, newScheduledCourse, getAllScheduledCourse } = useScheduledCourse()
     const { getActivityEvaluationVersionDetail, activityEvaluationDetail } = useActivities()
     console.log('Activity evaluation detail: ', activityEvaluationDetail)
+
     console.log('New scheduled course estado: ', newScheduledCourse)
     console.log('Evaluation version detail: ', evaluationVersionDetail) 
     const location = useLocation()
@@ -26,48 +28,68 @@ export function Activity() {
     console.log('Grouped course: ', groupedCourse) 
     const [evaluationDetailIds, setEvaluationDetailIds] = useState([])
     console.log('Ids evaluation version detail: ', evaluationDetailIds)
+   
 
-    const [totalPercentageByActivity, setTotalPercentageByActivity] = useState(0)
-    const [totalPercentageByLearningOutCome, setTotalPercentageByLearningOutCome] = useState({})
-    console.log('Total percentage by learning outcome: ', totalPercentageByLearningOutCome)
-    const [totalPercentage, setTotalPercentage] = useState(0)
+    const filteredActivityEvaluationDetail = Object.values(activityEvaluationDetail).filter(detail => 
+        detail.activity.scheduled_course_id === Number(selectedScheduledId))
+    console.log('Filtered Activity evaluation detail: ', filteredActivityEvaluationDetail)
 
-    
-    const [filteredPercentages, setFilteredPercentages] = useState([])
-    console.log('Filtered percentages: ', filteredPercentages)
 
     const filteredDetails = Object.values(evaluationVersionDetail).filter(detail => detail.evaluation_version_id === selectedVersionId)
     console.log('Filtered Details: ', filteredDetails)
 
-    // Calcular la suma de los porcentajes
-    /*useEffect(() => {
-      const total = filteredDetails.reduce((acc, detail) => {
-          const detailId = detail.id
-          const detailPercentage = parseFloat(detail.percentage.percentage) || 0
-          return acc + (totalPercentageByLearningOutCome[detailId] || 0) + detailPercentage
-      }, 0)
-      setTotalPercentage(total)
-    }, [filteredDetails, totalPercentageByLearningOutCome])*/
+    const { uniqueActivities, 
+      handlePercentageChange,
+      filteredPercentages,
+      totalPercentageByActivity,
+      totalPercentageByLearningOutCome
+    } = useActivityPercentage(selectedScheduledId, selectedVersionId, filteredDetails, filteredActivityEvaluationDetail)
+    console.log('filtered percentages: ', filteredPercentages)
 
-    useEffect(() =>{
-        getAllScheduledCourse()
-        const evaluationVersionIds = groupedCourse.flatMap(course => 
-            course.details.map(detail => detail.evaluation_version_id)
-        )
-        const filteredEvaluationVersionIds = evaluationVersionIds.filter(id => id !== undefined)
-        console.log('Filtered evaluation version ids: ', filteredEvaluationVersionIds)
-        console.log('course period', groupedCourse[0].period)
-        getEvaluationVersionDetail(filteredEvaluationVersionIds, groupedCourse[0].period)
-        getActivityEvaluationVersionDetail(evaluationDetailIds)
-    }, [selectedScheduledId])
+    
+    // Calcular el total del porcentaje
+    const [totalPercentage, setTotalPercentage] = useState(0)
+    console.log(totalPercentage)
 
     useEffect(() => {
       if(newScheduledCourse && newScheduledCourse.length > 0 && selectedScheduledId == null){
         setSelectedScheduledId(newScheduledCourse[0].id)
         console.log('Scheduled course ID seleccionado:', selectedScheduledId)
+        const firstScheduledCourse = newScheduledCourse[0]
+        if (selectedVersionId == null) {
+            setSelectedVersionId(firstScheduledCourse.evaluation_version_id)
+        }
       }
-    }, [newScheduledCourse])
+    }, [newScheduledCourse, selectedScheduledId, selectedVersionId])
 
+    // Actualizar el estado del porcentagje total general si es necesario
+    useEffect(() => {
+    const totalActivityPercentage = 
+      Object.values(totalPercentageByActivity).reduce((acc, val) => acc + val, 0)
+    setTotalPercentage(totalActivityPercentage)
+    }, [totalPercentageByActivity])
+
+    useEffect(() => {
+      getAllScheduledCourse()
+      const evaluationVersionIds = groupedCourse.flatMap(course => 
+          course.details.map(detail => detail.evaluation_version_id)
+      )
+      console.log(evaluationVersionIds)
+      const filteredEvaluationVersionIds = evaluationVersionIds.filter(id => id !== undefined)
+      console.log(filteredActivityEvaluationDetail)
+      if (filteredEvaluationVersionIds.length > 0) {
+          getEvaluationVersionDetail(filteredEvaluationVersionIds, groupedCourse[0].period)
+          // Actualizar evaluationDetailIds si es necesario
+          //setEvaluationDetailIds(filteredEvaluationVersionIds) 
+      }
+  }, [selectedScheduledId, groupedCourse])
+
+  useEffect(() => {
+    if (evaluationDetailIds.length > 0) {
+        getActivityEvaluationVersionDetail(evaluationDetailIds)
+    }
+}, [evaluationDetailIds])
+    
     const handleSelectChange = (e) => {
       const selectedId = e.target.value
       console.log('Selected Id: ', selectedId)
@@ -89,6 +111,7 @@ export function Activity() {
         return newActivities.map(activity => ({
           name: activity.name,
           description: activity.description,
+          scheduled_course_id: selectedScheduledId,
           activity_evaluation_detail: []
         }))
       }
@@ -102,101 +125,22 @@ export function Activity() {
     const handleActivity = () => {
       setNewActivities([...newActivities, { 
         name: '', description: '', scheduled_course_id: selectedScheduledId, 
-        activity_evaluation_detail: [] 
+        activity_evaluation_detail: filteredDetails.map((detail) => ({
+          version_evaluation_detail_id: detail.id,
+          percentage: 0,
+        })),
       }])
       console.log('New Activities: ', newActivities)
     }
 
-    useEffect(() => {
-      if(filteredPercentages){
-        const initialTotals = filteredPercentages.reduce((acc, item) => {
-          acc[item.activity_id] = (acc[item.activity_id] || 0) + item.percentage
-          return acc
-        }, {})
-        setTotalPercentageByActivity(initialTotals)
-      }
-    }, [filteredPercentages])
-
-    const handlePercentageChange = (activityId, versionDetailId, value, newPercentage) => {
-      const updatedPercentage = parseFloat(value) || 0
-      const maxAllowedPercentage = filteredDetails.find(detail => detail.id === versionDetailId)?.percentage || 0
-      console.log('Max allowed percentage: ', maxAllowedPercentage)
-    
-      setFilteredPercentages(prevPercentages => {
-        const updatedPercentages = prevPercentages.map(percentage => {
-          if (percentage.activity_id === activityId && percentage.version_evaluation_detail_id === versionDetailId) {
-            return {
-              ...percentage,
-              percentage: updatedPercentage,
-            }
-          }
-          return percentage
-        })
-    
-        const totalForLearningOutcome = updatedPercentages
-          .filter(item => item.version_evaluation_detail_id === versionDetailId)
-          .reduce((sum, item) => sum + item.percentage, 0)
-        console.log('Total for learingOutcome: ', totalForLearningOutcome)
-        if (totalForLearningOutcome > maxAllowedPercentage.percentage) {
-          toast.error(`La suma de los porcentajes para este RA no puede exceder ${maxAllowedPercentage.percentage}%`)
-          return prevPercentages // Evita la actualización si la suma excede el límite
-        }
-    
-        setTotalPercentageByLearningOutCome(prevState => ({
-          ...prevState,
-          [versionDetailId]: totalForLearningOutcome,
-        }))
-    
-        setTotalPercentageByActivity(prevState => ({
-          ...prevState,
-          [activityId]: (prevState[activityId] || 0) - newPercentage + updatedPercentage,
-        }))
-    
-        return updatedPercentages
-      })
-    }
-    
-
-   /* const calculateTotalPercentage = (percentages) => {
-      return percentages.reduce((acc, percentage) => acc + parseInt(percentage || 0), 0)
-    }*/
     const calculateTotalPercentage = (percentages) => {
         return Object.values(percentages).reduce((acc, curr) => acc + curr, 0)
     }
-    //const totalPercentage = calculateTotalPercentage(totalPercentageByLearningOutCome)
-    //const total = calculateTotalPercentage(totalPercentageByLearningOutCome)
-    //setTotalPercentage(total)
 
 // Inicializar el estado
 const [activities, setActivities] = useState([])
 console.log('Activities: ', activities)
-const filteredActivityEvaluationDetail = Object.values(activityEvaluationDetail).filter(detail => 
-  detail.activity.scheduled_course_id === Number(selectedScheduledId))
-console.log('Filtered Activity evaluation detail: ', filteredActivityEvaluationDetail)
 
-const uniqueActivities = Array.from(
-    new Set(filteredActivityEvaluationDetail.map((detail) => detail.activity.id))
-  ).map((id) => {
-    return filteredActivityEvaluationDetail.find((detail) => detail.activity.id === id)
-})
-console.log('Unique Activities: ', uniqueActivities)
-
-
-const generateFilteredPercentages = () => {
-  const percentages = filteredActivityEvaluationDetail.filter(detail => 
-    filteredDetails.some(filteredDetail => filteredDetail.id === detail.version_evaluation_detail_id)
-  ).map(detail => ({
-    activity_id: detail.activity.id || null,
-    version_evaluation_detail_id: detail.version_evaluation_detail_id, 
-    percentage: parseFloat(detail.percentage) || 0
-  }))
-
-  setFilteredPercentages(percentages)
-}
-
-useEffect(() => {
-  generateFilteredPercentages()
-}, [selectedScheduledId])
 
   // Handle input changes
   const handleInputChange = (activityId, field, value) => {
@@ -299,25 +243,16 @@ useEffect(() => {
                                             setNewActivities(updatedActivities)
                                         }} />
                                     </td>
-                                    {/*Object.entries(learningOutComes).map((learningOutcomeId, learningOutComeIndex) => (
-                                        <td key={learningOutcomeId} className="px-6 py-4">
-                                            <input
-                                                name={`new_learning_percentage${learningOutComeIndex}_${learningOutcomeId}`}
-                                                type="text"
-                                                value={activity.percentages[learningOutComeIndex] || ''}
-                                                onChange={(e) => {
-                                                    const updatedActivities = [...newActivities];
-                                                    if (!updatedActivities[activityIndex].percentages) {
-                                                        updatedActivities[activityIndex].percentages = []
-                                                    }
-                                                    updatedActivities[activityIndex].percentages[learningOutComeIndex] = e.target.value
-                                                    setNewActivities(updatedActivities)
-                                                    handlePercentage(activityIndex, learningOutComeIndex, e.target.value, true)
-                                                }}
-                                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                            />
-                                        </td>
-                                    ))*/}
+                                     {filteredDetails.map((detail) =>(
+                                      <td key={detail.id} className="px-6 py-4">
+                                        <input 
+                                          type="number"
+                                          //value={percentageValue}
+                                          //onChange={(e) => handlePercentageChange(activityDetail.activity.id, detail.id, e.target.value, percentageValue)}
+                                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        />
+                                      </td>
+                                      ))}
                                     <td className="px-6 py-4">
                                         {calculateTotalPercentage(activity.percentages || [])}%
                                     </td>
@@ -341,11 +276,11 @@ useEffect(() => {
                                     {filteredDetails.map((detail) => {
                                       const detailId = detail.id
                                       const detailPercentage = parseFloat(detail.percentage.percentage).toFixed(0)
-                                      const totalPercentage = totalPercentageByLearningOutCome[detailId]
+                                      const currentTotalPercentage = totalPercentageByLearningOutCome[detailId]
                                       //setTotalPercentage(totalPercentage)
                                       return (
                                           <td key={detailId} className="px-6 py-4">
-                                              <span style={{ color: totalPercentage < detailPercentage ? 'red' : 'inherit' }}>
+                                              <span style={{ color: currentTotalPercentage < detailPercentage ? 'red' : 'inherit' }}>
                                                   {detailPercentage}%
                                               </span>
                                           </td>
@@ -400,7 +335,7 @@ useEffect(() => {
             {renderTableRows()}
           </table> 
           <div className="flex justify-end gap-2">
-            <button type='submit' className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+            <button disabled={totalPercentage <= 99} type='submit' className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
               <SettingsCheckIcon/>
               <span className="ml-1">Configurar Actividad</span>
             </button>                      

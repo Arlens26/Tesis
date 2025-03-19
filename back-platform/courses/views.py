@@ -3,7 +3,7 @@ from rest_framework.response import Response
 #from rest_framework.views import APIView
 from .serializer import CourseSerializer, AcademicPeriodSerializer, EvaluationVersionSerializer, ScheduledCourseSerializer, LearningOutComeSerializer, PercentageSerializer, EvaluationVersionDetailSerializer, StudentEnrolledCourseSerializer, StudentGradeReportSerializer
 from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail, StudentEnrolledCourse
-from activities.models import ActivityEvaluationDetail, GradeDetailLearningOutCome
+from activities.models import ActivityEvaluationDetail, GradeDetailLearningOutCome, Activity
 
 #from django.http import JsonResponse
 from datetime import datetime
@@ -276,6 +276,7 @@ class CreateStudentEnrolledCourseView(viewsets.ModelViewSet):
         student_group, created = Group.objects.get_or_create(name='student')
 
         error_messages = []  
+        enrolled_courses_ids = []
 
         for student_data in students_data:
             # Crear o recuperar el usuario basado en el email
@@ -296,15 +297,32 @@ class CreateStudentEnrolledCourseView(viewsets.ModelViewSet):
 
             # Intentar crear la instancia de StudentEnrolledCourse
             try:
-                StudentEnrolledCourse.objects.create(
+                enrolled_course, created = StudentEnrolledCourse.objects.get_or_create(
                     student=user,
                     scheduled_course=scheduled_course
                 )
+                enrolled_courses_ids.append(enrolled_course.id)
+
             except IntegrityError:
                 error_messages.append(f"El estudiante {user.first_name} {user.last_name} ({user.username}) ya está matriculado en este curso.")
 
         if error_messages:
             return Response({'Conflict: Duplicate Enrollment': error_messages}, status=status.HTTP_409_CONFLICT)
+        
+        # Obtener IDs de actividades asociadas al scheduled_course_id
+        activity_ids = Activity.objects.filter(scheduled_course=scheduled_course).values_list('id', flat=True)
+
+        # Obtener IDs de ActivityEvaluationDetail para las actividades obtenidas
+        activity_evaluation_details = ActivityEvaluationDetail.objects.filter(activity__in=activity_ids)
+
+        # Crear instancias de GradeDetailLearningOutCome con nota 0
+        for enrolled_course_id in enrolled_courses_ids:
+            for detail in activity_evaluation_details:
+                GradeDetailLearningOutCome.objects.create(
+                    enrolled_course_id=enrolled_course_id,
+                    activity_evaluation_detail=detail,
+                    grade=0  
+                )
 
         return Response({'message': 'Students enrolled successfully'}, status=status.HTTP_201_CREATED)
     

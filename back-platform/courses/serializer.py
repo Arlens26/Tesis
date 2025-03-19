@@ -314,12 +314,18 @@ class StudentGradeReportSerializer(serializers.Serializer):
         
         if grade_details and activity_details:
             # Crear un diccionario de actividades por ID para acceder rápidamente al porcentaje
-            activity_map = {activity['id']: activity for activity in activity_details}
-            
+            activity_map = {activity['activity_id']: activity for activity in activity_details}
+            #print(f"activity_map {activity_map}")
             for grade_detail in grade_details:
                 activity_id = grade_detail['activity']['id']
-                percentage = activity_map[activity_id]['percentage'] / 100  # Convertir a decimal
-                
+                #percentage = activity_map[activity_id]['percentage'] / 100  # Convertir a decimal
+                try:
+                    percentage = activity_map[activity_id]['percentage'] / 100
+                    # Continúa con el cálculo
+                except KeyError:
+                    # Maneja el caso donde 'percentage' no existe
+                    print(f"No se encontró el porcentaje para la actividad {activity_id}")
+                    continue
                 # Calcular la nota acumulada y el puntaje máximo
                 grades.append(grade_detail['grade'] * percentage)
                 max_scores.append(5 * percentage)  # 5 es la nota máxima por actividad

@@ -25,7 +25,7 @@ export function Activity() {
     const [evaluationDetailIds, setEvaluationDetailIds] = useState([])
     console.log('Ids evaluation version detail: ', evaluationDetailIds)
     const [activitiesData, setActivitiesData] = useState([])
-   
+    console.log('activities data: ', activitiesData)
 
     const filteredActivityEvaluationDetail = useMemo(() => 
       Object.values(activityEvaluationDetail).filter(d => 
@@ -44,12 +44,12 @@ export function Activity() {
     )
     console.log('Filtered Details: ', filteredDetails)
 
-    const { uniqueActivities, 
+    const {  
       handlePercentageChange,
       filteredPercentages,
       totalPercentageByActivity,
       totalPercentageByLearningOutCome
-    } = useActivityPercentage(selectedScheduledId, selectedVersionId, filteredDetails, filteredActivityEvaluationDetail)
+    } = useActivityPercentage(filteredDetails, filteredActivityEvaluationDetail, activitiesData)
     console.log('filtered percentages: ', filteredPercentages)
 
 
@@ -174,16 +174,8 @@ export function Activity() {
       console.log(filteredActivityEvaluationDetail)
       if (filteredEvaluationVersionIds.length > 0) {
           getEvaluationVersionDetail(filteredEvaluationVersionIds, groupedCourse[0].period)
-          // Actualizar evaluationDetailIds si es necesario
-          //setEvaluationDetailIds(filteredEvaluationVersionIds) 
       }
   }, [selectedScheduledId, groupedCourse])
-
-  /*useEffect(() => {
-    if (evaluationDetailIds.length > 0) {
-        getActivityEvaluationVersionDetail(evaluationDetailIds)
-    }
-}, [evaluationDetailIds])*/
     
     const handleSelectChange = (e) => {
       const selectedId = Number(e.target.value)
@@ -191,7 +183,6 @@ export function Activity() {
       const selectedDetail = newScheduledCourse.find(detail => detail.id === parseInt(selectedId))
 
       setActivitiesData([])
-      //setFilteredPercentages([])
   
       setSelectedScheduledId(selectedId)
       setSelectedVersionId(selectedDetail?.evaluation_version_id || null)
@@ -203,11 +194,6 @@ export function Activity() {
         setEvaluationDetailIds(detailIds)
         getActivityEvaluationVersionDetail(detailIds)
       }
-      /*if (selectedDetail) {
-          setSelectedVersionId(selectedDetail.evaluation_version_id)
-          const filteredEvaluationVersionDetailIds = evaluationVersionDetail.map(detail => detail.id)
-          setEvaluationDetailIds(filteredEvaluationVersionDetailIds)
-      }*/
     }
 
     const handleSubmit = (event) => {
@@ -281,21 +267,19 @@ export function Activity() {
             type="number"
             min={0}
             max={100}
+            onWheel={(e) => e.target.blur()}
             value={percentageValue}
             onChange={(e) => {
               const updatedPercentage = parseFloat(e.target.value) || 0
               const previousValue = percentageValue
-              // Si es actividad existente
-              //if (!activity.id.startsWith('temp-')) {
-                // Verificar si el cambio es válido
+
               const isValid = handlePercentageChange(
                 activity.id,
                 detail.id,
                 updatedPercentage,
                 previousValue
               )
-              //}
-              
+
               // Actualizar el estado local solo si es válido
               if (isValid) {
                 const updatedActivities = [...activitiesData]
@@ -315,7 +299,6 @@ export function Activity() {
       )
     })}
     <td className="px-6 py-4">
-      {/* Mostrar el total de la actividad, si lo deseas */}
       {Object.values(activity.percentages).reduce((a, b) => a + parseFloat(b), 0)}%
     </td>
     <td className="px-6 py-4">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../../scheduled_course/hooks/useSheduledCourse"
 import { useActivities } from "../hooks/useActivities"
@@ -17,25 +17,31 @@ export function Activity() {
     console.log('New scheduled course estado: ', newScheduledCourse)
     console.log('Evaluation version detail: ', evaluationVersionDetail) 
     const location = useLocation()
-    const [newActivities, setNewActivities] = useState([])
-    console.log('New activities estado: ', newActivities)
-
+    
     const [selectedScheduledId, setSelectedScheduledId] = useState(null)
-    console.log('Selected scheduled id: ', selectedScheduledId)
     const [selectedVersionId, setSelectedVersionId] = useState(null)
-    console.log('Selected version id: ', selectedVersionId)
     const groupedCourse = location.state?.course || []
     console.log('Grouped course: ', groupedCourse) 
     const [evaluationDetailIds, setEvaluationDetailIds] = useState([])
     console.log('Ids evaluation version detail: ', evaluationDetailIds)
+    const [activitiesData, setActivitiesData] = useState([])
    
 
-    const filteredActivityEvaluationDetail = Object.values(activityEvaluationDetail).filter(detail => 
-        detail.activity.scheduled_course_id === Number(selectedScheduledId))
+    const filteredActivityEvaluationDetail = useMemo(() => 
+      Object.values(activityEvaluationDetail).filter(d => 
+        d.activity.scheduled_course_id === Number(selectedScheduledId)
+      ), 
+      [activityEvaluationDetail, selectedScheduledId]
+    )
     console.log('Filtered Activity evaluation detail: ', filteredActivityEvaluationDetail)
 
 
-    const filteredDetails = Object.values(evaluationVersionDetail).filter(detail => detail.evaluation_version_id === selectedVersionId)
+    const filteredDetails = useMemo(() => 
+      Object.values(evaluationVersionDetail).filter(d => 
+        d.evaluation_version_id === selectedVersionId
+      ), 
+      [evaluationVersionDetail, selectedVersionId]
+    )
     console.log('Filtered Details: ', filteredDetails)
 
     const { uniqueActivities, 
@@ -46,6 +52,94 @@ export function Activity() {
     } = useActivityPercentage(selectedScheduledId, selectedVersionId, filteredDetails, filteredActivityEvaluationDetail)
     console.log('filtered percentages: ', filteredPercentages)
 
+
+    useEffect(() => {
+      // Si hay actividades existentes y activitiesData está vacío
+      if (
+        filteredActivityEvaluationDetail.length > 0 && 
+        activitiesData.length === 0 &&
+        filteredDetails.length > 0 &&
+        filteredPercentages.length > 0
+      ) {
+        const initialActivities = filteredActivityEvaluationDetail
+          // Elimina duplicados (por si hay múltiples detalles)
+          .filter((act, index, self) => 
+            self.findIndex(a => a.activity.id === act.activity.id) === index
+          )
+          .map(activityDetail => ({
+            id: activityDetail.activity.id,
+            name: activityDetail.activity.name,
+            description: activityDetail.activity.description,
+            percentages: filteredDetails.reduce((acc, detail) => {
+              const match = filteredPercentages.find(p => 
+                p.version_evaluation_detail_id === detail.id &&
+                p.activity_id === activityDetail.activity.id
+              )
+              acc[detail.id] = match ? parseFloat(match.percentage) : 0
+              return acc
+            }, {})
+          }))
+          console.log('Initial activities: ', initialActivities)
+        setActivitiesData(initialActivities)
+      }
+    }, [filteredActivityEvaluationDetail, filteredDetails, activitiesData.length,  filteredPercentages])
+
+    const handleAddActivity = () => {
+      const newActivity = {
+        id: `temp-${Date.now()}`, 
+        name: '',
+        description: '',
+        percentages: filteredDetails.reduce((acc, detail) => {
+          acc[detail.id] = 0
+          return acc
+        }, {})
+      }
+    
+      setActivitiesData(prev => [...prev, { ...newActivity }])
+    }
+
+  // Efecto para carga inicial
+  useEffect(() => {
+  const loadInitialData = async () => {
+    await getAllScheduledCourse()
+    
+    if (newScheduledCourse?.length > 0) {
+      // Busca el curso que ya tenga actividades asociadas
+      const courseWithActivities = newScheduledCourse.find(sc => 
+        filteredActivityEvaluationDetail.some(act => 
+          act.activity.scheduled_course_id === sc.id
+        )
+      )
+      const initialCourse = courseWithActivities || newScheduledCourse[0]
+      
+      setSelectedScheduledId(initialCourse.id)
+      setSelectedVersionId(initialCourse.evaluation_version_id)
+    }
+  }
+  
+  loadInitialData()
+}, [])
+
+  // Efecto para actualizar detalles de evaluación
+  useEffect(() => {
+    if (!selectedVersionId || !groupedCourse.length) return
+    
+    const evaluationVersionIds = groupedCourse[0].details
+        .map(detail => detail.evaluation_version_id)
+        .filter(Boolean)
+    
+    getEvaluationVersionDetail(evaluationVersionIds, groupedCourse[0].period)
+  }, [selectedVersionId])
+
+  // Efecto para actualizar actividades
+  useEffect(() => {
+    if (!evaluationVersionDetail || !selectedVersionId) return
+    const detailIds = evaluationVersionDetail
+      .filter(d => d.evaluation_version_id === selectedVersionId)
+      .map(d => d.id)
+    setEvaluationDetailIds(detailIds)
+    getActivityEvaluationVersionDetail(detailIds) 
+  }, [evaluationVersionDetail, selectedVersionId])
     
     // Calcular el total del porcentaje
     const [totalPercentage, setTotalPercentage] = useState(0)
@@ -56,13 +150,14 @@ export function Activity() {
         setSelectedScheduledId(newScheduledCourse[0].id)
         console.log('Scheduled course ID seleccionado:', selectedScheduledId)
         const firstScheduledCourse = newScheduledCourse[0]
+        console.log('First scheduled course: ', firstScheduledCourse)
         if (selectedVersionId == null) {
             setSelectedVersionId(firstScheduledCourse.evaluation_version_id)
         }
       }
     }, [newScheduledCourse, selectedScheduledId, selectedVersionId])
 
-    // Actualizar el estado del porcentagje total general si es necesario
+    // Actualizar el estado del porcentaje total general si es necesario
     useEffect(() => {
     const totalActivityPercentage = 
       Object.values(totalPercentageByActivity).reduce((acc, val) => acc + val, 0)
@@ -84,31 +179,42 @@ export function Activity() {
       }
   }, [selectedScheduledId, groupedCourse])
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (evaluationDetailIds.length > 0) {
         getActivityEvaluationVersionDetail(evaluationDetailIds)
     }
-}, [evaluationDetailIds])
+}, [evaluationDetailIds])*/
     
     const handleSelectChange = (e) => {
-      const selectedId = e.target.value
+      const selectedId = Number(e.target.value)
       console.log('Selected Id: ', selectedId)
       const selectedDetail = newScheduledCourse.find(detail => detail.id === parseInt(selectedId))
+
+      setActivitiesData([])
+      //setFilteredPercentages([])
   
       setSelectedScheduledId(selectedId)
-  
+      setSelectedVersionId(selectedDetail?.evaluation_version_id || null)
+      
       if (selectedDetail) {
+        const detailIds = evaluationVersionDetail
+          .filter(d => d.evaluation_version_id === selectedDetail.evaluation_version_id)
+          .map(d => d.id)
+        setEvaluationDetailIds(detailIds)
+        getActivityEvaluationVersionDetail(detailIds)
+      }
+      /*if (selectedDetail) {
           setSelectedVersionId(selectedDetail.evaluation_version_id)
           const filteredEvaluationVersionDetailIds = evaluationVersionDetail.map(detail => detail.id)
           setEvaluationDetailIds(filteredEvaluationVersionDetailIds)
-      }
+      }*/
     }
 
     const handleSubmit = (event) => {
       event.preventDefault()
 
       const buildActivity = () => {
-        return newActivities.map(activity => ({
+        return activitiesData.map(activity => ({
           name: activity.name,
           description: activity.description,
           scheduled_course_id: selectedScheduledId,
@@ -121,44 +227,6 @@ export function Activity() {
       }
       console.log(activity)
     }
-
-    const handleActivity = () => {
-      setNewActivities([...newActivities, { 
-        name: '', description: '', scheduled_course_id: selectedScheduledId, 
-        activity_evaluation_detail: filteredDetails.map((detail) => ({
-          version_evaluation_detail_id: detail.id,
-          percentage: 0,
-        })),
-      }])
-      console.log('New Activities: ', newActivities)
-    }
-
-    const calculateTotalPercentage = (percentages) => {
-        return Object.values(percentages).reduce((acc, curr) => acc + curr, 0)
-    }
-
-// Inicializar el estado
-const [activities, setActivities] = useState([])
-console.log('Activities: ', activities)
-
-
-  // Handle input changes
-  const handleInputChange = (activityId, field, value) => {
-    setActivities(prevActivities => prevActivities.map(activity =>
-      activity.id === activityId ? { ...activity, [field]: value } : activity
-    ))
-  }
-
-  const handleDeleteActivity = (index) => {
-      // Crear una copia del estado actual de newActivities
-      const updatedActivities = [...newActivities]
-      
-      // Eliminar la actividad en el índice especificado
-      updatedActivities.splice(index, 1)
-      
-      // Actualizar el estado con las actividades restantes
-      setNewActivities(updatedActivities)
-  }
 
   // Render table headers
   const renderTableHeaders = () => (
@@ -178,94 +246,90 @@ console.log('Activities: ', activities)
   // Render table rows
   const renderTableRows = () => (
     <tbody>
-      {uniqueActivities.map((activityDetail) => (
-        <tr key={activityDetail.activity.id} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-          <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-            <input
-              type="text"
-              value={activityDetail.activity.name}
-              onChange={(e) => handleInputChange(activityDetail.activity.id, 'name', e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            />
-          </td>
-          <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-            <textarea
-              value={activityDetail.activity.description}
-              onChange={(e) => handleInputChange(activityDetail.activity.id, 'description', e.target.value)}
-              rows="1"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            />
-          </td>
-          {Object.values(filteredDetails).map((detail) => {
-          // Buscar el porcentaje correspondiente en filteredPercentages
-          const matchingPercentage = filteredPercentages.find(
-            (percentage) => percentage.version_evaluation_detail_id === detail.id &&
-            percentage.activity_id === activityDetail.activity.id
-          )
-          // Obtener el valor del porcentaje o establecer un valor por defecto
-          const percentageValue = matchingPercentage ? parseFloat(matchingPercentage.percentage).toFixed(0) : ''
-
-            return (
-              <td key={detail.id} className="px-6 py-4">
-                <input
-                  type="number"
-                  value={percentageValue}
-                  onChange={(e) => handlePercentageChange(activityDetail.activity.id, detail.id, e.target.value, percentageValue)}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
-              </td>
-            )
-          })}
-          <td className="px-6 py-4">
-            {/*calculatePercentageActivity(activity)*/}{totalPercentageByActivity[activityDetail.activity.id] || 0}%
-          </td>
-          <td className="px-6 py-4">
-            <button type='button'
-              className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'>
-              <DeleteIcon/>
-            </button>
-          </td>
-        </tr>
-      ))}
-      {newActivities.map((activity, activityIndex) => (
-                                <tr key={`newActivity_${activityIndex}`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                                    <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        <input type="text" value={activity.name} placeholder='Nombre de la actividad' name={`new_name_${activityIndex}`} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => {
-                                            const updatedActivities = [...newActivities];
-                                            updatedActivities[activityIndex].name = e.target.value;
-                                            setNewActivities(updatedActivities);
-                                        }} />
-                                    </td>
-                                    <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        <textarea value={activity.description} placeholder='Descripción' name={`new_description_${activityIndex}`} rows="1" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" onChange={(e) => {
-                                            const updatedActivities = [...newActivities]
-                                            updatedActivities[activityIndex].description = e.target.value
-                                            setNewActivities(updatedActivities)
-                                        }} />
-                                    </td>
-                                     {filteredDetails.map((detail) =>(
-                                      <td key={detail.id} className="px-6 py-4">
-                                        <input 
-                                          type="number"
-                                          //value={percentageValue}
-                                          //onChange={(e) => handlePercentageChange(activityDetail.activity.id, detail.id, e.target.value, percentageValue)}
-                                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        />
-                                      </td>
-                                      ))}
-                                    <td className="px-6 py-4">
-                                        {calculateTotalPercentage(activity.percentages || [])}%
-                                    </td>
-                                    <td className="px-6 py-4">
-                                      <button 
-                                        type='button'
-                                        onClick={ () => handleDeleteActivity(activityIndex)}
-                                        className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'>
-                                        <DeleteIcon/>
-                                      </button>
-                                    </td>
-                                </tr>
-      ))}
+      {activitiesData.map((activity, activityIndex) => (
+  <tr key={activity.id} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+      <input
+        type="text"
+        value={activity.name}
+        onChange={(e) => {
+          const updated = [...activitiesData];
+          updated[activityIndex].name = e.target.value;
+          setActivitiesData(updated);
+        }}
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      />
+    </td>
+    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+      <textarea
+        value={activity.description}
+        onChange={(e) => {
+          const updated = [...activitiesData];
+          updated[activityIndex].description = e.target.value;
+          setActivitiesData(updated);
+        }}
+        rows="1"
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      />
+    </td>
+    {filteredDetails.map((detail) => {
+      // Obtén el valor actual
+      const percentageValue = activitiesData[activityIndex].percentages[detail.id] || 0
+      return (
+        <td key={detail.id} className="px-6 py-4">
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={percentageValue}
+            onChange={(e) => {
+              const updatedPercentage = parseFloat(e.target.value) || 0
+              const previousValue = percentageValue
+              // Si es actividad existente
+              //if (!activity.id.startsWith('temp-')) {
+                // Verificar si el cambio es válido
+              const isValid = handlePercentageChange(
+                activity.id,
+                detail.id,
+                updatedPercentage,
+                previousValue
+              )
+              //}
+              
+              // Actualizar el estado local solo si es válido
+              if (isValid) {
+                const updatedActivities = [...activitiesData]
+                updatedActivities[activityIndex].percentages[detail.id] = updatedPercentage
+                setActivitiesData(updatedActivities)
+              } else {
+                // Revertir el valor del input al anterior
+                const updatedActivities = [...activitiesData]
+                updatedActivities[activityIndex].percentages[detail.id] = previousValue
+                setActivitiesData(updatedActivities)
+                //e.target.value = previousValue
+              }
+            }}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+        </td>
+      )
+    })}
+    <td className="px-6 py-4">
+      {/* Mostrar el total de la actividad, si lo deseas */}
+      {Object.values(activity.percentages).reduce((a, b) => a + parseFloat(b), 0)}%
+    </td>
+    <td className="px-6 py-4">
+      <button type='button' 
+      className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+      onClick={() => {
+        // Función para eliminar la actividad
+        setActivitiesData(prev => prev.filter((_, i) => i !== activityIndex));
+      }}>
+        <DeleteIcon/>
+      </button>
+    </td>
+  </tr>
+))}
                               <tr key={`totalPercentageRa`} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                     <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                         PORCENTAJE
@@ -286,11 +350,6 @@ console.log('Activities: ', activities)
                                           </td>
                                       )
                                     })}
-                                    {/*filteredDetails.map((detail) =>(
-                                        <td key={detail.percentage.id} className="px-6 py-4">
-                                        {parseFloat(detail.percentage.percentage).toFixed(0)}%
-                                        </td>
-                                    ))*/}
                                     <td className="px-6 py-4">
                                       <span style={{color: totalPercentage < 100 ? 'red' : 'inherit'}}>
                                         {totalPercentage}%
@@ -323,9 +382,9 @@ console.log('Activities: ', activities)
         <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
           <button 
             className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-            onClick={handleActivity}
+            onClick={handleAddActivity}
             type="button"
-            disabled={totalPercentage === 100}
+            disabled={totalPercentage >= 100}
             >
             <CreateIcon/>
             <span className="ml-1">Crear actividad</span>

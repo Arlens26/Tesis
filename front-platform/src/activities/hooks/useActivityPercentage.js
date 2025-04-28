@@ -1,10 +1,28 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { toast } from "sonner"
 //import { useActivities } from "./useActivities"
 
-export function useActivityPercentage(selectedScheduledId, selectedVersionId, filteredDetails, filteredActivityEvaluationDetail) {
+export function useActivityPercentage(
+  selectedScheduledId, 
+  selectedVersionId, 
+  filteredDetails, 
+  filteredActivityEvaluationDetail) {
     console.log('filt', filteredActivityEvaluationDetail)
-    const [filteredPercentages, setFilteredPercentages] = useState([])
+    //const [filteredPercentages, setFilteredPercentages] = useState([])
+    const filteredPercentages = useMemo(() => 
+      filteredActivityEvaluationDetail
+        .filter(detail => 
+          filteredDetails.some(filteredDetail => 
+            filteredDetail.id === detail.version_evaluation_detail_id
+          )
+        )
+        .map(detail => ({
+          activity_id: detail.activity.id || null,
+          version_evaluation_detail_id: detail.version_evaluation_detail_id, 
+          percentage: parseFloat(detail.percentage) || 0
+        })),
+      [filteredActivityEvaluationDetail, filteredDetails] // Dependencias
+    )
     console.log('Filtered percentages: ', filteredPercentages)
     const [totalPercentageByActivity, setTotalPercentageByActivity] = useState(0)
     const [totalPercentageByLearningOutCome, setTotalPercentageByLearningOutCome] = useState({})
@@ -19,6 +37,14 @@ export function useActivityPercentage(selectedScheduledId, selectedVersionId, fi
     console.log('Unique Activities: ', uniqueActivities)
 
     useEffect(() => {
+      const initialTotals = filteredPercentages.reduce((acc, item) => {
+        acc[item.activity_id] = (acc[item.activity_id] || 0) + item.percentage
+        return acc
+      }, {})
+      setTotalPercentageByActivity(initialTotals)
+    }, [filteredPercentages])
+
+    useEffect(() => {
         if(filteredPercentages){
           const initialTotals = filteredPercentages.reduce((acc, item) => {
             acc[item.activity_id] = (acc[item.activity_id] || 0) + item.percentage
@@ -28,7 +54,7 @@ export function useActivityPercentage(selectedScheduledId, selectedVersionId, fi
         }
     }, [filteredPercentages])
 
-    const generateFilteredPercentages = () => {
+    /*const generateFilteredPercentages =  useCallback(() => {
         const percentages = filteredActivityEvaluationDetail.filter(detail => 
           filteredDetails.some(filteredDetail => filteredDetail.id === detail.version_evaluation_detail_id)
         ).map(detail => ({
@@ -38,84 +64,105 @@ export function useActivityPercentage(selectedScheduledId, selectedVersionId, fi
         }))
       
         setFilteredPercentages(percentages)
-      }
+      }, [filteredActivityEvaluationDetail, filteredDetails])*/
       
-    useEffect(() => {
+    /*useEffect(() => {
         generateFilteredPercentages()
-    }, [selectedScheduledId])
+    }, [selectedScheduledId])*/
 
-    const handlePercentageChange = (activityId, versionDetailId, value, newPercentage) => {
-        const updatedPercentage = parseFloat(value) || 0
-        const maxAllowedPercentage = filteredDetails.find(detail => detail.id === versionDetailId)?.percentage || 0
-        console.log('Max allowed percentage: ', maxAllowedPercentage)
-      
-        setFilteredPercentages(prevPercentages => {
-          const updatedPercentages = prevPercentages.map(percentage => {
-            if (percentage.activity_id === activityId && percentage.version_evaluation_detail_id === versionDetailId) {
-              return {
-                ...percentage,
-                percentage: updatedPercentage,
-              }
-            }
-            return percentage
-          })
-      
-          const totalForLearningOutcome = updatedPercentages
-            .filter(item => item.version_evaluation_detail_id === versionDetailId)
-            .reduce((sum, item) => sum + item.percentage, 0)
-          console.log('Total for learingOutcome: ', totalForLearningOutcome)
-          if (totalForLearningOutcome > maxAllowedPercentage.percentage) {
-            toast.error(`La suma de los porcentajes para este RA no puede exceder ${maxAllowedPercentage.percentage}%`)
-            return prevPercentages // Evita la actualización si la suma excede el límite
-          }
-      
-          setTotalPercentageByLearningOutCome(prevState => ({
-            ...prevState,
-            [versionDetailId]: totalForLearningOutcome,
-          }))
-      
-          setTotalPercentageByActivity(prevState => ({
-            ...prevState,
-            [activityId]: (prevState[activityId] || 0) - newPercentage + updatedPercentage,
-          }))
-      
-          return updatedPercentages
+    const handlePercentageChange = (activityId, versionDetailId, value, previousPercentage) => {
+      const updatedPercentage = parseFloat(value) || 0
+      const maxAllowed = filteredDetails.find(d => d.id === versionDetailId)?.percentage.percentage || 0
+      const currentPercentages = filteredPercentages
+    
+      const existingIndex = currentPercentages.findIndex(p => 
+        p.activity_id === activityId && 
+        p.version_evaluation_detail_id === versionDetailId
+      )
+    
+      let newPercentages = [...currentPercentages]
+      if (existingIndex !== -1) {
+        newPercentages[existingIndex] = { 
+          ...newPercentages[existingIndex], 
+          percentage: updatedPercentage 
+        }
+      } else {
+        newPercentages.push({
+          activity_id: activityId,
+          version_evaluation_detail_id: versionDetailId,
+          percentage: updatedPercentage
         })
       }
+    
+      // Validar totales
+      const totalForLO = newPercentages
+        .filter(p => p.version_evaluation_detail_id === versionDetailId)
+        .reduce((sum, p) => sum + p.percentage, 0)
+    
+      if (totalForLO > maxAllowed) {
+        toast.error(`Superaste el máximo permitido (${maxAllowed}%) para este RA`)
+        return false
+      }
+    
+      const diff = updatedPercentage - previousPercentage
+      setTotalPercentageByLearningOutCome(prevState => ({
+        ...prevState,
+        [versionDetailId]: (prevState[versionDetailId] || 0) + diff
+      }))
+      setTotalPercentageByActivity(prevState => ({
+        ...prevState,
+        [activityId]: (prevState[activityId] || 0) + diff
+      }))
+      /*setFilteredPercentages(prev => {
+        // Buscar si ya existe el porcentaje para esta actividad y detalle
+        const existingIndex = prev.findIndex(p => 
+          p.activity_id === activityId && 
+          p.version_evaluation_detail_id === versionDetailId
+        )
+    
+        let newPercentages = [...prev]
+        if (existingIndex !== -1) {
+          // Actualizar existente
+          newPercentages[existingIndex] = { 
+            ...newPercentages[existingIndex], 
+            percentage: updatedPercentage 
+          }
+        } else {
+          // Agregar nuevo porcentaje (incluyendo temporales)
+          newPercentages.push({
+            activity_id: activityId,
+            version_evaluation_detail_id: versionDetailId,
+            percentage: updatedPercentage
+          })
+        }
+    
+        // Validar totales
+        const totalForLO = newPercentages
+          .filter(p => p.version_evaluation_detail_id === versionDetailId)
+          .reduce((sum, p) => sum + p.percentage, 0)
+    
+        if (totalForLO > maxAllowed) {
+          toast.error(`Superaste el máximo permitido (${maxAllowed}%) para este RA`);
+          return prev // Revertir si excede
+        }
+    
+        const diff = updatedPercentage - previousPercentage
 
-      /*const handlePercentageUpdate = () => {
-        const updatedTotalByActivity = {};
-        const updatedTotalByLearningOutcome = {};
-      
-        newActivities.forEach((activity) => {
-          const totalForActivity = activity.activity_evaluation_detail.reduce(
-            (sum, detail) => sum + detail.percentage,
-            0
-          );
-      
-          updatedTotalByActivity[activity.id] = totalForActivity;
-      
-          activity.activity_evaluation_detail.forEach((detail) => {
-            if (!updatedTotalByLearningOutcome[detail.version_evaluation_detail_id]) {
-              updatedTotalByLearningOutcome[detail.version_evaluation_detail_id] = 0;
-            }
-            updatedTotalByLearningOutcome[detail.version_evaluation_detail_id] += detail.percentage;
-          });
-        });
-      
-        setTotalPercentageByActivity((prev) => ({
-          ...prev,
-          ...updatedTotalByActivity,
-        }));
-      
-        setTotalPercentageByLearningOutCome((prev) => ({
-          ...prev,
-          ...updatedTotalByLearningOutcome,
-        }));
-      
-        const globalTotal = Object.values(updatedTotalByActivity).reduce((sum, value) => sum + value, 0);
-        setTotalPercentage(globalTotal);
-      };*/
+        // Actualizar totales
+        setTotalPercentageByLearningOutCome(prevState => ({
+          ...prevState,
+          [versionDetailId]: (prevState[versionDetailId] || 0) + diff
+        }))
+
+        setTotalPercentageByActivity(prevState => ({
+          ...prevState,
+          [activityId]: (prevState[activityId] || 0) + diff
+        }))
+
+        return newPercentages
+      })*/
+      return true
+    }
 
       return {
         uniqueActivities,

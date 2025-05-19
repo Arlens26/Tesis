@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { useEnrolledStudent } from "../../students/hooks/useEnrolledStudent"
 import { toast } from "sonner"
 import { useLocation } from "react-router-dom"
@@ -108,12 +108,36 @@ export function ActivityRating() {
         }
       }, [selectedActivityId])
 
+      // Calcula las notas finales sumando todas las actividades
+    const finalGrades = useMemo(() => {
+      const grades = {};
+
+      filteredByVersion.forEach((detail) => {
+          const studentId = detail.enrolled_course.student.id
+          const activityId = detail.activity_evaluation_detail.activities.id
+          const percentage = detail.activity_evaluation_detail.percentage
+          const grade = parseFloat(detail.grade)
+
+          if (!grades[studentId]) grades[studentId] = {}
+          if (!grades[studentId][activityId]) grades[studentId][activityId] = 0
+
+          grades[studentId][activityId] += (grade * percentage) / 100
+      })
+
+      const result = {};
+        Object.keys(grades).forEach((studentId) => {
+            result[studentId] = Object.values(grades[studentId]).reduce((acc, curr) => acc + curr, 0)
+        })
+
+        return result
+      }, [filteredByVersion])
+
       useEffect(() => {
-        if (gradeDetail && gradeDetail.length > 0 && !selectedActivityId) {
-          setSelectedActivityId(gradeDetail[0].activity_evaluation_detail.activities.id)
+        if (filteredByVersion && filteredByVersion.length > 0 && !selectedActivityId) {
+          setSelectedActivityId(filteredByVersion[0].activity_evaluation_detail.activities.id)
           console.log("Activity ID seleccionado:", selectedActivityId)
         }
-      }, [gradeDetail, selectedActivityId])
+      }, [filteredByVersion, selectedActivityId])
 
       
       
@@ -195,7 +219,8 @@ export function ActivityRating() {
                 </th>
                 ))}
                 <th scope="col" className="px-6 py-3">Escala</th>
-                <th scope="col" className="px-6 py-3">Nota acumulada - Max: {max}</th>
+                <th scope="col" className="px-6 py-3">Nota acumulada - Max: {max.toFixed(2)}</th>
+                <th scope="col" className="px-6 py-3">Nota Final</th>
             </tr>
         </thead>
     )
@@ -209,6 +234,8 @@ export function ActivityRating() {
 
         const nameStudent = detail.enrolled_course.student.name
         //const grade = detail.grade
+        const studentId = detail.enrolled_course.student.id
+        const finalGrade = finalGrades[studentId] || 0
 
         return (
           <tr
@@ -224,7 +251,8 @@ export function ActivityRating() {
                   type="number"
                   min={0}
                   max={5}
-                  value={notes.find(note => note.id === detail.id)?.[outcome.id] || ""}
+                  onWheel={(e) => e.target.blur()}
+                  value={notes.find(note => note.id === detail.id)?.[outcome.id] || 0.00}
                   onChange={(e) =>
                     handleNoteChange(detail.enrolled_course.student.id, outcome.id, outcome.version_id, e.target.value)
                   }
@@ -248,6 +276,14 @@ export function ActivityRating() {
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
             </td>
+            <td className="px-6 py-4">
+                <input
+                    type="number"
+                    value={finalGrade.toFixed(2)}
+                    readOnly
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                 />
+            </td>
           </tr>
         )
       })}            
@@ -256,7 +292,7 @@ export function ActivityRating() {
 
     return(
       <div className="grid gap-2">
-        <span>Calificicaciones</span>
+        <span>Calificaciones</span>
         {filteredByVersion != 0 ? 
         <div>
         <label className="text-sm">Actividades:</label>
@@ -295,7 +331,7 @@ export function ActivityRating() {
               </table>
         </form>
         </div>
-        : <div><span>Aún no hay actividades programadas para este curso</span></div>  
+        : <div><span>Aún no hay estudiantes matriculados para este curso</span></div>  
         }
         <div className="flex justify-end gap-2">
           <GoBackButton label='Volver' route='/course-list/'/>

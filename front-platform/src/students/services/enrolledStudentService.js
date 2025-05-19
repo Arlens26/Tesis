@@ -28,8 +28,14 @@ export const updateStudentEnrolledStatusFetch = (data) => {
     })
 }
 
-export const getGradeDetailFetch = () => {
-    return fetch(GRADE_DETAIL_LEARNING_OUTCOME)
+export const getGradeDetailFetch = (token) => {
+    return fetch(GRADE_DETAIL_LEARNING_OUTCOME, {
+            method: 'GET',
+            headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json' 
+            },
+        })
         .then(res => {
             if (!res.ok) {
                 throw new Error('Error fetching grade detail')

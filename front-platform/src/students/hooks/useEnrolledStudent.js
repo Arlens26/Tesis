@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { 
     getStudentEnrolledCourseFetch, 
     updateStudentEnrolledStatusFetch, 
@@ -7,8 +7,11 @@ import {
     createStudentEnrolledCourseFetch, 
     getStudentGradeReportFetch 
 } from "../services/enrolledStudentService"
+import { AuthContext } from "../../auth/context/user"
 
 export function useEnrolledStudent() {
+
+    const { user } = useContext(AuthContext)
 
     const [gradeDetail, setGradeDetail] = useState([])
     const [studentEnrolledCourse, setStudentEnrolledCourse] = useState([])
@@ -27,7 +30,7 @@ export function useEnrolledStudent() {
     }
 
     const getGradeDetail = () => {
-        getGradeDetailFetch()
+        getGradeDetailFetch(user.token)
             .then(json => setGradeDetail(json))
             .catch(error => console.error('Error fetching grade detail:', error))
     }

@@ -15,7 +15,13 @@ class ActivityEvaluationDetailView(viewsets.ModelViewSet):
 
 class GradeDetailLearningOutComeView(viewsets.ModelViewSet):
     serializer_class = GradeDetailLearningOutComeSerializer
-    queryset = GradeDetailLearningOutCome.objects.all()
+    #queryset = GradeDetailLearningOutCome.objects.all()
+    queryset = GradeDetailLearningOutCome.objects.select_related(
+        'enrolled_course__student', 
+        'enrolled_course__scheduled_course', 
+        'activity_evaluation_detail__activity', 
+        'activity_evaluation_detail__version_evaluation_detail'
+    ).all()
 
 class VersionDetailActivityEvaluationView(viewsets.ViewSet):
     serializer_class = ActivityEvaluationDetail
@@ -54,12 +60,11 @@ class ActivitySettingView(viewsets.ViewSet):
         
         for item in data:
             activity_data = item.get('activities')
-            evaluation_data = item.get('activity_evaluation_detail')
+            evaluation_details = item.get('activity_evaluation_detail')  # Ahora es una lista
 
-            activity_id = evaluation_data.get('activity_id', None)
-            
-            if activity_id is not None:
-                # Actualizar actividad existente
+            # Crear o actualizar actividad
+            activity_id = activity_data.get('id', None)
+            if activity_id and not str(activity_id).startswith('temp-'):
                 try:
                     activity = Activity.objects.get(id=activity_id)
                     activity.name = activity_data['name']
@@ -67,20 +72,21 @@ class ActivitySettingView(viewsets.ViewSet):
                     activity.scheduled_course_id = activity_data['scheduled_course']
                     activity.save()
                 except Activity.DoesNotExist:
-                    return Response({'error': f'Activity with id {activity_id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({'error': f'Actividad no existe'}, status=404)
             else:
-                # Crear nueva actividad
-                activity_serializer = ActivitySerializer(data=activity_data)
-                if activity_serializer.is_valid():
-                    activity = activity_serializer.save()
-                else:
-                    return Response(activity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                # Crear nueva actividad sin ID temporal
+                activity = Activity.objects.create(
+                    name=activity_data['name'],
+                    description=activity_data['description'],
+                    scheduled_course_id=activity_data['scheduled_course']
+                )
 
-            evaluation_detail = ActivityEvaluationDetail(
-                version_evaluation_detail_id=evaluation_data['version_evaluation_detail_id'],
-                activity=activity,
-                percentage=evaluation_data['percentage']
-            )
-            evaluation_detail.save()
+            # Crear detalles de evaluación
+            for detail in evaluation_details:
+                ActivityEvaluationDetail.objects.create(
+                    version_evaluation_detail_id=detail['version_evaluation_detail_id'],
+                    activity=activity,
+                    percentage=detail['percentage']
+                )
 
-        return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
+        return Response({'status': 'success'}, status=201)

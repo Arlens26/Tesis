@@ -23,6 +23,14 @@ class UserViewSet(viewsets.ViewSet):
         user_serializer = UserSerializer(instance=user)
 
         return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['post'])
+    @authentication_classes([TokenAuthentication])
+    @permission_classes([IsAuthenticated])
+    def logout(self, request):
+        # Elimina el token del usuario actual
+        request.auth.delete()
+        return Response({'message': 'Sesión cerrada exitosamente'}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def register(self, request):

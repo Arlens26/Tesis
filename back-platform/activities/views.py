@@ -15,13 +15,27 @@ class ActivityEvaluationDetailView(viewsets.ModelViewSet):
 
 class GradeDetailLearningOutComeView(viewsets.ModelViewSet):
     serializer_class = GradeDetailLearningOutComeSerializer
-    #queryset = GradeDetailLearningOutCome.objects.all()
     queryset = GradeDetailLearningOutCome.objects.select_related(
         'enrolled_course__student', 
         'enrolled_course__scheduled_course', 
         'activity_evaluation_detail__activity', 
         'activity_evaluation_detail__version_evaluation_detail'
     ).all()
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        if not user.is_authenticated:
+            return GradeDetailLearningOutCome.objects.none()
+            
+        # Si es profesor, filtrar por sus cursos
+        if user.groups.filter(name='professor').exists():
+            return self.queryset.filter(
+                enrolled_course__scheduled_course__professor=user
+            )
+            
+        # Si no es profesor, no mostrar nada
+        return GradeDetailLearningOutCome.objects.none()
 
 class VersionDetailActivityEvaluationView(viewsets.ViewSet):
     serializer_class = ActivityEvaluationDetail

@@ -33,7 +33,7 @@ export function LoginForm() {
             }
           })
           .catch((error) => {
-            toast.error('Usurio o contraseña incorrecta', error)
+            toast.error('Usuario o contraseña incorrecta', error)
         })
 
     }

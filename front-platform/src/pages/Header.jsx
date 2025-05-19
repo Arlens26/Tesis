@@ -1,9 +1,23 @@
+import { useNavigate } from "react-router-dom"
 import { useUsers } from "../auth/hooks/useUsers"
 import { LogoutIcon } from "../components/Icons"
 import logo from '../images/logo-univalle.png'
+import { toast } from 'sonner'
 
 export function HeaderPage() {
-  const { user, role } = useUsers()
+  const { user, role, logout } = useUsers()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+        .then(() => {
+            toast.success(`Sesión cerrada exitosamente del usuario: ${user.first_name}`)
+            navigate('/login')
+        })
+        .catch(error => {
+            toast.error('Error al cerrar sesión:', error)
+        })
+  }
   //const { profile } = user;
     return (
         <header className='mr-14'>     
@@ -21,7 +35,7 @@ export function HeaderPage() {
                     {profile.is_student && <span>Estudiante</span>}
                   </>
                 )*/}</span> : <span>Bienvenido</span>} </span>
-                <button className="ml-1">
+                <button className="ml-1" onClick={handleLogout}>
                   <LogoutIcon/>
                 </button>
             </div>

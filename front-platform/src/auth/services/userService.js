@@ -1,5 +1,6 @@
 const AUTH_ENDPOINT = `http://127.0.0.1:8000/authentication/user/login/`
 const PROFILE_ENDPOINT = `http://127.0.0.1:8000/authentication/user/profile/`
+const LOGOUT_ENDPOINT = `http://127.0.0.1:8000/authentication/user/logout/`
 
 export const loginUser = (fields) => {
     return fetch(AUTH_ENDPOINT, {
@@ -27,6 +28,21 @@ export const userProfile = (token) => {
     .then(response => {
         if (!response.ok) {
             throw new Error('Error al obtener el perfil del usuario');
+        }
+        return response.json()
+    })
+}
+
+export const logoutUser = (token) => {
+    return fetch(LOGOUT_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Token ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al cerrar sesión')
         }
         return response.json()
     })

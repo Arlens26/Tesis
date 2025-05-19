@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/user";
-import { loginUser, userProfile } from "../services/userService";
+import { loginUser, userProfile, logoutUser } from "../services/userService";
 
 export function useUsers() {
 
@@ -33,6 +33,24 @@ export function useUsers() {
       })
   }
 
+  const logout = () => {
+    if (!user?.token) {
+        return Promise.reject('No hay usuario autenticado');
+    }
+    
+    return logoutUser(user.token)
+        .then(() => {
+            setUser(null)
+            setRole(null)
+            // Limpiar localStorage si es necesario
+            localStorage.removeItem('authToken')
+        })
+        .catch(error => {
+            console.error('Error al cerrar sesión:', error)
+            throw error
+        })
+  }
+
     // Devuelve las funciones o valores necesarios del contexto
-    return { user, getLogin, role, setRole }
+    return { user, getLogin, role, setRole, logout }
 }

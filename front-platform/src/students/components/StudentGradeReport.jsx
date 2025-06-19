@@ -31,11 +31,11 @@ export function StudentGradeReport() {
     console.log('Filtered by Student: ', filteredByStudent)
 
     const uniqueScheduledCourses = Array.from(
-        new Set(filteredByScheduledCourse.map(detail => 
+        new Set(filteredByAcademicPeriod.map(detail => 
             detail.student_enrolled_course.scheduled_course.id
         ))
     ).map(id => {
-        const courseDetail = filteredByScheduledCourse.find(
+        const courseDetail = filteredByAcademicPeriod.find(
             detail => detail.student_enrolled_course.scheduled_course.id === id
         )
         return {
@@ -57,10 +57,10 @@ export function StudentGradeReport() {
     console.log('filtered students: ', filteredByStudents)*/
 
     useEffect(() => {
-        if (filteredByAcademicPeriod.length > 0 && !selectedScheduledCourseId) {
+        if (filteredByAcademicPeriod.length > 0) {
             setSelectedScheduledCourseId(filteredByAcademicPeriod[0].id)
         }
-    }, [filteredByAcademicPeriod])
+    }, [selectedPeriodId])
 
     useEffect(() => {
         if (filteredByAcademicPeriod.length > 0 && !selectedScheduledCourseId) {
@@ -70,17 +70,27 @@ export function StudentGradeReport() {
 
     // Filtrar los cursos por periodo académico seleccionado
     const uniqueAcademicPeriod = Array.from(
-        new Set(studentGradeReport.map((detail) => detail.student_enrolled_course.scheduled_course.academic_period.id))
+        new Set(studentGradeReport.map((detail) => 
+            detail.student_enrolled_course.scheduled_course.academic_period.id))
     ).map((id) => {
-        return studentGradeReport.find((detail) => detail.student_enrolled_course.scheduled_course.academic_period.id === id)
+        return studentGradeReport.find(
+            (detail) => detail.student_enrolled_course.scheduled_course.academic_period.id === id)
+        /*const periodDetail = studentGradeReport.find(
+            (detail) => detail.student_enrolled_course.scheduled_course.academic_period.id === id)
+        console.log('periodDetail:', periodDetail)*/
+        /*return {
+            id: periodDetail.student_enrolled_course.scheduled_course.academic_period.id,
+            year: periodDetail.student_enrolled_course.scheduled_course.academic_period.year,
+            semester: periodDetail.student_enrolled_course.scheduled_course.academic_period.year
+        }*/
     })
     console.log('Unique Academic Period: ', uniqueAcademicPeriod)
 
     const sortedAcademicPeriods = uniqueAcademicPeriod.sort((a, b) => {
-        if(b.period.year !== a.period.year){
-            return b.period.year - a.period.year
+        if(b.student_enrolled_course.scheduled_course.academic_period.year !== a.student_enrolled_course.scheduled_course.academic_period.year){
+            return b.student_enrolled_course.scheduled_course.academic_period.year - a.student_enrolled_course.scheduled_course.academic_period.year
         }
-        return b.period.semester - a.period.semester
+        return b.student_enrolled_course.scheduled_course.academic_period.year - a.student_enrolled_course.scheduled_course.academic_period.year
     })
 
     useEffect(() => {
@@ -106,9 +116,10 @@ export function StudentGradeReport() {
     //const dataPoints = filteredByAcademicPeriod[0].grade_detail_learning_outcome.map(item => item.grade)
 
     // Extraer todos los códigos únicos
-const codes = Array.from(new Set(filteredByScheduledCourse.flatMap(item => 
-    item.grade_detail_learning_outcome.map(grade => grade.code)
-  )))
+    const codes = Array.from(new Set(filteredByScheduledCourse.flatMap(item => 
+        (item.grade_detail_learning_outcome || []).map(grade => grade.code)
+    )))
+    
   // Asegurarse de que haya al menos 5 etiquetas
 const minLabels = 5
 const generateAdditionalLabels = (existingCodes, count) => {
@@ -170,16 +181,16 @@ if (codes.length < minLabels) {
                 if (!raMetrics[raCode]) {
                     raMetrics[raCode] = {
                         Promedio: 0,
-                        Media: 0,
-                        Mediana: 0,
+                        //Media: 0,
+                        //Mediana: 0,
                         count: 0 // Para calcular el promedio si es necesario
                     }
                 }
                 raMetrics[raCode].Promedio += stat.average
-                raMetrics[raCode].Media += stat.mean
-                raMetrics[raCode].Mediana += stat.median
+                //raMetrics[raCode].Media += stat.mean
+                //raMetrics[raCode].Mediana += stat.median
                 raMetrics[raCode].count += 1 // Contar cuántas veces se sumó
-            });
+            })
         })
 
         // Calcular el promedio dividiendo por el conteo
@@ -202,13 +213,13 @@ if (codes.length < minLabels) {
                 }
             })
         })
-        const metrics = ['Promedio', 'Mediana']
+        const metricsStudent = ['Promedio']
         const datasets = []
         
         // Agregar datasets para el estudiante
-        metrics.forEach(metric => {
+        metricsStudent.forEach(metric => {
             const data = Object.keys(raMetrics).map(raCode => raMetrics[raCode][metric])
-            
+            console.log('data metrics: ', data)
             // Verifica si selectedStudentId es null o undefined y si hay estudiantes filtrados
             const studentName = filteredByStudent.length > 0 ? filteredByStudent[0].student_enrolled_course.student.first_name : '';
             const label = selectedStudentId != null && studentName ? `${metric} - ${studentName}` : ''
@@ -224,8 +235,9 @@ if (codes.length < minLabels) {
             }
         })
         
+        const metricsGroup = ['Promedio', 'Mediana']
         // Agregar datasets para el grupo
-        metrics.forEach(metric => {
+        metricsGroup.forEach(metric => {
             const data = Object.keys(overallMetrics).map(raCode => overallMetrics[raCode][metric])
             datasets.push({
                 label: `Grupo - ${metric}`,
@@ -254,7 +266,7 @@ const activities = Array.from(new Set(filteredByScheduledCourse.flatMap(item =>
     item.activity_evaluation_detail.map(activity => activity.name)
     )))*/
   //const minVertices = 5
-  const datasetRadar = filteredByStudent.flatMap(item => {
+  const datasetRadar = (filteredByStudent || []).flatMap(item => {
     const activityGroups = item.activity_evaluation_detail.reduce((acc, activity) => {
         acc[activity.name] = acc[activity.name] || {}
         codes.forEach(code => {
@@ -280,6 +292,13 @@ const activities = Array.from(new Set(filteredByScheduledCourse.flatMap(item =>
 console.log('dataset radar: ', datasetRadar)
   
   //const labels = studentGrades.map(student => student.studentName)
+    /*const refChart = useRef(null)
+    const downloadImage = useCallback(() =>{
+        const link = document.createElement('a')
+        link.download = 'desempeño_RA.png'
+        link.ref = refChart.current.toBase64Image()
+        link.click()
+    }, [])*/
 
     return(
         <>
@@ -307,6 +326,7 @@ console.log('dataset radar: ', datasetRadar)
                 id="scheduled_course" 
                 name='scheduled_courses' 
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={(e) => setSelectedScheduledCourseId(e.target.value)}
                 //onChange={handleScheduledCourseChange}
             >
                 <option disabled>Seleccione el curso programado</option>
@@ -338,11 +358,12 @@ console.log('dataset radar: ', datasetRadar)
                     </option>
                 ))}
             </select>
-            <div>
-                <LineChart labels={codes} datasets={datasets} />
+            <div className="p-2">
+                {/*<button type="button">Descargar</button>*/}
+                <LineChart labels={codes} datasets={datasets} title={'Nivel de desempeño por RAs'} />
             </div>
             <div>
-                <RadarChart labels={codes} datasets={datasetRadar} />
+                <RadarChart labels={codes} datasets={datasetRadar} title={'Notas por actividad'} />
             </div>
         </>
     )

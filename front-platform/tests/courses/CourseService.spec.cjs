@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test')
+import { test, expect }  from '@playwright/test'
 
 const COURSE_ENDPOINT = `http://127.0.0.1:8000/courses/all/courses/`
 

@@ -137,8 +137,8 @@ export function CourseList() {
       navigate('/course-list/activity/', {state: {course: course}})
     }
 
-    const handleActivityRaiting = (courseId, versionId) => {
-      navigate('/grade-detail', {state: {course_id: courseId, version_id: versionId}})
+    const handleActivityRaiting = (courseId, versionId, course) => {
+      navigate('/grade-detail', {state: {course_id: courseId, version_id: versionId, course: course}})
     }
     
     const handleSelectSemester = (semester) => {
@@ -386,7 +386,40 @@ export function CourseList() {
                           onClick={(e) =>{
                             e.stopPropagation();
                             //console.log(curso.id)
-                            handleActivityRaiting(curso.id, curso.evaluation_version_id)
+                            const selectedCourse = coursesToRender.filter(course => course.id === curso.id)
+                            const groupedCourse = selectedCourse.reduce((acc, curso) => {
+                              // Busca si ya existe un curso con el mismo id
+                              const existingCourse = acc.find(item => item.id === curso.id)
+                              
+                              if (existingCourse) {
+                                // Si existe, añade la variación al arreglo os detalles
+                                existingCourse.details.push({
+                                  evaluation_version_id: curso.evaluation_version_id,
+                                  group: curso.group,
+                                  period: curso.period
+                                })
+                              } else {
+                                // Si no existe, crea un nuevo objeto con los detalles
+                                acc.push({
+                                  code: curso.code,
+                                  credit: curso.credit,
+                                  description: curso.description,
+                                  id: curso.id,
+                                  name: curso.name,
+                                  professor_id: curso.professor_id,
+                                  period: curso.period,
+                                  details: [{
+                                    evaluation_version_id: curso.evaluation_version_id,
+                                    group: curso.group,
+                                    //period: curso.period
+                                  }]
+                                })
+                              }
+                            
+                              return acc
+                            }, [])
+                            handleActivityRaiting(curso.id, curso.evaluation_version_id, groupedCourse)
+                            
                           }}>
                           <ListCheckIcon/>
                           <span className="ml-1">Calificaciones</span>

@@ -1,6 +1,6 @@
 import { useContext, useState } from "react"
 import { AuthContext } from "../../auth/context/user"
-import { activityFetch, activityDetailFetch, createActivityFetch, activityEvaluationVersionDetailFetch } from '../services/activityService'
+import { activityFetch, settingActivityFetch, activityDetailFetch, createActivityFetch, activityEvaluationVersionDetailFetch } from '../services/activityService'
 
 export function useActivities(){
     
@@ -41,6 +41,16 @@ export function useActivities(){
           })
     }
 
+    const settingActivity = (fields) => {
+      return settingActivityFetch(fields)
+          .then(data => {
+              console.log('Datos enviados exitosamente', data)
+          })
+          .catch(error => {
+            throw new Error('Error al configurar la actividad', error)
+          })
+    }
+
     const getActivityEvaluationVersionDetail = (versionDetailIds) => {
         activityEvaluationVersionDetailFetch(versionDetailIds, user.token)
         .then(json => {
@@ -54,6 +64,6 @@ export function useActivities(){
         })
     }
 
-    return { getActivities, activities, createActivity, 
+    return { getActivities, activities, createActivity, settingActivity,
              getActivityDetail, activityDetail, getActivityEvaluationVersionDetail, activityEvaluationDetail }
 }

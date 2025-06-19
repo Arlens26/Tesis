@@ -4,7 +4,8 @@ import { Chart as ChartJS, LinearScale, CategoryScale, PointElement, LineElement
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
-const LineChart = ({ labels, datasets }) => {
+// eslint-disable-next-line react/prop-types
+const LineChart = ({ labels, datasets, title }) => {
     console.log('Labels: ', labels)
     console.log('datasets: ', datasets)
     const chartData = {
@@ -24,7 +25,7 @@ const LineChart = ({ labels, datasets }) => {
 
     return (
         <div>
-            <h2 style={{ textAlign: "center" }}>Gráfico de Líneas de RAs</h2>
+            <h2 style={{ textAlign: "center" }}>{title}</h2>
             <Line data={chartData} options={options} />
         </div>
     )

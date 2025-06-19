@@ -5,7 +5,8 @@ import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler,
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
-export function RadarChart({ labels, datasets }) {
+// eslint-disable-next-line react/prop-types
+export function RadarChart({ labels, datasets, title }) {
   //const { getStudents, students } = useEnrolledStudent()
 
   /*const courses = [
@@ -93,7 +94,7 @@ export function RadarChart({ labels, datasets }) {
 
   return (
     <div style={{ width: '500px', margin: '0 auto' }}>
-      <h2 style={{ textAlign: "center" }}>Gráfico de Radar</h2>
+      <h2 style={{ textAlign: "center" }}>{title}</h2>
       <Radar data={chartData} options={options} />
     </div>
   )

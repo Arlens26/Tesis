@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Course, AcademicPeriod, EvaluationVersion, ScheduledCourse, LearningOutCome, Percentage, EvaluationVersionDetail, StudentEnrolledCourse
 from activities.serializer import ActivityEvaluationDetail, GradeDetailLearningOutCome
 from statistics import mean, median
+from django.db.models import Sum, F, FloatField
 
 class CourseSerializer(serializers.ModelSerializer):
     #period = serializers.StringRelatedField()
@@ -144,67 +145,80 @@ class StudentGradeReportSerializer(serializers.Serializer):
     grade_detail_learning_outcome = serializers.SerializerMethodField()
     ra_statistics = serializers.SerializerMethodField()
     overall_ra_statistics = serializers.SerializerMethodField()
-    average = serializers.SerializerMethodField()
-    median = serializers.SerializerMethodField()
-    mean = serializers.SerializerMethodField()
+    #average = serializers.SerializerMethodField()
+    #median = serializers.SerializerMethodField()
+    #mean = serializers.SerializerMethodField()
 
     def get_overall_ra_statistics(self, obj):
-        # Obtén todas las notas y detalles de aprendizaje para el curso programado
-        grade_details = GradeDetailLearningOutCome.objects.filter(
-            activity_evaluation_detail__activity__scheduled_course=obj.scheduled_course
-        )
-        
-        # Agrupar por código de RA
-        ra_statistics = {}
-        for grade_detail in grade_details:
-            ra_code = grade_detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome.code
-            percentage = grade_detail.activity_evaluation_detail.percentage
-            grade = grade_detail.grade
-            
-            if ra_code not in ra_statistics:
-                ra_statistics[ra_code] = {"grades": [], "percentages": []}
-            
-            ra_statistics[ra_code]["grades"].append(grade)
-            ra_statistics[ra_code]["percentages"].append(percentage)
 
-        # Calcular estadísticas por RA
-        overall_statistics = []
-        for ra_code, data in ra_statistics.items():
-            grades = data["grades"]
-            percentages = data["percentages"]
-            
-            # Promedio de notas por RA considerando el porcentaje
-            total_weighted = sum(grade * (percentage / 100) for grade, percentage in zip(grades, percentages))
-            total_percentage = sum(percentages) / 100  # Convertir a escala 1
-            
-            # Normalización al máximo posible
-            max_possible = total_percentage * 5
-            average = (total_weighted / max_possible) * 100 if max_possible > 0 else 0
-
-            # Calcular la mediana
-            normalized_grades = [(grade / 5) * percentage for grade, percentage in zip(grades, percentages)]
-            sorted_grades = sorted(normalized_grades)
-            median = (
-                sorted_grades[len(sorted_grades) // 2]
-                if len(sorted_grades) % 2 == 1
-                else (sorted_grades[len(sorted_grades) // 2 - 1] + sorted_grades[len(sorted_grades) // 2]) / 2
+        # Obtener todos los detalles de calificaciones para el curso programado
+        grade_details = (
+            GradeDetailLearningOutCome.objects.filter(
+                activity_evaluation_detail__activity__scheduled_course=obj.scheduled_course
             )
-            
-            # Calcular la media simple
-            mean = sum(normalized_grades) / len(normalized_grades) if normalized_grades else 0
+            .values(
+                'enrolled_course',  # Agrupar por estudiante
+                'activity_evaluation_detail__version_evaluation_detail__learning_outcome__code'  # Agrupar por RA
+            )
+            .annotate(
+                sum_grade_percentage=Sum(F('grade') * F('activity_evaluation_detail__percentage'), output_field=FloatField()),
+                sum_percentage=Sum(F('activity_evaluation_detail__percentage'), output_field=FloatField())
+            )
+        )
 
-            overall_statistics.append({
+        # Calcular el promedio por RA para cada estudiante
+        student_ra_averages = {}
+        for detail in grade_details:
+            ra_code = detail['activity_evaluation_detail__version_evaluation_detail__learning_outcome__code']
+            sum_gp = detail['sum_grade_percentage'] or 0
+            sum_p = detail['sum_percentage'] or 0
+
+            if sum_p == 0:
+                avg = 0.0
+            else:
+                max_possible = sum_p * 5
+                avg = (sum_gp / max_possible) * 100 if max_possible != 0 else 0.0
+
+            if ra_code not in student_ra_averages:
+                student_ra_averages[ra_code] = []
+            student_ra_averages[ra_code].append(avg)
+
+        # Calcular estadísticas generales por RA
+        overall_stats = []
+        for ra_code, averages in student_ra_averages.items():
+            if not averages:
+                continue
+            #print('student_ra:', student_ra_averages.items())
+            # Promedio
+            avg = sum(averages) / len(averages)
+            print('averages:' , sum(averages))
+            print('len:' , len(averages))
+            print('sum average:' , avg)
+            # Mediana
+            sorted_avg = sorted(averages)
+            n = len(sorted_avg)
+            if n % 2 == 1:
+                median = sorted_avg[n // 2]
+            else:
+                median = (sorted_avg[n//2 - 1] + sorted_avg[n//2]) / 2
+
+            overall_stats.append({
                 "ra_code": ra_code,
-                "average": round(average, 2),
+                "average": round(avg, 2),
                 "median": round(median, 2),
-                "mean": round(mean, 2)
+                "mean": round(avg, 2),  # Ajustar si 'mean' es diferente
             })
 
-        return overall_statistics
+        return overall_stats
 
     def get_ra_statistics(self, obj):
         enrolled_course_id = obj.id
-        grade_details = GradeDetailLearningOutCome.objects.filter(enrolled_course_id=enrolled_course_id)
+        grade_details = GradeDetailLearningOutCome.objects.filter(
+            enrolled_course_id=enrolled_course_id
+        ).select_related(
+            'activity_evaluation_detail__version_evaluation_detail__learning_outcome',
+            'activity_evaluation_detail__activity'
+        )
         learning_outcomes_statistics = {}
 
         # Organizar las notas por RA
@@ -228,26 +242,32 @@ class StudentGradeReportSerializer(serializers.Serializer):
         for ra_code, stats in learning_outcomes_statistics.items():
             grades = stats["grades"]
             max_scores = stats["max_scores"]
-
+            #print('grades:', grades)
+            #print('max_scores:', max_scores)
             if grades and max_scores:
                 average = sum(grades) / sum(max_scores) * 100  # Promedio ponderado como porcentaje
-                median_value = median([grade / max_score * 100 for grade, max_score in zip(grades, max_scores)])
-                mean_value = mean([grade / max_score * 100 for grade, max_score in zip(grades, max_scores)])
-            else:
-                average = median_value = mean_value = 0
+                #print('Average:', average)
+                #median_value = median([grade / max_score * 100 for grade, max_score in zip(grades, max_scores)])
+                #mean_value = mean([grade / max_score * 100 for grade, max_score in zip(grades, max_scores)])
+            #else:
+                #average = median_value = mean_value = 0
 
             learning_outcomes_results.append({
                 "learning_outcome_code": ra_code,
                 "average": round(average, 2),
-                "median": round(median_value, 2),
-                "mean": round(mean_value, 2),
+                #"median": round(median_value, 2),
+                #"mean": round(mean_value, 2),
             })
 
         return learning_outcomes_results
 
+
     def get_activity_evaluation_detail(self, obj):
         activity_evaluation_detail = ActivityEvaluationDetail.objects.filter(
             activity__scheduled_course=obj.scheduled_course
+        ).select_related(
+            'version_evaluation_detail__learning_outcome',
+            'activity'
         )
         activities_data = [
             {
@@ -266,6 +286,9 @@ class StudentGradeReportSerializer(serializers.Serializer):
         enrolled_course_id = obj.id  
         grade_details = GradeDetailLearningOutCome.objects.filter(
             enrolled_course_id=enrolled_course_id
+        ).select_related(
+            'activity_evaluation_detail__activity',
+            'activity_evaluation_detail__version_evaluation_detail__learning_outcome'
         )
         
         grade_details_data = []
@@ -283,6 +306,7 @@ class StudentGradeReportSerializer(serializers.Serializer):
         })
         return grade_details_data if grade_details_data else None
 
+    '''
     def get_average(self, obj):
         grades, max_scores = self._get_grades_and_max_scores(obj)
         if max_scores:
@@ -331,7 +355,10 @@ class StudentGradeReportSerializer(serializers.Serializer):
                 max_scores.append(5 * percentage)  # 5 es la nota máxima por actividad
         
         return grades, max_scores
+    
+    '''
 
+    '''
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         if not representation.get('activity_evaluation_detail'):
@@ -339,6 +366,7 @@ class StudentGradeReportSerializer(serializers.Serializer):
         if not representation.get('grade_detail_learning_outcome'):
             representation.pop('grade_detail_learning_outcome', None)
         return representation
+    '''
 
     class Meta:
         fields = [
@@ -347,9 +375,9 @@ class StudentGradeReportSerializer(serializers.Serializer):
             'grade_detail_learning_outcome',
             'ra_statistics',
             'overall_ra_statistics',
-            'average',
-            'median',
-            'mean',
+            #'average',
+            #'median',
+            #'mean',
         ]
 
 

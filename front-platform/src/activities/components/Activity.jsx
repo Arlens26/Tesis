@@ -11,7 +11,7 @@ export function Activity() {
 
     const { getEvaluationVersionDetail,
       evaluationVersionDetail, newScheduledCourse, getAllScheduledCourse } = useScheduledCourse()
-    const { getActivityEvaluationVersionDetail, activityEvaluationDetail } = useActivities()
+    const { getActivityEvaluationVersionDetail, activityEvaluationDetail, settingActivity } = useActivities()
     console.log('Activity evaluation detail: ', activityEvaluationDetail)
 
     console.log('New scheduled course estado: ', newScheduledCourse)
@@ -26,6 +26,9 @@ export function Activity() {
     console.log('Ids evaluation version detail: ', evaluationDetailIds)
     const [activitiesData, setActivitiesData] = useState([])
     console.log('activities data: ', activitiesData)
+
+    const selectedDetail = newScheduledCourse?.find(item => item.id === selectedScheduledId)
+    console.log('selected detail: ', selectedDetail)
 
     const filteredActivityEvaluationDetail = useMemo(() => 
       Object.values(activityEvaluationDetail).filter(d => 
@@ -198,20 +201,31 @@ export function Activity() {
 
     const handleSubmit = (event) => {
       event.preventDefault()
-
+    
       const buildActivity = () => {
-        return activitiesData.map(activity => ({
-          name: activity.name,
-          description: activity.description,
-          scheduled_course_id: selectedScheduledId,
-          activity_evaluation_detail: []
-        }))
+        return activitiesData.map(activity => {
+          // Estructura base para la actividad
+          const activityPayload = {
+            activities: {
+              name: activity.name,
+              description: activity.description,
+              scheduled_course: selectedScheduledId 
+            },
+            activity_evaluation_detail: Object.entries(activity.percentages).map(([versionId, percentage]) => ({
+              version_evaluation_detail_id: parseInt(versionId),
+              percentage: percentage,
+              // Solo se incluye activity_id si no es temporal
+              ...(activity.id && !activity.id.toString().startsWith('temp-') && { activity_id: activity.id })
+            }))
+          }
+          
+          return activityPayload
+        })
       }
-
-      const activity = {
-        activity: buildActivity()
-      }
-      console.log(activity)
+    
+      const finalData = buildActivity()
+      console.log('Datos a enviar:', finalData)
+      settingActivity(finalData)
     }
 
   // Render table headers
@@ -306,7 +320,10 @@ export function Activity() {
       className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
       onClick={() => {
         // Función para eliminar la actividad
-        setActivitiesData(prev => prev.filter((_, i) => i !== activityIndex));
+        setActivitiesData(prev => prev.filter((_, i) => i !== activityIndex))
+        console.log('activity id: ', activity.id)
+        const versionEvaluationDetailIds = Object.keys(activity.percentages).map(Number)
+        console.log('detail ids: ', versionEvaluationDetailIds)
       }}>
         <DeleteIcon/>
       </button>
@@ -362,6 +379,30 @@ export function Activity() {
                           </option>
                     ))}
         </select>
+        <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm">Versión de evaluación</label>
+              <input 
+                type="text" 
+                placeholder='' 
+                name='name' 
+                value={selectedVersionId} 
+                //onChange={handleInputChange}
+                disabled 
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>     
+            </div>
+            <div>
+              <label className="text-sm">Periodo académico</label>
+              <input 
+                type="text" 
+                placeholder='' 
+                name='name' 
+                value={selectedDetail ? `${selectedDetail.period.year} - ${selectedDetail.period.semester}` : ''} 
+                //onChange={handleInputChange}
+                disabled 
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+            </div>
+          </div>
         <form className='form flex flex-col gap-4' onSubmit={handleSubmit}>
           <button 
             className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'

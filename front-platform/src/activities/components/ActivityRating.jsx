@@ -12,17 +12,89 @@ export function ActivityRating() {
 
     const { getGradeDetail, gradeDetail, updateGradeDetail } = useEnrolledStudent()
     console.log('Grade datail: ', gradeDetail)
+    const [selectedScheduledId, setSelectedScheduledId] = useState(null)
+    console.log('selected scheduled id: ', selectedScheduledId)
+    //const [selectedVersionId, setSelectedVersionId] = useState(null)
     const [selectedActivityId, setSelectedActivityId] = useState(null)
 
-    const version_id = location.state.version_id
-    console.log('Version id: ', version_id)
-    
-    const filteredByVersion = gradeDetail
-      .filter(detail => detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version === Number(version_id))
-      .filter(detail => detail.enrolled_course.scheduled_course.professor_id === Number(user.id))
-      console.log('Filtered by evaluation version: ', filteredByVersion)
+    //const [selectedGroupId, setSelectedGroupId] = useState(null)
+    const groupedCourse = location.state?.course || []
+    console.log('Grouped course: ', groupedCourse) 
 
-    const filteredByActivities = filteredByVersion      
+    const versionIds = new Set(
+      groupedCourse.flatMap(course => 
+        course.details.map(detail => detail.evaluation_version_id)
+      )
+    )
+    console.log('versionIds: ', versionIds)
+
+    const filteredByVersion = gradeDetail
+    .filter(detail => 
+      versionIds.has(
+        detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version
+      )
+    )
+    .filter(detail => 
+      detail.enrolled_course.scheduled_course.professor_id === Number(user.id)
+    )
+
+    /*const version_id = location.state.version_id
+    console.log('Version id: ', version_id)*/
+
+    /*const filteredByVersion = gradeDetail
+      .filter(detail => detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version === Number(version_id))
+      .filter(detail => detail.enrolled_course.scheduled_course.professor_id === Number(user.id))*/
+    console.log('Filtered by evaluation version: ', filteredByVersion)
+
+    const uniqueGroups = Array.from(
+      new Set(filteredByVersion.map(detail => detail.enrolled_course.scheduled_course.id))
+    ).map(id => {
+      return filteredByVersion.find(detail => detail.enrolled_course.scheduled_course.id === id)
+    }) 
+
+    console.log('unique groups: ', uniqueGroups)
+
+    const filteredByGroup = useMemo(() => {
+      return selectedScheduledId
+        ? filteredByVersion.filter(detail => 
+            detail.enrolled_course.scheduled_course.id === Number(selectedScheduledId))
+        : []
+    }, [filteredByVersion, selectedScheduledId])
+
+    console.log('filtered group: ', filteredByGroup)
+
+    useEffect(() => {
+          if(uniqueGroups && uniqueGroups.length > 0 && selectedScheduledId == null){
+            setSelectedScheduledId(uniqueGroups[0].enrolled_course.scheduled_course.id)
+            //console.log('Scheduled course ID seleccionado:', selectedScheduledId)
+            /*const firstScheduledCourse = newScheduledCourse[0]
+            console.log('First scheduled course: ', firstScheduledCourse)
+            if (selectedVersionId == null) {
+                setSelectedVersionId(firstScheduledCourse.evaluation_version_id)
+            }*/
+          }
+        }, [uniqueGroups, selectedScheduledId])
+
+    /*useEffect(() => {
+      if (filteredByGroup.length > 0 && !selectedActivityId) {
+        const firstActivityId = filteredByGroup[0].activity_evaluation_detail.activities.id
+        setSelectedActivityId(firstActivityId)
+      }
+    }, [filteredByGroup, selectedActivityId])
+
+    const uniqueActivitiesGroup = useMemo(() => {
+      return Array.from(
+        new Set(filteredByGroup.map(detail => detail.activity_evaluation_detail.activities.id))
+      ).map(id => {
+        return filteredByGroup.find(detail => 
+          detail.activity_evaluation_detail.activities.id === id
+        )
+      })
+    }, [filteredByGroup])
+
+    console.log('unique activities group: ', uniqueActivitiesGroup)*/
+
+    const filteredByActivities = filteredByGroup      
       .filter(detail => detail.activity_evaluation_detail.activities.id === Number(selectedActivityId))
     console.log('Filtered by activities: ', filteredByActivities)
     
@@ -292,9 +364,26 @@ export function ActivityRating() {
 
     return(
       <div className="grid gap-2">
-        <span>Calificaciones</span>
-        {filteredByVersion != 0 ? 
+        <span>Calificaciones del curso {groupedCourse[0].name}</span>
+        {filteredByGroup != 0 ? 
         <div>
+        <label className="text-sm">Grupos:</label>
+        <select 
+          id="activity_course" 
+          name='activities' 
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          onChange={(e) => setSelectedScheduledId(e.target.value)}
+        >
+                    <option disabled>Grupos</option>
+                    {uniqueGroups.map((detail) => (
+                      <option
+                        key={`group_${detail.enrolled_course.scheduled_course.id}`}
+                        value={detail.enrolled_course.scheduled_course.id}
+                      >
+                        {detail.enrolled_course.scheduled_course.group}
+                      </option>
+                    ))}
+        </select>
         <label className="text-sm">Actividades:</label>
         <select 
           id="activity_course" 

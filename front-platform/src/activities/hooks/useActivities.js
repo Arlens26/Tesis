@@ -1,6 +1,8 @@
 import { useContext, useState } from "react"
 import { AuthContext } from "../../auth/context/user"
-import { activityFetch, settingActivityFetch, activityDetailFetch, createActivityFetch, activityEvaluationVersionDetailFetch } from '../services/activityService'
+import { activityFetch, settingActivityFetch, deleteSettingActivityFetch,
+         activityDetailFetch, createActivityFetch, 
+         activityEvaluationVersionDetailFetch } from '../services/activityService'
 
 export function useActivities(){
     
@@ -51,6 +53,16 @@ export function useActivities(){
           })
     }
 
+    const deleteSettingActivity = (activityId, versionEvaluationDetailIds) => {
+      return deleteSettingActivityFetch(activityId, versionEvaluationDetailIds, user.token)
+      .then(data => {
+        console.log('Datos eliminados exitosamente', data)
+      })
+      .catch(error => {
+        throw new Error('Error al eliminar una actividad de la configuración', error)
+      })
+    }
+
     const getActivityEvaluationVersionDetail = (versionDetailIds) => {
         activityEvaluationVersionDetailFetch(versionDetailIds, user.token)
         .then(json => {
@@ -64,6 +76,6 @@ export function useActivities(){
         })
     }
 
-    return { getActivities, activities, createActivity, settingActivity,
+    return { getActivities, activities, createActivity, settingActivity, deleteSettingActivity,
              getActivityDetail, activityDetail, getActivityEvaluationVersionDetail, activityEvaluationDetail }
 }

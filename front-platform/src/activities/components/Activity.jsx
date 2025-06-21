@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom"
 import { useScheduledCourse } from "../../scheduled_course/hooks/useSheduledCourse"
 import { useActivities } from "../hooks/useActivities"
 import { CreateIcon, DeleteIcon, SettingsCheckIcon } from "../../components/Icons"
-//import { toast } from "sonner"
+import { toast } from "sonner"
 import { GoBackButton } from "../../components/GoBackButton"
 import { useActivityPercentage } from "../hooks/useActivityPercentage"
 
@@ -11,7 +11,7 @@ export function Activity() {
 
     const { getEvaluationVersionDetail,
       evaluationVersionDetail, newScheduledCourse, getAllScheduledCourse } = useScheduledCourse()
-    const { getActivityEvaluationVersionDetail, activityEvaluationDetail, settingActivity } = useActivities()
+    const { getActivityEvaluationVersionDetail, activityEvaluationDetail, settingActivity, deleteSettingActivity } = useActivities()
     console.log('Activity evaluation detail: ', activityEvaluationDetail)
 
     console.log('New scheduled course estado: ', newScheduledCourse)
@@ -50,7 +50,7 @@ export function Activity() {
     const {  
       handlePercentageChange,
       filteredPercentages,
-      totalPercentageByActivity,
+      //totalPercentageByActivity,
       totalPercentageByLearningOutCome
     } = useActivityPercentage(filteredDetails, filteredActivityEvaluationDetail, activitiesData)
     console.log('filtered percentages: ', filteredPercentages)
@@ -145,8 +145,15 @@ export function Activity() {
   }, [evaluationVersionDetail, selectedVersionId])
     
     // Calcular el total del porcentaje
-    const [totalPercentage, setTotalPercentage] = useState(0)
-    console.log(totalPercentage)
+    const totalPercentage = useMemo(() => {
+      return activitiesData.reduce((total, activity) => {
+        const activityTotal = Object.values(activity.percentages).reduce(
+          (sum, val) => sum + parseFloat(val), 
+          0
+        )
+        return total + activityTotal
+      }, 0)
+    }, [activitiesData])
 
     useEffect(() => {
       if(newScheduledCourse && newScheduledCourse.length > 0 && selectedScheduledId == null){
@@ -161,11 +168,11 @@ export function Activity() {
     }, [newScheduledCourse, selectedScheduledId, selectedVersionId])
 
     // Actualizar el estado del porcentaje total general si es necesario
-    useEffect(() => {
+    /*useEffect(() => {
     const totalActivityPercentage = 
       Object.values(totalPercentageByActivity).reduce((acc, val) => acc + val, 0)
-    setTotalPercentage(totalActivityPercentage)
-    }, [totalPercentageByActivity])
+      setTotalPercentage(totalActivityPercentage)
+    }, [totalPercentageByActivity])*/
 
     useEffect(() => {
       getAllScheduledCourse()
@@ -321,9 +328,20 @@ export function Activity() {
       onClick={() => {
         // Función para eliminar la actividad
         setActivitiesData(prev => prev.filter((_, i) => i !== activityIndex))
-        console.log('activity id: ', activity.id)
+        console.log('activity id: ', activity, 'type:', typeof activity.id)
         const versionEvaluationDetailIds = Object.keys(activity.percentages).map(Number)
         console.log('detail ids: ', versionEvaluationDetailIds)
+
+        if((typeof activity.id === 'number') || 
+        (typeof activity.id === 'string') && !activity.id.startsWith('temp-')){
+          deleteSettingActivity(activity.id, versionEvaluationDetailIds)
+            .then(() => {
+              toast.success('La actividad fue eliminada exitosamente')
+            })
+            .catch(() => {
+              toast.error('Error al eliminar la actividad')
+            })
+        }
       }}>
         <DeleteIcon/>
       </button>
@@ -340,8 +358,10 @@ export function Activity() {
                                     {filteredDetails.map((detail) => {
                                       const detailId = detail.id
                                       const detailPercentage = parseFloat(detail.percentage.percentage).toFixed(0)
+                                      console.log('detail percentage: ', detailPercentage)
                                       const currentTotalPercentage = totalPercentageByLearningOutCome[detailId]
-                                      //setTotalPercentage(totalPercentage)
+                                      console.log('current total percentage: ', currentTotalPercentage)
+                                      //setTotalPercentage(currentTotalPercentage)
                                       return (
                                           <td key={detailId} className="px-6 py-4">
                                               <span style={{ color: currentTotalPercentage < detailPercentage ? 'red' : 'inherit' }}>

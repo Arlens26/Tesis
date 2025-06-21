@@ -13,6 +13,35 @@ class ActivityEvaluationDetailView(viewsets.ModelViewSet):
     serializer_class = ActivityEvaluationDetailSerializer
     queryset = ActivityEvaluationDetail.objects.all()
 
+    @action(detail=False, methods=['post'])
+    def delete_by_activity_and_versions(self, request):
+        activity_id = request.data.get('activity_id')
+        version_evaluation_detail_ids = request.data.get('version_evaluation_detail_ids', [])
+
+        if not activity_id or not version_evaluation_detail_ids:
+            return Response(
+                {'error': 'Se requieren activity_id y version_evaluation_detail_ids'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Se eliminan los registros que coincidan con los ids recibidos
+            deleted_count, _ = ActivityEvaluationDetail.objects.filter(
+                activity_id=activity_id,
+                version_evaluation_detail_id__in=version_evaluation_detail_ids
+            ).delete()
+            
+            return Response(
+                {'message': f'Se eliminaron {deleted_count} registros'},
+                status=status.HTTP_200_OK
+            )
+                
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 class GradeDetailLearningOutComeView(viewsets.ModelViewSet):
     serializer_class = GradeDetailLearningOutComeSerializer
     queryset = GradeDetailLearningOutCome.objects.select_related(

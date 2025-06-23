@@ -24,6 +24,8 @@ import { StudentEnrolledCourseList } from './students/components/StudentEnrolled
 import { EnrolledStudentList } from './students/components/EnrolledStudentList.jsx';
 import { StudentGradeReport } from './students/components/StudentGradeReport.jsx';
 import { EvaluationVersionCourseDetailView } from './components/EvaluationVersionCourseDetailView.jsx';
+import { useRef } from 'react';
+import { useEffect } from 'react';
 
 function App() {
 
@@ -35,14 +37,28 @@ function App() {
   const menuCheckId = useId();
 
   //const { courses, getCourse, deleteCourse } = useCourses();
-  const [menuChecked, setMenuChecked] = useState(true);
+  const [menuChecked, setMenuChecked] = useState(true)
+  const menuRef = useRef(null)
 
   const handleMenuToggle = () => {
-    setMenuChecked(!menuChecked);
+    setMenuChecked(!menuChecked)
     console.log(menuChecked)
-  };
+  }
 
-  const [components, setComponents] = useState([]);
+  const handleClickOutSide = (event) => {
+    if(menuRef.current && !menuRef.current.contains(event.target)) {
+      setMenuChecked(true)
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutSide)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutSide)
+    }
+  }, [])
+
+  const [components, setComponents] = useState([])
 
   const agregarComponente = () => {
     setComponents([...components, <Card key={components.length} />]);
@@ -156,28 +172,29 @@ function App() {
   return (
     <VersionProvider>
       <ScheduledCourseProvider>
-        <Toaster richColors closeButton />
+        <Toaster richColors closeButton position="top-right"/>
         <section className={`container ${menuChecked ? 'menu-open' : ''} min-w-full`}>
           <HeaderPage />
               <label className='btn-menu mt-1 ml-4' htmlFor={menuCheckId}>
                 <MenuIcon />
               </label>
               <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
-          <aside className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
-            <ul>
-                <li><Link to="/">Inicio</Link></li>
-                <li><Link to="/login">Login</Link></li>
-                <li><Link to="/role">Role</Link></li>
-                <li><Link to="/code">Code</Link></li>
-                <li><Link to="/course-list">Courses</Link></li>
-                <li><Link to="/course">Create Course</Link></li>
-                <li><Link to="/grade-detail">Grade detail</Link></li>
-                <li><Link to="/enrolled-student">Enrolled student</Link></li>
-                <li><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
-                <li><Link to="/student-grade-report">Student grade report</Link></li>
+              {menuChecked && <div className="overlay" onClick={handleMenuToggle}></div>}
+          <aside ref={menuRef} className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
+            <ul className="space-y-2">
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/">Inicio</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/login">Login</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/role">Role</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/code">Code</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course-list">Courses</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course">Create Course</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/grade-detail">Grade detail</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/enrolled-student">Enrolled student</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
+                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-grade-report">Student grade report</Link></li>
             </ul>
           </aside>
-          <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''} p-14`}>
+          <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''} p-16`}>
             {/*<BreadCrumb/>*/}
             <Routes>
               <Route path='/' element={<main/>} />

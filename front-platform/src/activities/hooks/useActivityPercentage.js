@@ -24,6 +24,7 @@ export function useActivityPercentage(
     )
     console.log('Filtered percentages: ', filteredPercentages)
     const [totalPercentageByActivity, setTotalPercentageByActivity] = useState(0)
+    console.log('Total percentage by activity: ', totalPercentageByActivity)
     const [totalPercentageByLearningOutCome, setTotalPercentageByLearningOutCome] = useState({})
     console.log('Total percentage by learning outcome: ', totalPercentageByLearningOutCome)
    
@@ -35,13 +36,13 @@ export function useActivityPercentage(
     })
     console.log('Unique Activities: ', uniqueActivities)
 
-    useEffect(() => {
+    /*useEffect(() => {
       const initialTotals = filteredPercentages.reduce((acc, item) => {
         acc[item.activity_id] = (acc[item.activity_id] || 0) + item.percentage
         return acc
       }, {})
       setTotalPercentageByActivity(initialTotals)
-    }, [filteredPercentages])
+    }, [filteredPercentages])*/
 
     useEffect(() => {
         if(filteredPercentages){
@@ -52,6 +53,23 @@ export function useActivityPercentage(
           setTotalPercentageByActivity(initialTotals)
         }
     }, [filteredPercentages])
+
+    useEffect(() => {
+      const initialTotals = {}
+      filteredDetails.forEach(detail => {
+        initialTotals[detail.id] = 0
+      })
+      
+      activitiesData.forEach(activity => {
+        Object.entries(activity.percentages).forEach(([detailId, percentage]) => {
+          if (initialTotals[detailId] !== undefined) {
+            initialTotals[detailId] += percentage
+          }
+        })
+      })
+    
+      setTotalPercentageByLearningOutCome(initialTotals)
+    }, [activitiesData, filteredDetails])
 
     const handlePercentageChange = (activityId, versionDetailId, value, previousPercentage) => {
       const updatedPercentage = parseFloat(value) || 0

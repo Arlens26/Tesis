@@ -25,6 +25,8 @@ class ActivityEvaluationDetailView(viewsets.ModelViewSet):
             )
 
         try:
+            activity = Activity.objects.get(id=activity_id)
+            activity.delete()
             # Se eliminan los registros que coincidan con los ids recibidos
             deleted_count, _ = ActivityEvaluationDetail.objects.filter(
                 activity_id=activity_id,
@@ -32,7 +34,9 @@ class ActivityEvaluationDetailView(viewsets.ModelViewSet):
             ).delete()
             
             return Response(
-                {'message': f'Se eliminaron {deleted_count} registros'},
+                { 
+                    'message': f'Se eliminaron {deleted_count} registros de evaluación y la actividad principal (ID: {activity_id})'
+                },
                 status=status.HTTP_200_OK
             )
                 
@@ -100,36 +104,44 @@ class ActivitySettingView(viewsets.ViewSet):
     @action(detail=False, methods=['post'])
     def save_activities(self, request):
         data = request.data
-        
+
         for item in data:
             activity_data = item.get('activities')
-            evaluation_details = item.get('activity_evaluation_detail')  # Ahora es una lista
+            evaluation_details = item.get('activity_evaluation_detail', [])
 
-            # Crear o actualizar actividad
-            activity_id = activity_data.get('id', None)
+            #activity_id = activity_data.get('id')
+            activity_id = activity_data.get('id')
+            if not activity_id and evaluation_details:
+                activity_id = evaluation_details[0].get('activity_id')
+            scheduled_course_id = activity_data.get('scheduled_course')
+
+            # Buscar y actualizar la actividad si existe
             if activity_id and not str(activity_id).startswith('temp-'):
                 try:
                     activity = Activity.objects.get(id=activity_id)
                     activity.name = activity_data['name']
                     activity.description = activity_data['description']
-                    activity.scheduled_course_id = activity_data['scheduled_course']
+                    activity.scheduled_course_id = scheduled_course_id
                     activity.save()
                 except Activity.DoesNotExist:
-                    return Response({'error': f'Actividad no existe'}, status=404)
+                    return Response({'error': 'Actividad no existe'}, status=404)
             else:
-                # Crear nueva actividad sin ID temporal
+                # Buscar por nombre y curso programado, o crear si no existe
                 activity = Activity.objects.create(
                     name=activity_data['name'],
                     description=activity_data['description'],
-                    scheduled_course_id=activity_data['scheduled_course']
+                    scheduled_course_id=scheduled_course_id
                 )
 
-            # Crear detalles de evaluación
+            # Crear o actualizar detalles de evaluación
             for detail in evaluation_details:
-                ActivityEvaluationDetail.objects.create(
-                    version_evaluation_detail_id=detail['version_evaluation_detail_id'],
+                version_id = detail['version_evaluation_detail_id']
+                percentage = detail['percentage']
+
+                ActivityEvaluationDetail.objects.update_or_create(
                     activity=activity,
-                    percentage=detail['percentage']
+                    version_evaluation_detail_id=version_id,
+                    defaults={'percentage': percentage}
                 )
 
-        return Response({'status': 'success'}, status=201)
+        return Response({'status': 'success'}, status=status.HTTP_200_OK)

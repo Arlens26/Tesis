@@ -9,7 +9,7 @@ export default {
     extend: {
       colors: {
         'primary' : '#C20E1A',
-        'main' : '#CFCFCF',
+        'main' : '#f2f2f2',
         'footer' : '#841F1C',
         'link' : '#cd1f32',
         'btn-create' : '#599876',

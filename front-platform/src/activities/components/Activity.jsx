@@ -27,6 +27,9 @@ export function Activity() {
     const [activitiesData, setActivitiesData] = useState([])
     console.log('activities data: ', activitiesData)
 
+    const [isInitialLoad, setIsInitialLoad] = useState(true)
+    console.log('Is intial load: ', isInitialLoad)
+
     const selectedDetail = newScheduledCourse?.find(item => item.id === selectedScheduledId)
     console.log('selected detail: ', selectedDetail)
 
@@ -53,12 +56,15 @@ export function Activity() {
       //totalPercentageByActivity,
       totalPercentageByLearningOutCome
     } = useActivityPercentage(filteredDetails, filteredActivityEvaluationDetail, activitiesData)
+    console.log('Activty data: ', activitiesData)
+    console.log('filtered activity evaluation detail: ', filteredActivityEvaluationDetail)
     console.log('filtered percentages: ', filteredPercentages)
 
 
     useEffect(() => {
       // Si hay actividades existentes y activitiesData está vacío
       if (
+        isInitialLoad &&
         filteredActivityEvaluationDetail.length > 0 && 
         activitiesData.length === 0 &&
         filteredDetails.length > 0 &&
@@ -84,8 +90,9 @@ export function Activity() {
           }))
           console.log('Initial activities: ', initialActivities)
         setActivitiesData(initialActivities)
+        setIsInitialLoad(false)
       }
-    }, [filteredActivityEvaluationDetail, filteredDetails, activitiesData.length,  filteredPercentages])
+    }, [filteredActivityEvaluationDetail, filteredDetails, activitiesData.length,  filteredPercentages, isInitialLoad])
 
     const handleAddActivity = () => {
       const newActivity = {
@@ -203,11 +210,19 @@ export function Activity() {
           .map(d => d.id)
         setEvaluationDetailIds(detailIds)
         getActivityEvaluationVersionDetail(detailIds)
+        setIsInitialLoad(true)
       }
     }
 
     const handleSubmit = (event) => {
       event.preventDefault()
+
+      for (const activity of activitiesData) {
+        if (!activity.name.trim() || !activity.description.trim()) {
+          toast.error('Por favor, completa todos los campos requeridos')
+          return
+        }
+      }
     
       const buildActivity = () => {
         return activitiesData.map(activity => {
@@ -233,6 +248,13 @@ export function Activity() {
       const finalData = buildActivity()
       console.log('Datos a enviar:', finalData)
       settingActivity(finalData)
+        .then(() => {
+          setIsInitialLoad(true)
+          toast.success('Configuración de la actividad exitosa')
+        })
+        .catch(() => {
+          toast.error('Error en la configuración de la actividad')
+        })
     }
 
   // Render table headers
@@ -340,6 +362,7 @@ export function Activity() {
             })
             .catch(() => {
               toast.error('Error al eliminar la actividad')
+              setActivitiesData(prev => [...prev, activity])
             })
         }
       }}>
@@ -438,7 +461,7 @@ export function Activity() {
             {renderTableRows()}
           </table> 
           <div className="flex justify-end gap-2">
-            <button disabled={totalPercentage <= 99} type='submit' className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+            <button disabled={totalPercentage > 100} type='submit' className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
               <SettingsCheckIcon/>
               <span className="ml-1">Configurar Actividad</span>
             </button>                      

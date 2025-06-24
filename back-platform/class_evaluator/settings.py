@@ -134,7 +134,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # cors authorization
-CORS_ALLOWED_ORIGINS = ['http://localhost:5173', 'tesis-0xfh.onrender.com']
+CORS_ALLOWED_ORIGINS = ['http://localhost:5173', 'https://tesis-0xfh.onrender.com']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

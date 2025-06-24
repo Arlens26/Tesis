@@ -83,8 +83,8 @@ WSGI_APPLICATION = 'class_evaluator.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "class_evaluator",
-        "USER": "neondb",
+        "NAME": "neondb",
+        "USER": "neondb_owner",
         "PASSWORD": "npg_gi76CfKIGEBs",
         "HOST": "ep-long-block-a59bbgdt-pooler.us-east-2.aws.neon.tech",
         "PORT": "5432",

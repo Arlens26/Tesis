@@ -1,6 +1,8 @@
-const AUTH_ENDPOINT = `http://127.0.0.1:8000/authentication/user/login/`
-const PROFILE_ENDPOINT = `http://127.0.0.1:8000/authentication/user/profile/`
-const LOGOUT_ENDPOINT = `http://127.0.0.1:8000/authentication/user/logout/`
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const AUTH_ENDPOINT = `${BASE_URL}/authentication/user/login/`
+const PROFILE_ENDPOINT = `${BASE_URL}/authentication/user/profile/`
+const LOGOUT_ENDPOINT = `${BASE_URL}/authentication/user/logout/`
 
 export const loginUser = (fields) => {
     return fetch(AUTH_ENDPOINT, {

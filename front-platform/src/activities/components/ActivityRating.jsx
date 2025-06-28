@@ -363,62 +363,53 @@ export function ActivityRating() {
   )
 
     return(
-      <div className="grid gap-2">
+      <div className="flex flex-col gap-2">
         <span>Calificaciones del curso {groupedCourse[0].name}</span>
         {filteredByGroup != 0 ? 
-        <div>
-        <label className="text-sm">Grupos:</label>
-        <select 
-          id="activity_course" 
-          name='activities' 
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          onChange={(e) => setSelectedScheduledId(e.target.value)}
-        >
-                    <option disabled>Grupos</option>
-                    {uniqueGroups.map((detail) => (
-                      <option
-                        key={`group_${detail.enrolled_course.scheduled_course.id}`}
-                        value={detail.enrolled_course.scheduled_course.id}
-                      >
-                        {detail.enrolled_course.scheduled_course.group}
-                      </option>
-                    ))}
-        </select>
-        <label className="text-sm">Actividades:</label>
-        <select 
-          id="activity_course" 
-          name='activities' 
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          onChange={(e) => setSelectedActivityId(e.target.value)}
-        >
-                    <option disabled>Seleccione una actividad</option>
-        {uniqueActivities &&
-          uniqueActivities.map((detail) => (
-            <option
-              key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
-              value={detail.activity_evaluation_detail.activities.id}
-            >
-              {`${detail.activity_evaluation_detail.activities.name}`}
-            </option>
-                    ))}
-        </select>
-        <div>
-          {/*filteredByVersion.map((detail) => (
-            <div key={`activityGrade_${detail.id}`}>
-              <span>Activity selected: {selectedActivityId} - </span>
-              <span>{detail.id} - {detail.grade} - {detail.enrolled_course.student.name} - </span>
-              <span>{detail.activity_evaluation_detail.activities.name} - {detail.activity_evaluation_detail.percentage}% - </span>
-              <span>{detail.activity_evaluation_detail.version_evaluation_detail.learning_outcome} - </span>  
-              <span>Versión id: {detail.activity_evaluation_detail.version_evaluation_detail.evaluation_version}</span>      
+        <div className="flex flex-col gap-4">
+          <label className="text-sm">Grupos:</label>
+          <select 
+            id="activity_course" 
+            name='activities' 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            onChange={(e) => setSelectedScheduledId(e.target.value)}
+          >
+                      <option disabled>Grupos</option>
+                      {uniqueGroups.map((detail) => (
+                        <option
+                          key={`group_${detail.enrolled_course.scheduled_course.id}`}
+                          value={detail.enrolled_course.scheduled_course.id}
+                        >
+                          {detail.enrolled_course.scheduled_course.group}
+                        </option>
+                      ))}
+          </select>
+          <label className="text-sm">Actividades:</label>
+          <select 
+            id="activity_course" 
+            name='activities' 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            onChange={(e) => setSelectedActivityId(e.target.value)}
+          >
+                      <option disabled>Seleccione una actividad</option>
+          {uniqueActivities &&
+            uniqueActivities.map((detail) => (
+              <option
+                key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
+                value={detail.activity_evaluation_detail.activities.id}
+              >
+                {`${detail.activity_evaluation_detail.activities.name}`}
+              </option>
+                      ))}
+          </select>
+          <form className='form flex flex-col gap-4 mt-4'>
+            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                  <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  {renderTableHeaders()}
+                  {renderTableRows()}
+                  </table>
             </div>
-          ))*/}
-        </div>
-        <form className='form flex flex-col gap-4 mt-4'>
-              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              {renderTableHeaders()}
-              {renderTableRows()}
-              </table>
-        </form>
+          </form>
         </div>
         : <div><span>Aún no hay estudiantes matriculados para este curso</span></div>  
         }

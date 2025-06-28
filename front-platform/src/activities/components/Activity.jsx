@@ -456,10 +456,12 @@ export function Activity() {
             <CreateIcon/>
             <span className="ml-1">Crear actividad</span>
           </button>
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            {renderTableHeaders()}
-            {renderTableRows()}
-          </table> 
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              {renderTableHeaders()}
+              {renderTableRows()}
+            </table> 
+          </div>
           <div className="flex justify-end gap-2">
             <button disabled={totalPercentage > 100} type='submit' className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
               <SettingsCheckIcon/>

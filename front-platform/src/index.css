@@ -5,6 +5,6 @@
 body{
     margin: 0;
     font-family: system-ui, 'Open Sans';
-    display: grid;
-    min-height: 100vh;
+    /*display: grid;
+    min-height: 100vh;*/
 }

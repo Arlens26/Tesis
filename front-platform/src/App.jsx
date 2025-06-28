@@ -173,9 +173,9 @@ function App() {
     <VersionProvider>
       <ScheduledCourseProvider>
         <Toaster richColors closeButton position="top-right"/>
-        <section className={`container ${menuChecked ? 'menu-open' : ''} min-w-full`}>
+        <section className={`container min-w-full min-h-screen overflow-hidden`}>
           <HeaderPage />
-              <label className='btn-menu mt-1 ml-4' htmlFor={menuCheckId}>
+              <label className='btn-menu mt-2 ml-4' htmlFor={menuCheckId}>
                 <MenuIcon />
               </label>
               <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />

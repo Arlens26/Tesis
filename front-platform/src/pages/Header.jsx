@@ -20,12 +20,12 @@ export function HeaderPage() {
   }
   //const { profile } = user;
     return (
-        <header className='mr-14'>     
+        <header className='bg-white shadow-md p-4 sm:px-6 md:px-8 flex flex-col sm:flex-row justify-between items-center w-full'>     
           <nav className="grid grid-cols-6 gap-4">
-            <div className='logo-container col-start-1 col-end-3'>
-              <img className='logo-img' src={logo} alt="logo_univalle" />
+            <div className='flex items-center ml-8 mb-8'>
+              <img className='logo-img h-auto max-w-[160px] max-h-8' src={logo} alt="logo_univalle" />
             </div>
-            <div className="col-end-7 col-span-2 flex justify-end items-center">
+            <div className="col-end-7 col-span-2 xs:col-end-7 xs:col-span-3 flex justify-end items-center mb-8">
               <span>{user ? <span>Bienvenido, {user.first_name} {user.last_name} {' '} - {' '}
                 <span className="text-primary">{role}</span> 
                 {/*profile && (

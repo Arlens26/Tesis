@@ -9,16 +9,17 @@ export function HeaderPage() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
+    const userName = user ? user.first_name : 'usuario'
     logout()
         .then(() => {
-            toast.success(`Sesión cerrada exitosamente del usuario: ${user.first_name}`)
+            toast.success(`Sesión cerrada exitosamente del usuario: ${userName}`)
             navigate('/login')
         })
         .catch(error => {
-            toast.error('Error al cerrar sesión:', error)
+            toast.error('Error al cerrar sesión', error)
         })
   }
-  //const { profile } = user;
+  
     return (
         <header className='bg-white shadow-md p-4 sm:px-6 md:px-8 flex flex-col sm:flex-row justify-between items-center w-full'>     
           <nav className="grid grid-cols-6 gap-4">
@@ -26,18 +27,18 @@ export function HeaderPage() {
               <img className='logo-img h-auto max-w-[160px] max-h-8' src={logo} alt="logo_univalle" />
             </div>
             <div className="col-end-7 col-span-2 xs:col-end-7 xs:col-span-3 flex justify-end items-center mb-8">
-              <span>{user ? <span>Bienvenido, {user.first_name} {user.last_name} {' '} - {' '}
-                <span className="text-primary">{role}</span> 
-                {/*profile && (
+                {role ? 
                   <>
-                    {profile.is_professor && <span>Profesor</span>}
-                    {profile.is_director && <span>Director</span>}
-                    {profile.is_student && <span>Estudiante</span>}
-                  </>
-                )*/}</span> : <span>Bienvenido</span>} </span>
-                <button className="ml-1" onClick={handleLogout}>
-                  <LogoutIcon/>
-                </button>
+                    <span>Bienvenido, {user.first_name} {user.last_name} {' '} - {' '}
+                      <span className="text-primary">{role}</span>
+                    </span>
+                    <button className="ml-1" onClick={handleLogout}>
+                      <LogoutIcon/>
+                    </button>
+                   </>
+                   : 
+                      <span>Bienvenido</span>
+                    }
             </div>
           </nav>
         </header>

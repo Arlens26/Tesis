@@ -26,10 +26,12 @@ import { EvaluationVersionCourseDetailView } from './components/EvaluationVersio
 import { useRef } from 'react';
 import { useEffect } from 'react';
 import { CodeActivity } from './components/CodeActivity.jsx';
+import { useUsers } from './auth/hooks/useUsers.js';
 
 function App() {
 
-  
+  const { role } = useUsers()
+  console.log('role: ', role)
   const menuCheckId = useId()
   //const { courses, getCourse, deleteCourse } = useCourses();
   const [menuChecked, setMenuChecked] = useState(true)
@@ -53,6 +55,7 @@ function App() {
     }
   }, [])
 
+  const isLoggedIn = role !== null
 
   return (
     <VersionProvider>
@@ -60,25 +63,38 @@ function App() {
         <Toaster richColors closeButton position="top-right"/>
         <section className={`container min-w-full min-h-screen overflow-hidden`}>
           <HeaderPage />
-              <label className='btn-menu mt-2 ml-4' htmlFor={menuCheckId}>
-                <MenuIcon />
-              </label>
-              <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
-              {menuChecked && <div className="overlay" onClick={handleMenuToggle}></div>}
-          <aside ref={menuRef} className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
-            <ul className="space-y-2">
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/">Inicio</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/login">Login</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/role">Role</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/code">Code</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course-list">Courses</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course">Create Course</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/grade-detail">Grade detail</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/enrolled-student">Enrolled student</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
-                <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-grade-report">Student grade report</Link></li>
-            </ul>
-          </aside>
+              {isLoggedIn &&
+                (<>
+                  <label className='btn-menu mt-2 ml-4' htmlFor={menuCheckId}>
+                  <MenuIcon />
+                  </label>
+                  <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
+                  {menuChecked && <div className="overlay" onClick={handleMenuToggle}></div>}
+                </>)
+              }
+          {isLoggedIn && (
+            <aside ref={menuRef} className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
+              <ul className="space-y-2">
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/">Inicio</Link></li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/login">Login</Link></li>
+                  {/*isLoggedIn && role === 'director' && (
+                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                      <Link to="/role">Role</Link>
+                    </li>
+                  )*/}
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                    <Link to="/role">Role</Link>
+                  </li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/code">Code</Link></li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course-list">Courses</Link></li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course">Create Course</Link></li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/grade-detail">Grade detail</Link></li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/enrolled-student">Enrolled student</Link></li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
+                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-grade-report">Student grade report</Link></li>
+              </ul>
+            </aside>
+          )}
           <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''} p-16`}>
             {/*<BreadCrumb/>*/}
             <Routes>

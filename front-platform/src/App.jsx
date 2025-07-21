@@ -1,4 +1,3 @@
-
 import './App.css';
 import { Toaster } from 'sonner';
 import { MenuIcon } from './components/Icons';
@@ -27,11 +26,13 @@ import { useRef } from 'react';
 import { useEffect } from 'react';
 import { CodeActivity } from './components/CodeActivity.jsx';
 import { useUsers } from './auth/hooks/useUsers.js';
+import { useRoleStore } from './auth/store/useRoleStore'
 
 function App() {
 
   const { role } = useUsers()
-  console.log('role: ', role)
+  const isDirector = useRoleStore((state) => state.isDirector)
+
   const menuCheckId = useId()
   //const { courses, getCourse, deleteCourse } = useCourses();
   const [menuChecked, setMenuChecked] = useState(true)
@@ -77,19 +78,21 @@ function App() {
               <ul className="space-y-2">
                   <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/">Inicio</Link></li>
                   <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/login">Login</Link></li>
-                  {/*isLoggedIn && role === 'director' && (
-                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                      <Link to="/role">Role</Link>
-                    </li>
-                  )*/}
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                    <Link to="/role">Role</Link>
-                  </li>
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/code">Code</Link></li>
+                  {isDirector && (
+                    <>
+                      <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                        <Link to="/role">Role</Link>
+                      </li>
+                      <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/code">Code</Link></li>                    
+                    </>
+                  )}
                   <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course-list">Courses</Link></li>
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course">Create Course</Link></li>
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/grade-detail">Grade detail</Link></li>
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/enrolled-student">Enrolled student</Link></li>
+                  {isDirector && role === 'director' && (
+                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/course">Create Course</Link></li>
+                  )}            
+                  {role === 'professor' && (
+                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/enrolled-student">Enrolled student</Link></li>
+                  )}
                   <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-enrolled-course-list">Student enrolled course list</Link></li>
                   <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2"><Link to="/student-grade-report">Student grade report</Link></li>
               </ul>
@@ -109,7 +112,6 @@ function App() {
               <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
               <Route path='/scheduled-course/' element={<ScheduledCourse/>} />
               <Route path='course-list/activity/' element={<Activity/>} />
-              <Route path='grade-detail' element={<ActivityRating/>} />
               <Route path='enrolled-student' element={<EnrolledStudent/>} />
               <Route path='enrolled-student-list' element={<EnrolledStudentList/>} />
               <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />

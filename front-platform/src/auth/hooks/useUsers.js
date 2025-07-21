@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/user";
 import { loginUser, userProfile, logoutUser } from "../services/userService";
+import { useRoleStore } from "../store/useRoleStore";
 
 export function useUsers() {
 
@@ -18,10 +19,13 @@ export function useUsers() {
           console.log(profileData)
             if (profileData.is_director && profileData.is_professor) {
                 setRole('director')
+                useRoleStore.getState().setIsDirector(true)
             } else if (profileData.is_professor) {
                 setRole('professor')
+                useRoleStore.getState().setIsDirector(false)
             } else if (profileData.is_student) {
                 setRole('student')
+                useRoleStore.getState().setIsDirector(false)
             } else {
                 console.error('No se pudo determinar el rol del usuario')
             }

@@ -36,26 +36,7 @@ function App() {
 
   const menuCheckId = useId()
   //const { courses, getCourse, deleteCourse } = useCourses();
-  const [menuChecked, setMenuChecked] = useState(true)
   const menuRef = useRef(null)
-
-  const handleMenuToggle = () => {
-    setMenuChecked(!menuChecked)
-    console.log(menuChecked)
-  }
-
-  const handleClickOutSide = (event) => {
-    if(menuRef.current && !menuRef.current.contains(event.target)) {
-      setMenuChecked(true)
-    }
-  }
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutSide)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutSide)
-    }
-  }, [])
 
   const isLoggedIn = role !== null
 
@@ -63,108 +44,144 @@ function App() {
     <VersionProvider>
       <ScheduledCourseProvider>
         <Toaster richColors closeButton position="top-right"/>
-        <section className={`container min-w-full min-h-screen overflow-hidden`}>
+        <div className="flex flex-col min-h-screen">
           <HeaderPage />
-              {isLoggedIn &&
-                (<>
-                  <label className='btn-menu mt-2 ml-4' htmlFor={menuCheckId}>
-                  <MenuIcon />
-                  </label>
-                  <input id={menuCheckId} type="checkbox" checked={menuChecked} onChange={handleMenuToggle} hidden />
-                  {menuChecked && <div className="overlay" onClick={handleMenuToggle}></div>}
-                </>)
-              }
-          {isLoggedIn && (
-            <aside ref={menuRef} className={`menu-list py-20 flex justify-center ${menuChecked ? 'open' : ''}`}>
-              <ul className="space-y-2">
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                    <Link to="/" className="flex items-center">
-                      <span className="mr-2"><HomeIcon/></span>
-                      Inicio
-                    </Link>
-                  </li>
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                    <Link to="/login" className="flex items-center">
-                      <span className="mr-2"><LoginIcon/></span>
-                      Login
-                    </Link>
-                  </li>
-                  {isDirector && (
-                    <>
+          <div className="flex flex-grow">
+            {isLoggedIn && (
+              <div className="group fixed left-0 top-0 h-full z-10">
+                <aside 
+                  ref={menuRef} 
+                  className="h-full py-20 flex flex-col items-center transition-all duration-300 w-16 group-hover:w-72 overflow-hidden bg-gray-800"
+                >
+                  <ul className="space-y-2 w-full px-2">
+                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                      <Link to="/" className="flex items-center">
+                        <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                          <HomeIcon/>
+                        </span>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                          Inicio
+                        </span>
+                      </Link>
+                    </li>
+                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                      <Link to="/login" className="flex items-center">
+                        <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                          <LoginIcon/>
+                        </span>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                          Login
+                        </span>
+                      </Link>
+                    </li>
+                    {isDirector && (
+                      <>
+                        <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                          <Link to="/role" className="flex items-center">
+                            <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                              <ProfileIcon/>
+                            </span>
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                              Perfil
+                            </span>
+                          </Link>
+                        </li>
+                        <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                          <Link to="/code" className="flex items-center">
+                            <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                              <CodeIcon/>
+                            </span>
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                              Código
+                            </span>
+                          </Link>
+                        </li>                    
+                      </>
+                    )}
+                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                      <Link to="/course-list" className="flex items-center">
+                        <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                          <CourseLayoutIcon/>
+                        </span>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                          Cursos
+                        </span>
+                      </Link>
+                    </li>
+                    {isDirector && role === 'director' && (
                       <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                        <Link to="/role" className="flex items-center">
-                          <span className="mr-2"><ProfileIcon/></span>
-                          Perfil
+                        <Link to="/course" className="flex items-center">
+                          <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                            <CreateIcon/>
+                          </span>
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                            Crear curso
+                          </span>
                         </Link>
                       </li>
+                    )}            
+                    {role === 'professor' && (
                       <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                        <Link to="/code" className="flex items-center">
-                          <span className="mr-2"><CodeIcon/></span>
-                          Código
+                        <Link to="/enrolled-student" className="flex items-center">
+                          <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                            <StudentEnrolledIcon/>
+                          </span>
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                            Matrículas estudiantes
+                          </span>
                         </Link>
-                      </li>                    
-                    </>
-                  )}
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                    <Link to="/course-list" className="flex items-center">
-                      <span className="mr-2"><CourseLayoutIcon/></span>
-                      Cursos
-                    </Link>
-                  </li>
-                  {isDirector && role === 'director' && (
+                      </li>
+                    )}
                     <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                      <Link to="/course" className="flex items-center">
-                        <span className="mr-2"><CreateIcon/></span>
-                        Crear curso
+                      <Link to="/student-enrolled-course-list" className="flex items-center">
+                        <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                          <StudentEnrolledListIcon/>
+                        </span>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                          Programación académica
+                        </span>
                       </Link>
                     </li>
-                  )}            
-                  {role === 'professor' && (
                     <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                      <Link to="/enrolled-student" className="flex items-center">
-                        <span className="mr-2"><StudentEnrolledIcon/></span>
-                        Matrículas estudiantes
-                      </Link>
-                    </li>
-                  )}
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
-                    <Link to="/student-enrolled-course-list" className="flex items-center">
-                      <span className="mr-2"><StudentEnrolledListIcon/></span>
-                      Programación académica
-                    </Link>
-                  </li>
-                  <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
                       <Link to="/student-grade-report" className="flex items-center">
-                        <span className="mr-2"><ReportAnaliticsIcon/></span>
-                        Reporte calificaciones de estudiantes
+                        <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                          <ReportAnaliticsIcon/>
+                        </span>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                          Reporte calificaciones
+                        </span>
                       </Link>
-                  </li>
-              </ul>
-            </aside>
-          )}
-          <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''} p-16`}>
-            {/*<BreadCrumb/>*/}
-            <Routes>
-              <Route path='/' element={<main/>} />
-              <Route path='/login' element={<LoginForm/>} />
-              <Route path='/role' element={<SelectRole/>} />
-              <Route path='/code' element={<CodeActivity/>}/>
-              {/* Cambiar forma de pasar props usando useContext para los cursos */}
-              <Route path='/course-list' element={<CourseList/>} />
-              <Route path='/course' element={<CourseForm/>} />
-              <Route path='/course/:id' element={<CourseForm/>} />
-              <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
-              <Route path='/scheduled-course/' element={<ScheduledCourse/>} />
-              <Route path='course-list/activity/' element={<Activity/>} />
-              <Route path='enrolled-student' element={<EnrolledStudent/>} />
-              <Route path='enrolled-student-list' element={<EnrolledStudentList/>} />
-              <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
-              <Route path='student-grade-report' element={<StudentGradeReport/>} />
-              <Route path='evaluation-version-course-detail-view' element={<EvaluationVersionCourseDetailView/>} />
-            </Routes>
-          </main>
-          <FooterPage />
-      </section>
+                    </li>
+                  </ul>
+                </aside>
+              </div>
+            )}
+            <main className={`bg-main p-16 flex-grow transition-all duration-300 ${isLoggedIn ? 'ml-16 group-hover:ml-72' : 'ml-0'}`}>
+              <Routes>
+                <Route path='/' element={<main/>} />
+                <Route path='/login' element={<LoginForm/>} />
+                <Route path='/role' element={<SelectRole/>} />
+                <Route path='/code' element={<CodeActivity/>}/>
+                {/* Cambiar forma de pasar props usando useContext para los cursos */}
+                <Route path='/course-list' element={<CourseList/>} />
+                <Route path='/course' element={<CourseForm/>} />
+                <Route path='/course/:id' element={<CourseForm/>} />
+                <Route path='/evaluation-version-course/' element={<EvaluationVersionCourseForm/>} />
+                <Route path='/scheduled-course/' element={<ScheduledCourse/>} />
+                <Route path='course-list/activity/' element={<Activity/>} />
+                <Route path='grade-detail' element={<ActivityRating/>} />
+                <Route path='enrolled-student' element={<EnrolledStudent/>} />
+                <Route path='enrolled-student-list' element={<EnrolledStudentList/>} />
+                <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
+                <Route path='student-grade-report' element={<StudentGradeReport/>} />
+                <Route path='evaluation-version-course-detail-view' element={<EvaluationVersionCourseDetailView/>} />
+              </Routes>
+            </main>
+          </div>
+          <div className={`${isLoggedIn ? 'ml-16 group-hover:ml-72' : ''} transition-all duration-300`}>
+            <FooterPage />
+          </div>
+        </div>
       </ScheduledCourseProvider>
     </VersionProvider>
   )

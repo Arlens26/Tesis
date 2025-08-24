@@ -87,22 +87,22 @@ WSGI_APPLICATION = 'class_evaluator.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    #"default": {
-    #    "ENGINE": "django.db.backends.postgresql",
-    #    "NAME": "neondb",
-    #    "USER": "neondb_owner",
-    #    "PASSWORD": "npg_gi76CfKIGEBs",
-    #    "HOST": "ep-long-block-a59bbgdt-pooler.us-east-2.aws.neon.tech",
-    #    "PORT": "5432",
-    #    }
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "class_evaluator",
-        "USER": "postgres",
-        "PASSWORD": "palmira_2021@bdP",
-        "HOST": "127.0.0.1",
+        "NAME": "neondb",
+        "USER": "neondb_owner",
+        "PASSWORD": "npg_gi76CfKIGEBs",
+        "HOST": "ep-long-block-a59bbgdt-pooler.us-east-2.aws.neon.tech",
         "PORT": "5432",
         }
+    #"default": {
+    #    "ENGINE": "django.db.backends.postgresql",
+    #    "NAME": "class_evaluator",
+    #    "USER": "postgres",
+    #    "PASSWORD": "palmira_2021@bdP",
+    #    "HOST": "127.0.0.1",
+    #    "PORT": "5432",
+    #    }
 }
 
 

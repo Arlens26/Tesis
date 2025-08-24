@@ -60,6 +60,7 @@ export function CourseList() {
     const [filteredCourses, setFilteredCourses] = useState([])
 
     const { role } = useUsers()
+    console.log('Rol: ', role)
   
     const navigate = useNavigate()
 
@@ -187,9 +188,11 @@ export function CourseList() {
     if (!courses || courses.length === 0) {
       return (
           <>
-              <span>No hay cursos creados...</span>
+            <div className="flex flex-col items-center justify-center py-8">
+              <span className="text-gray-600">No hay cursos creados...</span>
+            </div>
           </>
-      );
+      )
   }
 
     const handleSubmit = (event) => {

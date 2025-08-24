@@ -197,7 +197,7 @@ function App() {
           <main className={`bg-main p-6 ${menuChecked ? 'main-menu-open' : ''} p-16`}>
             {/*<BreadCrumb/>*/}
             <Routes>
-              <Route path='/' element={<main/>} />
+              <Route path='/' element={<LoginForm />} />
               <Route path='/login' element={<LoginForm/>} />
               <Route path='/role' element={<SelectRole/>} />
               <Route path='/code' element={<CreateCode/>}/>

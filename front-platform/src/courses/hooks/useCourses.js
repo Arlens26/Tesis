@@ -36,11 +36,11 @@ export function useCourses() {
         console.log(role)
         let ENDPOINT = ''
         if (role === 'director') {
-          ENDPOINT = `${BASE_URL}courses/all/courses/`;
+          ENDPOINT = `${BASE_URL}/courses/all/courses/`;
           console.log('Cursos del director')
           
         }else if (role === 'professor') {
-          ENDPOINT = `${BASE_URL}courses/all/scheduled-course/`;
+          ENDPOINT = `${BASE_URL}/courses/all/scheduled-course/`;
           console.log('Cursos del profesor')
         }
         return fetch(ENDPOINT, {

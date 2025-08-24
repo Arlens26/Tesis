@@ -4,10 +4,11 @@ import { VersionContext } from '../../evaluation_version/context/evaluationVersi
 import { getCourseFetch, createCourse, deleteCourse, updateCourse } from '../services/courseService';
 //import responseCursos from '../mocks/curso.json';
 //import { json } from 'react-router-dom';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export function useCourses() {
     
-    const EVALUATION_VESION_ENDPOINT = `http://localhost:8000/courses/all/evaluation-version/`
+    const EVALUATION_VESION_ENDPOINT = `${BASE_URL}courses/all/evaluation-version/`
     const { user, course, setCourse, role } = useContext(AuthContext)
     console.log(user)
     const { evaluationVersion, setEvaluationVersion } = useContext(VersionContext)
@@ -35,11 +36,11 @@ export function useCourses() {
         console.log(role)
         let ENDPOINT = ''
         if (role === 'director') {
-          ENDPOINT = `http://localhost:8000/courses/all/courses/`;
+          ENDPOINT = `${BASE_URL}courses/all/courses/`;
           console.log('Cursos del director')
           
         }else if (role === 'professor') {
-          ENDPOINT = `http://localhost:8000/courses/all/scheduled-course/`;
+          ENDPOINT = `${BASE_URL}courses/all/scheduled-course/`;
           console.log('Cursos del profesor')
         }
         return fetch(ENDPOINT, {

@@ -31,7 +31,7 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-ALLOWED_HOSTS = ['*', 'localhost', 'tesis-0xfh.onrender.com']
+ALLOWED_HOSTS = ['*', 'localhost', 'tesis-0xfh.onrender.com', 'eisc-platform.vercel.app']
 
 
 # Application definition
@@ -148,7 +148,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # cors authorization
-CORS_ALLOWED_ORIGINS = ['http://localhost:5173', 'https://tesis-0xfh.onrender.com']
+CORS_ALLOWED_ORIGINS = ['http://localhost:5173', 'https://tesis-0xfh.onrender.com', 'https://eisc-platform.vercel.app']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

@@ -158,7 +158,7 @@ function App() {
             )}
             <main className={`bg-main p-16 flex-grow transition-all duration-300 ${isLoggedIn ? 'ml-16 group-hover:ml-72' : 'ml-0'}`}>
               <Routes>
-                <Route path='/' element={<main/>} />
+                <Route path='/' element={<LoginForm/>} />
                 <Route path='/login' element={<LoginForm/>} />
                 <Route path='/role' element={<SelectRole/>} />
                 <Route path='/code' element={<CodeActivity/>}/>

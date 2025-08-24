@@ -184,17 +184,6 @@ export function CourseList() {
     : courses)
     console.log('Courses to render: ', coursesToRender)
 
-    //console.log(courses.length)
-    if (!courses || courses.length === 0) {
-      return (
-          <>
-            <div className="flex flex-col items-center justify-center py-8">
-              <span className="text-gray-600">No hay cursos creados...</span>
-            </div>
-          </>
-      )
-  }
-
     const handleSubmit = (event) => {
       event.preventDefault()
       const filteredCourses = coursesToRender.filter(
@@ -226,213 +215,206 @@ export function CourseList() {
                     </svg>
                 </div>
                 <input name="search" onChange={handleChange} value={search} type="search" id="default-search" className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Cursos, códigos..." required />
-                {/*<button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Buscar</button>*/}
             </div>
         </form>
-        <div className='flex flex-col gap-2'>
-        {role === 'professor' ? (
+        
+        {/* Elementos que deben mostrarse incluso cuando no hay cursos */}
+        {role === 'professor' && (
           <BtnSemesterGroup onSelectSemester={handleSelectSemester}/>
-        ) :  null}
-        {role === 'director' ? (
-          <div className="flex justify-end gap-2">
+        )}
+        {role === 'director' && (
+          <div className="flex justify-end gap-2 mb-4">
             <ButtonCreateCourse/>
             <BtnStudentEnrolledCourseList/>
           </div>
-        ) : null}
-          {coursesToRender.filter((curso, index, self) => {
-            return self.findIndex((c) => c.id === curso.id) === index
-          }).sort((a,b) => a.name > b.name).map((curso) => (
-                <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
-                  <h2 id={`accordion-collapse-heading-${curso.id}`}>
+        )}
+
+        {/* Mostrar mensaje solo cuando no hay cursos */}
+        {(!courses || courses.length === 0) ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <span className="text-gray-600">No hay cursos creados...</span>
+          </div>
+        ) : (
+          <div className='flex flex-col gap-2'>
+            {coursesToRender.filter((curso, index, self) => {
+              return self.findIndex((c) => c.id === curso.id) === index
+            }).sort((a,b) => a.name > b.name ? 1 : -1).map((curso) => (
+                  <div key={curso.id} id={`accordion-collapse-${curso.id}`} data-accordion="collapse">
+                    <h2 id={`accordion-collapse-heading-${curso.id}`}>
+                      <div
+                        type="button"
+                        className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
+                        data-accordion-target={`#accordion-collapse-body-${curso.id}`}
+                        aria-expanded={accordionStates[curso.id]}
+                        onClick={() => toggleAccordion(curso.id)}
+                        aria-controls={`accordion-collapse-body-${curso.id}`}
+                      >
+                        <div className='flex items-start gap-2'>
+                        {role === 'director' ? (
+                          <>
+                          <button className='bg-btn-edit opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEditCourse(curso.id)
+                            }}>
+                              <EditIcon />
+                            </button>
+                            {!hasEvaluationVersion || !evaluationVersion.some(ev => ev.course === curso.id) ? (
+                            <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
+                                onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCourse(curso.id, curso.name)
+                              }}> 
+                              <DeleteIcon />
+                            </button>
+                            ) : null}
+                          </>
+                        ) : null}
+                        <div className="flex flex-col">
+                          <span>{curso.code} - {curso.name} </span>
+                          <span className="text-xs">Créditos: {curso.credit}</span>
+                        </div>
+                        </div>
+                        <svg
+                          data-accordion-icon
+                          className={`w-3 h-3 ${accordionStates[curso.id] ? 'rotate-0' : 'rotate-180'} shrink-0`}
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 10 6"
+                        >
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
+                        </svg>
+                      </div>
+                    </h2>
                     <div
-                      type="button"
-                      className="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
-                      data-accordion-target={`#accordion-collapse-body-${curso.id}`}
-                      aria-expanded={accordionStates[curso.id]}
-                      onClick={() => toggleAccordion(curso.id)}
-                      aria-controls={`accordion-collapse-body-${curso.id}`}
+                      id={`accordion-collapse-body-${curso.id}`}
+                      className={`${accordionStates[curso.id] ? 'block' : 'hidden'}`}
+                      aria-labelledby={`accordion-collapse-heading-${curso.id}`}
                     >
-                      <div className='flex items-start gap-2'>
                       {role === 'director' ? (
                         <>
-                        <button className='bg-btn-edit opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                          onClick={(e) => {
-                            // Detener la propagación del evento para que no afecte al botón del acordeón
-                            e.stopPropagation()
-                            handleEditCourse(curso.id)
-                          }}>
-                            <EditIcon />
-                          </button>
-                          {!hasEvaluationVersion || !evaluationVersion.some(ev => ev.course === curso.id) ? (
-                          <button className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
-                              onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteCourse(curso.id, curso.name)
-                            }}> 
-                            <DeleteIcon />
-                          </button>
-                          ) : null}
-                        </>
-                      ) : null}
-                      <div className="flex flex-col">
-                        <span>{curso.code} - {curso.name} </span>
-                        <span className="text-xs">Créditos: {curso.credit}</span>
-                      </div>
-                      </div>
-                      <svg
-                        data-accordion-icon
-                        className={`w-3 h-3 ${accordionStates[curso.id] ? 'rotate-0' : 'rotate-180'} shrink-0`}
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 10 6"
-                      >
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
-                      </svg>
-                    </div>
-                  </h2>
-                  <div
-                    id={`accordion-collapse-body-${curso.id}`}
-                    className={`${accordionStates[curso.id] ? 'block' : 'hidden'}`}
-                    aria-labelledby={`accordion-collapse-heading-${curso.id}`}
-                  >
-                    {/*<div className="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-                      <span>La cantidad de créditos es: {curso.credit}</span>
-                    </div>*/}
-                    {role === 'director' ? (
-                      <>
-                        <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">             
-                      <button 
-                        className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          handleCreateEvaluationVersion(curso.id)
-                          }}>
-                          <CreateIcon/>
-                          <span className="ml-1">Evaluación versión</span>
-                      </button>
-                      {hasEvaluationVersion && evaluationVersion.some(ev => ev.course === curso.id) ? (
-                      <div className="grid gap-2">
-                        <EvaluationVersionList courseId={curso.id}/>
+                          <div className="relative px-4 py-4 overflow-x-auto shadow-md sm:rounded-lg">             
                         <button 
-                            className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                          className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                          onClick={(e) =>{
+                            e.stopPropagation();
+                            handleCreateEvaluationVersion(curso.id)
+                            }}>
+                            <CreateIcon/>
+                            <span className="ml-1">Evaluación versión</span>
+                        </button>
+                        {hasEvaluationVersion && evaluationVersion.some(ev => ev.course === curso.id) ? (
+                        <div className="grid gap-2">
+                          <EvaluationVersionList courseId={curso.id}/>
+                          <button 
+                              className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                              onClick={(e) =>{
+                                e.stopPropagation();
+                                const activeVersion = evaluationVersion.filter(version => version.course == curso.id && !version.end_date);
+
+                                if (activeVersion.length > 0) {
+                                  const activeVersionId = activeVersion[activeVersion.length - 1].id;
+                                  console.log(activeVersionId)
+                                  handleScheduledCourse(curso.id, activeVersionId)
+                                } else {
+                                  console.log("No hay ninguna versión activa para este curso.");
+                                }
+                                }}>
+                                <CreateIcon/>
+                                <span className="ml-1">Programar curso</span>
+                          </button>
+                        </div>
+                      ) : null}
+                      </div>
+                        </>
+                      ): null}
+
+                      {role === 'professor' ? (
+                        <div className="flex mt-4 mb-4 gap-2">
+                          <button 
+                            className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
                             onClick={(e) =>{
                               e.stopPropagation();
-                               // Filtrar las versiones para encontrar la última versión activa
-                              const activeVersion = evaluationVersion.filter(version => version.course == curso.id && !version.end_date);
-
-                              // Verificar si hay alguna versión activa
-                              if (activeVersion.length > 0) {
-                                // Obtener el id de la última versión activa
-                                const activeVersionId = activeVersion[activeVersion.length - 1].id;
-                                console.log(activeVersionId)
-                                handleScheduledCourse(curso.id, activeVersionId)
-                              } else {
-                                console.log("No hay ninguna versión activa para este curso.");
-                              }
-                              }}>
-                              <CreateIcon/>
-                              <span className="ml-1">Programar curso</span>
-                        </button>
-                      </div>
-                    ) : null}
+                              console.log(curso.id)
+                              const selectedCourse = coursesToRender.filter(course => course.id === curso.id)
+                              const groupedCourse = selectedCourse.reduce((acc, curso) => {
+                                const existingCourse = acc.find(item => item.id === curso.id)
+                                
+                                if (existingCourse) {
+                                  existingCourse.details.push({
+                                    evaluation_version_id: curso.evaluation_version_id,
+                                    group: curso.group,
+                                    period: curso.period
+                                  })
+                                } else {
+                                  acc.push({
+                                    code: curso.code,
+                                    credit: curso.credit,
+                                    description: curso.description,
+                                    id: curso.id,
+                                    name: curso.name,
+                                    professor_id: curso.professor_id,
+                                    period: curso.period,
+                                    details: [{
+                                      evaluation_version_id: curso.evaluation_version_id,
+                                      group: curso.group,
+                                    }]
+                                  })
+                                }
+                              
+                                return acc
+                              }, [])
+                              handleActivity(groupedCourse)
+                            }}>
+                            <CreateIcon/>
+                            <span className="ml-1">Configurar evaluación</span>
+                          </button>  
+                          <button 
+                            className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
+                            onClick={(e) =>{
+                              e.stopPropagation();
+                              const selectedCourse = coursesToRender.filter(course => course.id === curso.id)
+                              const groupedCourse = selectedCourse.reduce((acc, curso) => {
+                                const existingCourse = acc.find(item => item.id === curso.id)
+                                
+                                if (existingCourse) {
+                                  existingCourse.details.push({
+                                    evaluation_version_id: curso.evaluation_version_id,
+                                    group: curso.group,
+                                    period: curso.period
+                                  })
+                                } else {
+                                  acc.push({
+                                    code: curso.code,
+                                    credit: curso.credit,
+                                    description: curso.description,
+                                    id: curso.id,
+                                    name: curso.name,
+                                    professor_id: curso.professor_id,
+                                    period: curso.period,
+                                    details: [{
+                                      evaluation_version_id: curso.evaluation_version_id,
+                                      group: curso.group,
+                                    }]
+                                  })
+                                }
+                              
+                                return acc
+                              }, [])
+                              handleActivityRaiting(curso.id, curso.evaluation_version_id, groupedCourse)
+                              
+                            }}>
+                            <ListCheckIcon/>
+                            <span className="ml-1">Calificaciones</span>
+                          </button>
+                        </div>
+                      ): null}
                     </div>
-                      </>
-                    ): null}
-
-                    {role === 'professor' ? (
-                      <div className="flex mt-4 mb-4 gap-2">
-                        <button 
-                          className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            console.log(curso.id)
-                            const selectedCourse = coursesToRender.filter(course => course.id === curso.id)
-                            const groupedCourse = selectedCourse.reduce((acc, curso) => {
-                              // Busca si ya existe un curso con el mismo id
-                              const existingCourse = acc.find(item => item.id === curso.id)
-                              
-                              if (existingCourse) {
-                                // Si existe, añade la variación al arreglo os detalles
-                                existingCourse.details.push({
-                                  evaluation_version_id: curso.evaluation_version_id,
-                                  group: curso.group,
-                                  period: curso.period
-                                })
-                              } else {
-                                // Si no existe, crea un nuevo objeto con los detalles
-                                acc.push({
-                                  code: curso.code,
-                                  credit: curso.credit,
-                                  description: curso.description,
-                                  id: curso.id,
-                                  name: curso.name,
-                                  professor_id: curso.professor_id,
-                                  period: curso.period,
-                                  details: [{
-                                    evaluation_version_id: curso.evaluation_version_id,
-                                    group: curso.group,
-                                    //period: curso.period
-                                  }]
-                                })
-                              }
-                            
-                              return acc
-                            }, [])
-                            handleActivity(groupedCourse)
-                          }}>
-                          <CreateIcon/>
-                          <span className="ml-1">Configurar evaluación</span>
-                        </button>  
-                        <button 
-                          className='bg-btn-create opacity-80 px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            //console.log(curso.id)
-                            const selectedCourse = coursesToRender.filter(course => course.id === curso.id)
-                            const groupedCourse = selectedCourse.reduce((acc, curso) => {
-                              // Busca si ya existe un curso con el mismo id
-                              const existingCourse = acc.find(item => item.id === curso.id)
-                              
-                              if (existingCourse) {
-                                // Si existe, añade la variación al arreglo os detalles
-                                existingCourse.details.push({
-                                  evaluation_version_id: curso.evaluation_version_id,
-                                  group: curso.group,
-                                  period: curso.period
-                                })
-                              } else {
-                                // Si no existe, crea un nuevo objeto con los detalles
-                                acc.push({
-                                  code: curso.code,
-                                  credit: curso.credit,
-                                  description: curso.description,
-                                  id: curso.id,
-                                  name: curso.name,
-                                  professor_id: curso.professor_id,
-                                  period: curso.period,
-                                  details: [{
-                                    evaluation_version_id: curso.evaluation_version_id,
-                                    group: curso.group,
-                                    //period: curso.period
-                                  }]
-                                })
-                              }
-                            
-                              return acc
-                            }, [])
-                            handleActivityRaiting(curso.id, curso.evaluation_version_id, groupedCourse)
-                            
-                          }}>
-                          <ListCheckIcon/>
-                          <span className="ml-1">Calificaciones</span>
-                        </button>
-                      </div>
-                    ): null}
                   </div>
-                </div>
-            ))}
-        </div>
+              ))}
+          </div>
+        )}
       </section>
     )
   }

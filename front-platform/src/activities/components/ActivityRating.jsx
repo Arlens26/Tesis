@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { useLocation } from "react-router-dom"
 import { AuthContext } from "../../auth/context/user"
 import { GoBackButton } from "../../components/GoBackButton"
+import { LoadingSpinner } from "../../components/LoadingSpinner"
 
 export function ActivityRating() {
 
@@ -54,12 +55,31 @@ export function ActivityRating() {
 
     console.log('unique groups: ', uniqueGroups)
 
+    const [loading, setLoading] = useState(true)
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false)
+    
+    // Cargar datos iniciales
+    useEffect(() => {
+      const loadData = async () => {
+        try {
+          setLoading(true)
+          await getGradeDetail()
+        } finally {
+          setLoading(false)
+          setInitialLoadComplete(true)
+        }
+      }
+      
+      loadData()
+    }, [])
+
     const filteredByGroup = useMemo(() => {
+      if (!initialLoadComplete) return []
       return selectedScheduledId
         ? filteredByVersion.filter(detail => 
             detail.enrolled_course.scheduled_course.id === Number(selectedScheduledId))
         : []
-    }, [filteredByVersion, selectedScheduledId])
+    }, [filteredByVersion, selectedScheduledId, initialLoadComplete])
 
     console.log('filtered group: ', filteredByGroup)
 
@@ -362,10 +382,38 @@ export function ActivityRating() {
     </tbody>
   )
 
+    // Mostrar spinner mientras se cargan los datos iniciales
+    if (loading || !initialLoadComplete) {
+      return (
+        <div className="flex flex-col gap-2">
+          <span>Calificaciones del curso {groupedCourse[0]?.name}</span>
+          <LoadingSpinner label="Cargando calificaciones..." />
+          <div className="flex justify-end gap-2">
+            <GoBackButton label='Volver' route='/course-list/'/>
+          </div>
+        </div>
+      )
+    }
+
+    // Mostrar mensaje solo cuando no hay datos después de cargar completamente
+    if (initialLoadComplete && filteredByGroup.length === 0) {
+      return (
+        <div className="flex flex-col gap-2">
+          <span>Calificaciones del curso {groupedCourse[0]?.name}</span>
+          <div className="flex flex-col items-center justify-center py-8">
+            <span className="text-gray-600">Aún no hay estudiantes matriculados para este curso</span>
+          </div>
+          <div className="flex justify-end gap-2">
+            <GoBackButton label='Volver' route='/course-list/'/>
+          </div>
+        </div>
+      )
+    }
+
+    // Renderizar contenido principal cuando hay datos
     return(
       <div className="flex flex-col gap-2">
-        <span>Calificaciones del curso {groupedCourse[0].name}</span>
-        {filteredByGroup != 0 ? 
+        <span>Calificaciones del curso {groupedCourse[0]?.name}</span>
         <div className="flex flex-col gap-4">
           <label className="text-sm">Grupos:</label>
           <select 
@@ -374,15 +422,15 @@ export function ActivityRating() {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             onChange={(e) => setSelectedScheduledId(e.target.value)}
           >
-                      <option disabled>Grupos</option>
-                      {uniqueGroups.map((detail) => (
-                        <option
-                          key={`group_${detail.enrolled_course.scheduled_course.id}`}
-                          value={detail.enrolled_course.scheduled_course.id}
-                        >
-                          {detail.enrolled_course.scheduled_course.group}
-                        </option>
-                      ))}
+            <option disabled>Grupos</option>
+            {uniqueGroups.map((detail) => (
+              <option
+                key={`group_${detail.enrolled_course.scheduled_course.id}`}
+                value={detail.enrolled_course.scheduled_course.id}
+              >
+                {detail.enrolled_course.scheduled_course.group}
+              </option>
+            ))}
           </select>
           <label className="text-sm">Actividades:</label>
           <select 
@@ -391,28 +439,26 @@ export function ActivityRating() {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             onChange={(e) => setSelectedActivityId(e.target.value)}
           >
-                      <option disabled>Seleccione una actividad</option>
-          {uniqueActivities &&
-            uniqueActivities.map((detail) => (
-              <option
-                key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
-                value={detail.activity_evaluation_detail.activities.id}
-              >
-                {`${detail.activity_evaluation_detail.activities.name}`}
-              </option>
-                      ))}
+            <option disabled>Seleccione una actividad</option>
+            {uniqueActivities &&
+              uniqueActivities.map((detail) => (
+                <option
+                  key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
+                  value={detail.activity_evaluation_detail.activities.id}
+                >
+                  {`${detail.activity_evaluation_detail.activities.name}`}
+                </option>
+              ))}
           </select>
           <form className='form flex flex-col gap-4 mt-4'>
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                  <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  {renderTableHeaders()}
-                  {renderTableRows()}
-                  </table>
+              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                {renderTableHeaders()}
+                {renderTableRows()}
+              </table>
             </div>
           </form>
         </div>
-        : <div><span>Aún no hay estudiantes matriculados para este curso</span></div>  
-        }
         <div className="flex justify-end gap-2">
           <GoBackButton label='Volver' route='/course-list/'/>
         </div>

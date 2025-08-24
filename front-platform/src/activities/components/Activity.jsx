@@ -27,9 +27,6 @@ export function Activity() {
     const [activitiesData, setActivitiesData] = useState([])
     console.log('activities data: ', activitiesData)
 
-    const [isInitialLoad, setIsInitialLoad] = useState(true)
-    console.log('Is intial load: ', isInitialLoad)
-
     const selectedDetail = newScheduledCourse?.find(item => item.id === selectedScheduledId)
     console.log('selected detail: ', selectedDetail)
 
@@ -62,37 +59,45 @@ export function Activity() {
 
 
     useEffect(() => {
-      // Si hay actividades existentes y activitiesData está vacío
-      if (
-        isInitialLoad &&
-        filteredActivityEvaluationDetail.length > 0 && 
-        activitiesData.length === 0 &&
-        filteredDetails.length > 0 &&
-        filteredPercentages.length > 0
-      ) {
-        const initialActivities = filteredActivityEvaluationDetail
-          // Elimina duplicados (por si hay múltiples detalles)
-          .filter((act, index, self) => 
+      
+      if(!filteredActivityEvaluationDetail || filteredActivityEvaluationDetail.length === 0){
+        setActivitiesData([])
+        return
+      }
+
+        const serverActivities = filteredActivityEvaluationDetail
+          .filter((act, index, self) =>
             self.findIndex(a => a.activity.id === act.activity.id) === index
           )
-          .map(activityDetail => ({
-            id: activityDetail.activity.id,
-            name: activityDetail.activity.name,
-            description: activityDetail.activity.description,
-            percentages: filteredDetails.reduce((acc, detail) => {
-              const match = filteredPercentages.find(p => 
-                p.version_evaluation_detail_id === detail.id &&
-                p.activity_id === activityDetail.activity.id
-              )
-              acc[detail.id] = match ? parseFloat(match.percentage) : 0
-              return acc
-            }, {})
-          }))
-          console.log('Initial activities: ', initialActivities)
-        setActivitiesData(initialActivities)
-        setIsInitialLoad(false)
-      }
-    }, [filteredActivityEvaluationDetail, filteredDetails, activitiesData.length,  filteredPercentages, isInitialLoad])
+          .map(activityDetail => {
+            if (!activityDetail || !activityDetail.activity) return null
+            return {
+              id: activityDetail.activity.id,
+              name: activityDetail.activity.name,
+              description: activityDetail.activity.description,
+              percentages: filteredDetails.reduce((acc, detail) => {
+                const match = filteredPercentages.find(p => 
+                  p.version_evaluation_detail_id === detail.id &&
+                  p.activity_id === activityDetail.activity.id
+                )
+                acc[detail.id] = match ? parseFloat(match.percentage) : 0
+                return acc
+              }, {})
+            }
+          })
+          .filter(Boolean)
+
+        setActivitiesData(prevLocalActivities => {
+          const updatedTempActivities = prevLocalActivities.filter(local => {
+            return String(local.id).startsWith('temp-') &&
+              !serverActivities.some(server => 
+                server.name === local.name && server.description === local.description
+              )              
+            })
+          return [...serverActivities, ...updatedTempActivities]
+        }) 
+
+    }, [filteredActivityEvaluationDetail, filteredDetails, filteredPercentages])
 
     const handleAddActivity = () => {
       const newActivity = {
@@ -153,11 +158,18 @@ export function Activity() {
     
     // Calcular el total del porcentaje
     const totalPercentage = useMemo(() => {
-      return activitiesData.reduce((total, activity) => {
-        const activityTotal = Object.values(activity.percentages).reduce(
-          (sum, val) => sum + parseFloat(val), 
-          0
-        )
+
+      if(!Array.isArray(activitiesData)){
+        return 0
+      }
+
+      return activitiesData
+        .filter(activity => activity && activity.percentages)
+        .reduce((total, activity) => {
+          const activityTotal = Object.values(activity.percentages).reduce(
+            (sum, val) => sum + (parseFloat(val) || 0), 
+            0
+          )
         return total + activityTotal
       }, 0)
     }, [activitiesData])
@@ -210,7 +222,6 @@ export function Activity() {
           .map(d => d.id)
         setEvaluationDetailIds(detailIds)
         getActivityEvaluationVersionDetail(detailIds)
-        setIsInitialLoad(true)
       }
     }
 
@@ -247,10 +258,11 @@ export function Activity() {
     
       const finalData = buildActivity()
       console.log('Datos a enviar:', finalData)
+      
       settingActivity(finalData)
         .then(() => {
-          setIsInitialLoad(true)
           toast.success('Configuración de la actividad exitosa')
+          getActivityEvaluationVersionDetail(evaluationDetailIds)
         })
         .catch(() => {
           toast.error('Error en la configuración de la actividad')
@@ -348,22 +360,25 @@ export function Activity() {
       <button type='button' 
       className='bg-primary opacity-80 rounded-sm py-1 px-1 hover:opacity-100'
       onClick={() => {
-        // Función para eliminar la actividad
-        setActivitiesData(prev => prev.filter((_, i) => i !== activityIndex))
-        console.log('activity id: ', activity, 'type:', typeof activity.id)
         const versionEvaluationDetailIds = Object.keys(activity.percentages).map(Number)
         console.log('detail ids: ', versionEvaluationDetailIds)
+        console.log('activity id: ', activity, 'type:', typeof activity.id)
 
         if((typeof activity.id === 'number') || 
-        (typeof activity.id === 'string') && !activity.id.startsWith('temp-')){
+           (typeof activity.id === 'string') && !activity.id.startsWith('temp-')){
           deleteSettingActivity(activity.id, versionEvaluationDetailIds)
             .then(() => {
               toast.success('La actividad fue eliminada exitosamente')
+              getActivityEvaluationVersionDetail(evaluationDetailIds)
             })
             .catch(() => {
               toast.error('Error al eliminar la actividad')
               setActivitiesData(prev => [...prev, activity])
             })
+        }
+        else {
+          // Función para eliminar la actividad
+          setActivitiesData(prev => prev.filter(a => a.id !== activity.id))
         }
       }}>
         <DeleteIcon/>
@@ -384,7 +399,6 @@ export function Activity() {
                                       console.log('detail percentage: ', detailPercentage)
                                       const currentTotalPercentage = totalPercentageByLearningOutCome[detailId]
                                       console.log('current total percentage: ', currentTotalPercentage)
-                                      //setTotalPercentage(currentTotalPercentage)
                                       return (
                                           <td key={detailId} className="px-6 py-4">
                                               <span style={{ color: currentTotalPercentage < detailPercentage ? 'red' : 'inherit' }}>
@@ -456,10 +470,12 @@ export function Activity() {
             <CreateIcon/>
             <span className="ml-1">Crear actividad</span>
           </button>
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            {renderTableHeaders()}
-            {renderTableRows()}
-          </table> 
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              {renderTableHeaders()}
+              {renderTableRows()}
+            </table> 
+          </div>
           <div className="flex justify-end gap-2">
             <button disabled={totalPercentage > 100} type='submit' className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
               <SettingsCheckIcon/>

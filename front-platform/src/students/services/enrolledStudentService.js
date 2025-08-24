@@ -1,8 +1,10 @@
-const GRADE_DETAIL_LEARNING_OUTCOME = `http://localhost:8000/activities/all/grade-detail-learning-outcome/`
-const STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/student-enrolled-course/`
-const UPDATE_STATUS_STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/student-enrolled-course/update-status/`
-const CREATE_STUDENT_ENROLLED_COURSE = `http://127.0.0.1:8000/courses/all/create-student-enrolled-course/`
-const STUDENT_GRADE_REPORT = `http://127.0.0.1:8000/courses/all/student-report/`
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const GRADE_DETAIL_LEARNING_OUTCOME = `${BASE_URL}/activities/all/grade-detail-learning-outcome/`
+const STUDENT_ENROLLED_COURSE = `${BASE_URL}/courses/all/student-enrolled-course/`
+const UPDATE_STATUS_STUDENT_ENROLLED_COURSE = `${BASE_URL}/courses/all/student-enrolled-course/update-status/`
+const CREATE_STUDENT_ENROLLED_COURSE = `${BASE_URL}/courses/all/create-student-enrolled-course/`
+const STUDENT_GRADE_REPORT = `${BASE_URL}/courses/all/student-report/`
 
 export const getStudentEnrolledCourseFetch = () => {
     return fetch(STUDENT_ENROLLED_COURSE)

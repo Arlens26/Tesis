@@ -1,7 +1,9 @@
-const PROFESSORS_ENDPOINT = `http://127.0.0.1:8000/authentication/professors/`
-const CREATE_SCHEDULED_COURSE_ENDPOINT = `http://localhost:8000/courses/all/create-scheduled-course/`
-const SCHEDULED_COURSE = `http://127.0.0.1:8000/courses/all/scheduled-course/`
-const EVALUATION_VERSION_DETAIL_ENDPOINT = `http://localhost:8000/courses/all/scheduled-course-detail/get_details_by_evaluation_version/?evaluation_version_ids=`
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const PROFESSORS_ENDPOINT = `${BASE_URL}/authentication/professors/`
+const CREATE_SCHEDULED_COURSE_ENDPOINT = `${BASE_URL}/courses/all/create-scheduled-course/`
+const SCHEDULED_COURSE = `${BASE_URL}/courses/all/scheduled-course/`
+const EVALUATION_VERSION_DETAIL_ENDPOINT = `${BASE_URL}/courses/all/scheduled-course-detail/get_details_by_evaluation_version/?evaluation_version_ids=`
 
 export const professorsFetch = () => {
     return fetch(PROFESSORS_ENDPOINT)

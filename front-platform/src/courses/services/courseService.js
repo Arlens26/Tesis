@@ -1,4 +1,6 @@
-const COURSE_ENDPOINT = `http://localhost:8000/courses/all/courses/`
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const COURSE_ENDPOINT = `${BASE_URL}/courses/all/courses/`
 
 
 export const getCourseFetch = (courseId) => {

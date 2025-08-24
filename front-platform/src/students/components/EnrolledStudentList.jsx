@@ -3,9 +3,11 @@ import { useEnrolledStudent } from "../hooks/useEnrolledStudent"
 import { toast } from "sonner"
 import { GoBackButton } from "../../components/GoBackButton"
 import { useEffect, useState } from "react"
+import { useUsers } from "../../auth/hooks/useUsers"
 
 export function EnrolledStudentList() {
     
+    const { role } = useUsers()
     const { updateStudentEnrolledStatus } = useEnrolledStudent()
     const { state } = useLocation()
     const { courseName, groupId, students } = state || {}
@@ -61,7 +63,9 @@ export function EnrolledStudentList() {
                     <tr>
                         <th scope="col" className="px-6 py-3">ID del Estudiante</th>
                         <th scope="col" className="px-6 py-3">Nombre del Estudiante</th>
-                        <th scope="col" className="px-6 py-3">Estado</th>
+                        { role === 'professor' && 
+                            <th scope="col" className="px-6 py-3">Estado</th> 
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -71,15 +75,17 @@ export function EnrolledStudentList() {
                             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                 {item.student.first_name} {item.student.last_name}
                             </td>
-                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            <button 
-                                type="button" 
-                                className={`focus:outline-none text-white font-medium rounded-full text-sm px-5 py-1 me-2 mb-2 ${item.status ? 'bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' : 'bg-red-700 hover:bg-red-800 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900'}`}
-                                onClick={() => updateStudentStatus(item.student.first_name, item.student.last_name, item.student.id, item.scheduled_course.id, item.status)}
-                            >
-                                {item.status ? 'Activo' : 'Inactivo' }
-                            </button>
-                            </td>
+                            { role === 'professor' && 
+                                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    <button 
+                                        type="button" 
+                                        className={`focus:outline-none text-white font-medium rounded-full text-sm px-5 py-1 me-2 mb-2 ${item.status ? 'bg-btn-create opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100' : 'bg-red-700 hover:bg-red-800 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900'}`}
+                                        onClick={() => updateStudentStatus(item.student.first_name, item.student.last_name, item.student.id, item.scheduled_course.id, item.status)}
+                                    >
+                                        {item.status ? 'Activo' : 'Inactivo' }
+                                    </button>
+                                </td>
+                            }
                         </tr>
                     ))}
                 </tbody>

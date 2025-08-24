@@ -1,6 +1,8 @@
-const EVALUATION_VERSION_ENDPOINT = `http://localhost:8000/courses/all/evaluation-version/`
-const CREATE_EVALUATION_VERSION_COURSE_ENPOINT = `http://localhost:8000/courses/all/create-evaluation-version-course/`
-const ACADEMIC_PERIODS_ENDPOINT = `http://localhost:8000/courses/all/academic-periods/`
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const EVALUATION_VERSION_ENDPOINT = `${BASE_URL}/courses/all/evaluation-version/`
+const CREATE_EVALUATION_VERSION_COURSE_ENPOINT = `${BASE_URL}/courses/all/create-evaluation-version-course/`
+const ACADEMIC_PERIODS_ENDPOINT = `${BASE_URL}/courses/all/academic-periods/`
 
 
 export const getEvaluationVersion = () => {

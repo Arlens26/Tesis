@@ -26,7 +26,7 @@ function BtnStudentEnrolledCourseList() {
   )
 }
 
-const BtnSemesterGroup = ({ onSelectSemester }) => {
+const BtnSemesterGroup = ({ onSelectSemester, selectedSemester }) => {
   const currentYear = new Date().getFullYear()
   const currentSemester = new Date().getMonth() < 6 ? 1 : 2
 
@@ -34,13 +34,21 @@ const BtnSemesterGroup = ({ onSelectSemester }) => {
     <div className="inline-flex rounded-md shadow-sm" role="group">
       <button 
       type="button" 
-      className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+      className={`px-4 py-2 text-sm font-medium border border-red-600 rounded-s-lg focus:z-10 focus:ring-2 focus:ring-red-500 ${
+        selectedSemester === 'current' 
+          ? 'text-white bg-red-600 hover:bg-red-700 hover:text-white focus:text-white dark:bg-red-600 dark:text-white dark:hover:text-white dark:hover:bg-red-700 dark:focus:text-white' 
+          : 'text-red-600 bg-white hover:bg-red-50 hover:text-red-700 focus:text-red-700 dark:bg-gray-800 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700 dark:focus:text-red-300'
+      } dark:border-red-600 dark:focus:ring-red-500`}
       onClick={() => onSelectSemester('current')}>
         Semestre {currentYear}-{currentSemester}
       </button>
       <button 
       type="button" 
-      className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+      className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-red-600 rounded-e-lg focus:z-10 focus:ring-2 focus:ring-red-500 ${
+        selectedSemester === 'previous' 
+          ? 'text-white bg-red-600 hover:bg-red-700 hover:text-white focus:text-white dark:bg-red-600 dark:text-white dark:hover:text-white dark:hover:bg-red-700 dark:focus:text-white' 
+          : 'text-red-600 bg-white hover:bg-red-50 hover:text-red-700 focus:text-red-700 dark:bg-gray-800 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700 dark:focus:text-red-300'
+      } dark:border-red-600 dark:focus:ring-red-500`}
       onClick={() => onSelectSemester('previous')}>
         Semestres anteriores
       </button>
@@ -205,7 +213,13 @@ export function CourseList() {
     }
     
     return (
-      <section>
+      <section className="max-w-8xl mx-auto p-6 bg-white rounded-lg shadow-md">
+        {/* Título y subtítulo */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-primary mb-2">Lista de Cursos</h1>
+          <p className="text-gray-600">Gestiona y consulta los cursos disponibles</p>
+        </div>
+
         <form className="max-w-md mx-auto m-2" onSubmit={handleSubmit}>   
             <label className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
             <div className="relative">
@@ -220,7 +234,7 @@ export function CourseList() {
         
         {/* Elementos que deben mostrarse incluso cuando no hay cursos */}
         {role === 'professor' && (
-          <BtnSemesterGroup onSelectSemester={handleSelectSemester}/>
+          <BtnSemesterGroup onSelectSemester={handleSelectSemester} selectedSemester={selectedSemester}/>
         )}
         {role === 'director' && (
           <div className="flex justify-end gap-2 mb-4">
@@ -303,7 +317,7 @@ export function CourseList() {
                             }}>
                             <CreateIcon/>
                             <span className="ml-1">Evaluación versión</span>
-                        </button>
+                        </button> <br/>
                         {hasEvaluationVersion && evaluationVersion.some(ev => ev.course === curso.id) ? (
                         <div className="grid gap-2">
                           <EvaluationVersionList courseId={curso.id}/>

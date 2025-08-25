@@ -13,6 +13,7 @@ import { EvaluationVersionCourseForm } from './evaluation_version/components/Eva
 import { ScheduledCourse } from './scheduled_course/components/ScheduledCourse.jsx';
 import { VersionProvider } from './evaluation_version/context/evaluationVersion.jsx';
 import { SelectRole } from './auth/components/SelectRole.jsx';
+import { UserProfile } from './auth/components/UserProfile.jsx';
 import { Activity } from './activities/components/Activity.jsx';
 import { ScheduledCourseProvider } from './scheduled_course/context/scheduledCourse.jsx';
 //import { BreadCrumb } from './components/BreadCrumb.jsx';
@@ -27,7 +28,7 @@ import { useEffect } from 'react';
 import { CodeActivity } from './components/CodeActivity.jsx';
 import { useUsers } from './auth/hooks/useUsers.js';
 import { useRoleStore } from './auth/store/useRoleStore'
-import { HomeIcon, LoginIcon, ProfileIcon, CourseLayoutIcon, CreateIcon, CodeIcon, StudentEnrolledIcon, StudentEnrolledListIcon, ReportAnaliticsIcon } from './components/Icons.jsx'
+import { HomeIcon, LoginIcon, ProfileIcon, CourseLayoutIcon, CreateIcon, CodeIcon, StudentEnrolledIcon, StudentEnrolledListIcon, ReportAnaliticsIcon, SettingIcon } from './components/Icons.jsx'
 
 function App() {
 
@@ -152,6 +153,16 @@ function App() {
                         </span>
                       </Link>
                     </li>
+                    <li className="text-white hover:bg-slate-100/10 transition duration-200 rounded p-2">
+                      <Link to="/user-profile" className="flex items-center">
+                        <span className="mr-0 group-hover:mr-2 transition-all duration-300">
+                          <SettingIcon/>
+                        </span>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 truncate">
+                          Perfil de Usuario
+                        </span>
+                      </Link>
+                    </li>
                   </ul>
                 </aside>
               </div>
@@ -175,6 +186,7 @@ function App() {
                 <Route path='student-enrolled-course-list' element={<StudentEnrolledCourseList/>} />
                 <Route path='student-grade-report' element={<StudentGradeReport/>} />
                 <Route path='evaluation-version-course-detail-view' element={<EvaluationVersionCourseDetailView/>} />
+                <Route path='user-profile' element={<UserProfile/>} />
               </Routes>
             </main>
           </div>

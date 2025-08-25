@@ -1,7 +1,7 @@
 import { useEffect, useContext } from 'react';
 import { AuthContext } from '../../auth/context/user';
 import { VersionContext } from '../../evaluation_version/context/evaluationVersion';
-import { getCourseFetch, createCourse, deleteCourse, updateCourse } from '../services/courseService';
+import { getCourseFetch, createCourse as createCourseService, deleteCourse as deleteCourseService, updateCourse as updateCourseService } from '../services/courseService';
 //import responseCursos from '../mocks/curso.json';
 //import { json } from 'react-router-dom';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -108,6 +108,18 @@ export function useCourses() {
           // Si el curso no está cargado, realiza la petición para obtenerlo
           getCourseFetch(courseId)
       }
+  }
+
+  const deleteCourse = (courseId) => {
+    return deleteCourseService(courseId, user.token)
+  }
+
+  const createCourse = (fields) => {
+    return createCourseService(fields, user.token)
+  }
+
+  const updateCourse = (courseId, fields) => {
+    return updateCourseService(courseId, fields, user.token)
   }
   
     return { 

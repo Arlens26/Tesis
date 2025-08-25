@@ -13,11 +13,12 @@ export const getCourseFetch = (courseId) => {
         })
 }
 
-export const createCourse = (fields) => {
+export const createCourse = (fields, token) => {
 
     return fetch(COURSE_ENDPOINT, {
       method: 'POST', 
       headers: {
+        'Authorization': `Token ${token}`,
         'Content-Type' : 'application/json'
       },
       body : JSON.stringify(fields)
@@ -37,10 +38,14 @@ export const createCourse = (fields) => {
   }
 
 
-export const deleteCourse = (courseId) => {
+export const deleteCourse = (courseId, token) => {
 
-    return fetch(`${COURSE_ENDPOINT}${courseId}`, {
-        method: 'DELETE'
+    return fetch(`${COURSE_ENDPOINT}${courseId}/`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+        }
     })
     .then(response => {
         if(response.ok){
@@ -53,11 +58,12 @@ export const deleteCourse = (courseId) => {
     })
 }
 
-export const updateCourse = (courseId, fields) => {
+export const updateCourse = (courseId, fields, token) => {
 
     return fetch(`${COURSE_ENDPOINT}${courseId}/`, {
         method: 'PUT',
         headers: {
+            'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'
         }, 
         body: JSON.stringify(fields)

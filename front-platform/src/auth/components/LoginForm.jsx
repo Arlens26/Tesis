@@ -1,12 +1,14 @@
 import { useUsers } from '../hooks/useUsers'
-import { LogoUnivalleIcon} from '../../components/Icons'
+import { LogoUnivalleIcon, EyeIcon, EyeSlashIcon} from '../../components/Icons'
 import { useNavigate } from "react-router-dom"
 import { toast } from 'sonner'
+import { useState } from 'react'
 
 export function LoginForm() {
 
     const { getLogin, setRole } = useUsers()
     const navigate = useNavigate()
+    const [showPassword, setShowPassword] = useState(false)
 
     const handleSubmit = (event) => {
   
@@ -40,22 +42,36 @@ export function LoginForm() {
 
     return (
       <form className='flex justify-center' onSubmit={handleSubmit}>
-        <div className="flex flex-col items-center max-w-sm p-8 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-            <div className='mb-4'>
-              <LogoUnivalleIcon/>
-            </div>
-            <div className="mb-4">
-              <input type="text" id="username" name='username' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Nombre de usuario" required/>
-            </div> 
-            <div className="mb-4">
-              <input type="password" name='password' id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Contraseña" required/>
-            </div> 
-            <div className='mb-4'>
-              <button type='submit' className='bg-primary opacity-80 px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Entrar</button>
-            </div>
-            <div className='mb-4'>
-              <span className='text-link cursor-pointer'><a>¿Olvidó su nombre de usuario o contraseña?</a></span>
-            </div>
+      <div className="flex flex-col items-center max-w-sm p-8 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <div className='mb-4'>
+          <LogoUnivalleIcon/>
+        </div>
+        <div className="mb-4 w-3/4"> {/* Se ajusta el ancho a w-3/4 */}
+          <input type="text" id="username" name='username' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Nombre de usuario" required/>
+        </div> 
+        <div className="mb-4 relative w-3/4"> {/* Se ajusta el ancho a w-3/4 */}
+          <input 
+            type={showPassword ? "text" : "password"} 
+            name='password' 
+            id="password" 
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-12 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+            placeholder="Contraseña" 
+            required
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+          </button>
+        </div> 
+        <div className='mb-4 w-3/4'> {/* Se ajusta el ancho a w-3/4 */}
+          <button type='submit' className='bg-primary opacity-80 w-full px-20 py-1 rounded-lg hover:opacity-100 text-slate-100'>Entrar</button>
+        </div>
+        <div className='mb-4 w-full text-center'>
+          <span className='text-link cursor-pointer'><a>¿Olvidó su nombre de usuario o contraseña?</a></span>
+          </div>
         </div>
       </form>
     )

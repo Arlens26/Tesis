@@ -3,9 +3,11 @@
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, authentication_classes, permission_classes
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from .serializer import UserSerializer, UserRegisterSerializer
+from .serializer import UserSerializer, UserRegisterSerializer, UserProfileUpdateSerializer, ChangePasswordSerializer
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
@@ -49,6 +51,7 @@ class UserViewSet(viewsets.ViewSet):
 
         return Response(user_register_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_decorator(csrf_exempt)
     @action(detail=False, methods=['post'])
     @authentication_classes([TokenAuthentication])
     @permission_classes([IsAuthenticated])
@@ -65,6 +68,8 @@ class UserViewSet(viewsets.ViewSet):
             profile_data = {
                 'id': user.id,
                 'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
                 'email': user.email,
                 'is_professor': is_professor,
                 'is_director': is_director,
@@ -73,6 +78,61 @@ class UserViewSet(viewsets.ViewSet):
             return Response(profile_data, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'User is not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    @method_decorator(csrf_exempt)
+    @action(detail=False, methods=['get'])
+    @authentication_classes([TokenAuthentication])
+    @permission_classes([IsAuthenticated])
+    def get_profile(self, request):
+        user = request.user
+        profile_data = {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+        }
+        return Response(profile_data, status=status.HTTP_200_OK)
+
+    @method_decorator(csrf_exempt)
+    @action(detail=False, methods=['put'])
+    @authentication_classes([TokenAuthentication])
+    @permission_classes([IsAuthenticated])
+    def update_profile(self, request):
+        user = request.user
+        serializer = UserProfileUpdateSerializer(user, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Perfil actualizado exitosamente',
+                'user': serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @method_decorator(csrf_exempt)
+    @action(detail=False, methods=['put'])
+    @authentication_classes([TokenAuthentication])
+    @permission_classes([IsAuthenticated])
+    def change_password(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            
+            # Invalidar el token actual y crear uno nuevo
+            request.auth.delete()
+            new_token = Token.objects.create(user=user)
+            
+            return Response({
+                'message': 'Contraseña actualizada exitosamente',
+                'token': new_token.key
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfessorListView(viewsets.ViewSet):
     def list(self, request):

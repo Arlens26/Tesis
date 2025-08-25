@@ -15,7 +15,7 @@ export function EvaluationVersionList({ courseId }){
 
     return(
         <div className="grid gap-3"> 
-        <h1>Lista de versiones de evaluación:</h1>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Lista de versiones de evaluación</h3>
         {/*<h1>Evaluation Version Data</h1>
         <div>*/}
             {/*evaluationVersion.filter(version => version.course == courseId).map(version => (

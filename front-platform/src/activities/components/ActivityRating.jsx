@@ -385,10 +385,16 @@ export function ActivityRating() {
     // Mostrar spinner mientras se cargan los datos iniciales
     if (loading || !initialLoadComplete) {
       return (
-        <div className="flex flex-col gap-2">
-          <span>Calificaciones del curso {groupedCourse[0]?.name}</span>
+        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+          {/* Título y subtítulo */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-primary mb-2">Calificaciones de Actividades</h1>
+            <p className="text-gray-600">Curso: {groupedCourse[0]?.name}</p>
+          </div>
+          
           <LoadingSpinner label="Cargando calificaciones..." />
-          <div className="flex justify-end gap-2">
+          
+          <div className="flex justify-end gap-2 mt-6">
             <GoBackButton label='Volver' route='/course-list/'/>
           </div>
         </div>
@@ -398,12 +404,18 @@ export function ActivityRating() {
     // Mostrar mensaje solo cuando no hay datos después de cargar completamente
     if (initialLoadComplete && filteredByGroup.length === 0) {
       return (
-        <div className="flex flex-col gap-2">
-          <span>Calificaciones del curso {groupedCourse[0]?.name}</span>
+        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+          {/* Título y subtítulo */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-primary mb-2">Calificaciones de Actividades</h1>
+            <p className="text-gray-600">Curso: {groupedCourse[0]?.name}</p>
+          </div>
+          
           <div className="flex flex-col items-center justify-center py-8">
             <span className="text-gray-600">Aún no hay estudiantes matriculados para este curso</span>
           </div>
-          <div className="flex justify-end gap-2">
+          
+          <div className="flex justify-end gap-2 mt-6">
             <GoBackButton label='Volver' route='/course-list/'/>
           </div>
         </div>
@@ -412,54 +424,68 @@ export function ActivityRating() {
 
     // Renderizar contenido principal cuando hay datos
     return(
-      <div className="flex flex-col gap-2">
-        <span>Calificaciones del curso {groupedCourse[0]?.name}</span>
-        <div className="flex flex-col gap-4">
-          <label className="text-sm">Grupos:</label>
-          <select 
-            id="activity_course" 
-            name='activities' 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={(e) => setSelectedScheduledId(e.target.value)}
-          >
-            <option disabled>Grupos</option>
-            {uniqueGroups.map((detail) => (
-              <option
-                key={`group_${detail.enrolled_course.scheduled_course.id}`}
-                value={detail.enrolled_course.scheduled_course.id}
-              >
-                {detail.enrolled_course.scheduled_course.group}
-              </option>
-            ))}
-          </select>
-          <label className="text-sm">Actividades:</label>
-          <select 
-            id="activity_course" 
-            name='activities' 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={(e) => setSelectedActivityId(e.target.value)}
-          >
-            <option disabled>Seleccione una actividad</option>
-            {uniqueActivities &&
-              uniqueActivities.map((detail) => (
-                <option
-                  key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
-                  value={detail.activity_evaluation_detail.activities.id}
-                >
-                  {`${detail.activity_evaluation_detail.activities.name}`}
-                </option>
-              ))}
-          </select>
-          <form className='form flex flex-col gap-4 mt-4'>
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                {renderTableHeaders()}
-                {renderTableRows()}
-              </table>
-            </div>
-          </form>
+      <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+        {/* Título y subtítulo */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-primary mb-2">Calificaciones de Actividades</h1>
+          <p className="text-gray-600">Curso: {groupedCourse[0]?.name}</p>
         </div>
-        <div className="flex justify-end gap-2">
+
+        <div className="grid gap-6">
+          {/* Filtros */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Grupos:</label>
+              <select 
+                id="activity_course" 
+                name='activities' 
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={(e) => setSelectedScheduledId(e.target.value)}
+              >
+                <option disabled>Grupos</option>
+                {uniqueGroups.map((detail) => (
+                  <option
+                    key={`group_${detail.enrolled_course.scheduled_course.id}`}
+                    value={detail.enrolled_course.scheduled_course.id}
+                  >
+                    {detail.enrolled_course.scheduled_course.group}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Actividades:</label>
+              <select 
+                id="activity_course" 
+                name='activities' 
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={(e) => setSelectedActivityId(e.target.value)}
+              >
+                <option disabled>Seleccione una actividad</option>
+                {uniqueActivities &&
+                  uniqueActivities.map((detail) => (
+                    <option
+                      key={`set_activity_${detail.activity_evaluation_detail.activities.id}`}
+                      value={detail.activity_evaluation_detail.activities.id}
+                    >
+                      {`${detail.activity_evaluation_detail.activities.name}`}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Tabla de calificaciones */}
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              {renderTableHeaders()}
+              {renderTableRows()}
+            </table>
+          </div>
+        </div>
+        
+        <div className="flex justify-end gap-2 mt-6">
           <GoBackButton label='Volver' route='/course-list/'/>
         </div>
       </div>

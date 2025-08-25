@@ -301,70 +301,102 @@ console.log('dataset radar: ', datasetRadar)
     }, [])*/
 
     return(
-        <>
-            <h1 className="text-xl">Reportes:</h1>
-            <label className="text-sm">Periodo académico:</label>
-            <select 
-                id="academic_period" 
-                name='academic_periods' 
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                onChange={(e) => setSelectedPeriodId(e.target.value)}
-            >
-                <option disabled>Seleccione un periodo académico</option>
-                {sortedAcademicPeriods &&
-                    sortedAcademicPeriods.map((detail) => (
-                    <option
-                        key={`set_academic_period_${detail.student_enrolled_course.scheduled_course.academic_period.id}`}
-                        value={detail.student_enrolled_course.scheduled_course.academic_period.id}
-                    >
-                        {`${detail.student_enrolled_course.scheduled_course.academic_period.year}-${detail.student_enrolled_course.scheduled_course.academic_period.semester}`}
-                    </option>
-                ))}
-            </select>
-            <label className="text-sm">Curso programado:</label>
-            <select 
-                id="scheduled_course" 
-                name='scheduled_courses' 
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                onChange={(e) => setSelectedScheduledCourseId(e.target.value)}
-                //onChange={handleScheduledCourseChange}
-            >
-                <option disabled>Seleccione el curso programado</option>
-                {uniqueScheduledCourses.map((course) => (
-                    <option
-                        key={`set_scheduled_course_${course.id}`}
-                        value={course.id}
-                    >
-                        {`${course.group} - ${course.courseName}`}
-                    </option>
-                ))}
-            </select>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-6 space-y-6">
+            {/* Header Section */}
+            <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                <h1 className="text-2xl font-semibold text-primary dark:text-white">Reportes de Calificaciones</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Visualiza el desempeño académico por estudiante y resultados de aprendizaje
+                </p>
+            </div>
 
-            <label className="text-sm">Estudiante:</label>
-            <select 
-                id="student" 
-                name='students'
-                value={selectedStudentId || ''}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                onChange={(e) => setSelectedStudentId(e.target.value)}
-            >
-                <option value="">Todos los estudiantes</option>
-                {uniqueStudents.map((student) => (
-                    <option
-                        key={`student_${student.id}`}
-                        value={student.id}
+            {/* Filters Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Periodo académico:
+                    </label>
+                    <select 
+                        id="academic_period" 
+                        name='academic_periods' 
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        onChange={(e) => setSelectedPeriodId(e.target.value)}
                     >
-                        {`${student.firstName} ${student.lastName}`}
-                    </option>
-                ))}
-            </select>
-            <div className="p-2">
-                {/*<button type="button">Descargar</button>*/}
-                <LineChart labels={codes} datasets={datasets} title={'Nivel de desempeño por RAs'} />
+                        <option disabled>Seleccione un periodo académico</option>
+                        {sortedAcademicPeriods &&
+                            sortedAcademicPeriods.map((detail) => (
+                            <option
+                                key={`set_academic_period_${detail.student_enrolled_course.scheduled_course.academic_period.id}`}
+                                value={detail.student_enrolled_course.scheduled_course.academic_period.id}
+                            >
+                                {`${detail.student_enrolled_course.scheduled_course.academic_period.year}-${detail.student_enrolled_course.scheduled_course.academic_period.semester}`}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Curso programado:
+                    </label>
+                    <select 
+                        id="scheduled_course" 
+                        name='scheduled_courses' 
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        onChange={(e) => setSelectedScheduledCourseId(e.target.value)}
+                    >
+                        <option disabled>Seleccione el curso programado</option>
+                        {uniqueScheduledCourses.map((course) => (
+                            <option
+                                key={`set_scheduled_course_${course.id}`}
+                                value={course.id}
+                            >
+                                {`${course.group} - ${course.courseName}`}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Estudiante:
+                    </label>
+                    <select 
+                        id="student" 
+                        name='students'
+                        value={selectedStudentId || ''}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        onChange={(e) => setSelectedStudentId(e.target.value)}
+                    >
+                        <option value="">Todos los estudiantes</option>
+                        {uniqueStudents.map((student) => (
+                            <option
+                                key={`student_${student.id}`}
+                                value={student.id}
+                            >
+                                {`${student.firstName} ${student.lastName}`}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
-            <div>
-                <RadarChart labels={codes} datasets={datasetRadar} title={'Notas por actividad'} />
+
+            {/* Charts Section */}
+            <div className="space-y-8">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                        Nivel de desempeño por RAs
+                    </h3>
+                    <LineChart labels={codes} datasets={datasets} title={'Nivel de desempeño por RAs'} />
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                        Notas por actividad
+                    </h3>
+                    <RadarChart labels={codes} datasets={datasetRadar} title={'Notas por actividad'} />
+                </div>
             </div>
-        </>
+        </div>
     )
 }

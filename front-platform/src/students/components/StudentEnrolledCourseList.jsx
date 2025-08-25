@@ -108,14 +108,18 @@ export function StudentEnrolledCourseList(){
     }, [studentEnrolledCourse])
     
     return(
-        <div className="grid gap-2">
-        <h1 className="text-xl">Programación académica</h1>
-        <label className="text-sm">Periodo académico:</label>
-        <select 
-            id="academic_period" 
-            name='academic_periods' 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={(e) => setSelectedPeriodId(e.target.value)}
+        <section className="max-w-8xl mx-auto p-6 bg-white rounded-lg shadow-md">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-primary mb-2">Programación Académica</h1>
+                <p className="text-gray-600">Consulta la programación de cursos por periodo académico</p>
+            </div>
+            <div className="grid gap-2">
+                <label className="text-sm">Periodo académico:</label>
+                <select 
+                    id="academic_period" 
+                    name='academic_periods' 
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    onChange={(e) => setSelectedPeriodId(e.target.value)}
         >
             <option disabled>Seleccione un periodo académico</option>
             {sortedAcademicPeriods &&
@@ -193,5 +197,6 @@ export function StudentEnrolledCourseList(){
             <GoBackButton label='Volver' route='/course-list'/>
         </div>
         </div>
+        </section>
     )
 }

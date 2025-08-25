@@ -44,61 +44,86 @@ export function EvaluationVersionCourseDetailView() {
         }
     }, [location.state])
 
-    return(
-        <>
-            {course ? ( 
-                <form className="flex flex-col gap-2">
-                    <h1 className="text-xl">Version de evaluación del curso asociados con los RAs </h1>
-                    <div>
-                        <label htmlFor="courseName">Fecha inicial de la versión de evaluación:</label>
-                        <input
-                            type="text"
-                            id="initialDate"
-                            value={initialDate}
-                            disabled={true}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="courseName">Nombre:</label>
-                        <input
-                            type="text"
-                            id="courseName"
-                            value={course.name}
-                            disabled={true}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="courseCode">Código:</label>
-                        <input
-                            type="text"
-                            id="courseCode"
-                            value={course.code}
-                            disabled={true}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="courseDescription">Descripción:</label>
-                        <input
-                            type="text"
-                            id="courseDescription"
-                            value={course.description}
-                            disabled={true}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="courseCredit">Créditos:</label>
-                        <input
-                            type="number"
-                            id="courseCredit"
-                            value={course.credit}
-                            disabled={true}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                        />
-                    </div>
+    return (
+        <section className="max-w-8xl mx-auto p-6 bg-white rounded-lg shadow-md">
+            {/* Título y subtítulo */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-primary mb-2">Versión de Evaluación del Curso</h1>
+                <p className="text-gray-600">Detalle de la versión de evaluación asociada con los resultados de aprendizaje</p>
+            </div>
+            <div className="grid gap-2">
+                <div className="flex flex-col gap-2">
+                    <form className="flex flex-col gap-2">
+                        {course ? ( 
+                            <div>
+                                <label htmlFor="courseName">Fecha inicial de la versión de evaluación:</label>
+                                <input
+                                    type="text"
+                                    id="initialDate"
+                                    value={initialDate}
+                                    disabled={true}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                />
+                            </div>
+                        ) : (
+                            <p>Cargando curso...</p> 
+                        )}
+                        {course ? ( 
+                            <div>
+                                <label htmlFor="courseName">Nombre:</label>
+                                <input
+                                    type="text"
+                                    id="courseName"
+                                    value={course.name}
+                                    disabled={true}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                />
+                            </div>
+                        ) : (
+                            <p>Cargando curso...</p> 
+                        )}
+                        {course ? ( 
+                            <div>
+                                <label htmlFor="courseCode">Código:</label>
+                                <input
+                                    type="text"
+                                    id="courseCode"
+                                    value={course.code}
+                                    disabled={true}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                />
+                            </div>
+                        ) : (
+                            <p>Cargando curso...</p> 
+                        )}
+                        {course ? ( 
+                            <div>
+                                <label htmlFor="courseDescription">Descripción:</label>
+                                <input
+                                    type="text"
+                                    id="courseDescription"
+                                    value={course.description}
+                                    disabled={true}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                />
+                            </div>
+                        ) : (
+                            <p>Cargando curso...</p> 
+                        )}
+                        {course ? ( 
+                            <div>
+                                <label htmlFor="courseCredit">Créditos:</label>
+                                <input
+                                    type="number"
+                                    id="courseCredit"
+                                    value={course.credit}
+                                    disabled={true}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                />
+                            </div>
+                        ) : (
+                            <p>Cargando curso...</p> 
+                        )}
                         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
@@ -163,9 +188,8 @@ export function EvaluationVersionCourseDetailView() {
                         <GoBackButton label='Volver' route='/course-list/'/>
                     </div>
                 </form>
-            ) : (
-                <p>Cargando curso...</p> 
-            )}
-        </>
+                </div>
+            </div>
+        </section>
     )
 }

@@ -48,8 +48,13 @@ export function EnrolledStudentList() {
     }
 
     return (
-        <div className="grid gap-2"> 
-            <h1 className="text-xl">Lista de estudiantes</h1>
+        <section className="max-w-8xl mx-auto p-6 bg-white rounded-lg shadow-md">
+            {/* Título y subtítulo */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-primary mb-2">Lista de Estudiantes</h1>
+                <p className="text-gray-600">Estudiantes matriculados en el curso</p>
+            </div>
+            <div className="grid gap-2">
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
@@ -93,6 +98,7 @@ export function EnrolledStudentList() {
             <div className="flex justify-end gap-2">
                 <GoBackButton label='Volver' route='/student-enrolled-course-list/'/>
             </div>
-        </div>
+            </div>
+        </section>
     )
 }

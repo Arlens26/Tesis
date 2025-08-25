@@ -419,24 +419,29 @@ export function Activity() {
     </tbody>
   )
 
-    return(
-      <div className="flex flex-col gap-4">
-        <span>Configuración evaluación del curso {groupedCourse[0].name}</span>
-        <label className="text-sm">Grupos:</label>
-        <select 
-          id="scheduled_course" 
-          name='scheduled_course' 
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          onChange={handleSelectChange}
-        >
+    return (
+        <section className="max-w-8xl mx-auto p-6 bg-white rounded-lg shadow-md">
+            {/* Título y subtítulo */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-primary mb-2">Configurar Evaluación</h1>
+                <p className="text-gray-600">Configura las actividades de evaluación para el curso</p>
+            </div>
+            <div className="grid gap-2">
+            <label className="text-sm">Grupo:</label>
+            <select 
+                id="scheduled_course" 
+                name='scheduled_course' 
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={handleSelectChange}
+            >
                     <option disabled>Grupos</option>
                     {newScheduledCourse && newScheduledCourse.map(detail => (
                           <option key={`set_activity_${detail.id}`} value={detail.id}>
                              {`${detail.group}`}
                           </option>
                     ))}
-        </select>
-        <div className="grid grid-cols-2 gap-4">
+            </select>
+            <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm">Versión de evaluación</label>
               <input 
@@ -484,6 +489,7 @@ export function Activity() {
             <GoBackButton label='Volver' route='/course-list/'/>          
           </div>     
         </form>
-      </div>
+            </div>
+        </section>
     )
   }

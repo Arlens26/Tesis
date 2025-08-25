@@ -71,55 +71,84 @@ export function CourseForm() {
     }
   
     return (
-      <div className="flex justify-center">
-          <form className='form flex flex-col gap-4 max-w-md w-full p-0' onSubmit={handleSubmit}>
-              <span>{paramsId ? 'Actualizar curso' : 'Crear curso'}</span>
-              <label className="text-sm">Nombre del curso</label>
-              <input 
-                  type="text" 
-                  placeholder='Nombre del curso' 
-                  name='name' 
-                  value={courseData.name}
-                  onChange={handleChange}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
-              <label className="text-sm">Código del curso</label>
-              <input 
-                  type="text" 
-                  placeholder='Código del curso' 
-                  name='code' 
-                  value={courseData.code}
-                  onChange={handleChange}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
-              <label className="text-sm">Descripción</label>
-              <textarea 
-                  placeholder='Descripción' 
-                  name='description' 
-                  rows="3" 
-                  value={courseData.description}
-                  onChange={handleChange}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
-              <label className="text-sm">Créditos</label>
-              <input 
-                  type="number" 
-                  placeholder='Créditos' 
-                  name='credit' 
-                  value={courseData.credit}
-                  onChange={handleChange}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />          
+        <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-primary">{paramsId ? 'Actualizar Curso' : 'Crear Curso'}</h1>
+            </div>
 
-              <div className="flex justify-end gap-2">
-                  <button type='submit' 
-                      className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg hover:opacity-100 flex items-center text-slate-100'>
-                      {paramsId ? <UpdateIcon /> : <SaveIcon />}
-                      <span className="ml-1">{paramsId ? 'Actualizar' : 'Guardar'}</span>
-                  </button>
-                  <GoBackButton label='Volver' route='/course-list/'/>
-              </div>
-          </form>
-      </div>
-  )
+            <div className="bg-white p-6 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold mb-4">Información del Curso</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                            Nombre del curso
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name"
+                            placeholder='Nombre del curso' 
+                            name='name' 
+                            value={courseData.name}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
+                            Código del curso
+                        </label>
+                        <input 
+                            type="text" 
+                            id="code"
+                            placeholder='Código del curso' 
+                            name='code' 
+                            value={courseData.code}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                            Descripción
+                        </label>
+                        <textarea 
+                            id="description"
+                            placeholder='Descripción' 
+                            name='description' 
+                            rows="3" 
+                            value={courseData.description}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="credit" className="block text-sm font-medium text-gray-700 mb-1">
+                            Créditos
+                        </label>
+                        <input 
+                            type="number" 
+                            id="credit"
+                            placeholder='Créditos' 
+                            name='credit' 
+                            value={courseData.credit}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4">
+                        <button type='submit' 
+                            className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg hover:opacity-100 flex items-center text-white gap-2'>
+                            {paramsId ? <UpdateIcon /> : <SaveIcon />}
+                            {paramsId ? 'Actualizar' : 'Guardar'}
+                        </button>
+                        <GoBackButton label='Volver' route='/course-list/'/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
   }

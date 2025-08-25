@@ -82,65 +82,100 @@ export function EvaluationVersionCourseForm() {
     }
   
     return (
-      <form className='form flex flex-col gap-4 p-6' onSubmit={handleSubmit}>
-          <h1 className="text-xl">Creación evaluación versión curso</h1>
-          <label className="text-sm">Nombre del curso</label>
-          <input 
-            type="text" 
-            placeholder='' 
-            name='name' 
-            value={courseData.name} 
-            onChange={handleInputChange}
-            disabled 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-          <label className="text-sm">Código del curso</label>
-          <input 
-            type="text" 
-            placeholder='' 
-            name='code'
-            value={courseData.code} 
-            onChange={handleInputChange}  
-            disabled 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-          <label className="text-sm">Descripción del curso</label>
-          <textarea 
-            type="text" 
-            placeholder='' 
-            name='description'
-            value={courseData.description} 
-            onChange={handleInputChange} 
-            disabled 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-          <label className="text-sm">Créditos</label>
-          <input 
-            type="text" 
-            placeholder='' 
-            name='credit' 
-            value={courseData.credit} 
-            onChange={handleInputChange}
-            disabled 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-          <div className="flex flex-col gap-4">
-                <div className="grid gap-2"> 
-                  <span className="text-sm">Porcentaje de RA:</span>
-                  <input
-                    type="number"
-                    placeholder="Porcentaje"
-                    min={0}
-                    max={100}
-                    value={percentage}
-                    onChange={(e) => setPercentage(parseInt(e.target.value))}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  />
-                  <button type='button' onClick={handleAddRa} 
-                    disabled={totalPercentage === 100}
-                    className={`bg-btn-create ${totalPercentage === 100 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'} w-fit px-4 py-1 rounded-lg flex items-center text-slate-100`}>
-                      <CreateIcon/>
-                      <span className="ml-1">Agregar RA</span>
-                  </button>
-                  
-                </div>
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-primary">Crear Versión de Evaluación del Curso</h1>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold mb-4">Información del Curso</h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                                Nombre del curso
+                            </label>
+                            <input 
+                                type="text" 
+                                id="name"
+                                name='name' 
+                                value={courseData.name} 
+                                onChange={handleInputChange}
+                                disabled 
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
+                                Código del curso
+                            </label>
+                            <input 
+                                type="text" 
+                                id="code"
+                                name='code'
+                                value={courseData.code} 
+                                onChange={handleInputChange}  
+                                disabled 
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                            Descripción del curso
+                        </label>
+                        <textarea 
+                            id="description"
+                            name='description'
+                            value={courseData.description} 
+                            onChange={handleInputChange} 
+                            disabled 
+                            rows="3"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="credit" className="block text-sm font-medium text-gray-700 mb-1">
+                            Créditos
+                        </label>
+                        <input 
+                            type="text" 
+                            id="credit"
+                            name='credit' 
+                            value={courseData.credit} 
+                            onChange={handleInputChange}
+                            disabled 
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                        />
+                    </div>
+
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Resultados de Aprendizaje (RA)</h3>
+                        
+                        <div className="grid gap-2"> 
+                            <label className="block text-sm font-medium text-gray-700">Porcentaje de RA:</label>
+                            <input
+                                type="number"
+                                placeholder="Porcentaje"
+                                min={0}
+                                max={100}
+                                value={percentage}
+                                onChange={(e) => setPercentage(parseInt(e.target.value))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                            />
+                            <button type='button' onClick={handleAddRa} 
+                                disabled={totalPercentage === 100}
+                                className={`bg-btn-create ${totalPercentage === 100 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'} w-fit px-4 py-1 rounded-lg flex items-center text-white gap-2`}>
+                                <CreateIcon/>
+                                Agregar RA
+                            </button>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th scope="col" className="px-6 py-3">
@@ -196,26 +231,26 @@ export function EvaluationVersionCourseForm() {
                                         Total Porcentaje
                                     </th>
                                     <td className="px-6 py-4">
-  
-                                    </td>
-                                    <td className="px-6 py-4">
                                         {`${totalPercentage}%`}
                                     </td>
                                     <td className="px-6 py-4">
-  
                                     </td>
-                                  </tr>
+                                </tr>
                             </tbody>
-            </table>
-            <div className="flex justify-end gap-2">
-              <button type='submit' 
-                className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
-                  <SaveIcon/>
-                  <span className="ml-1">Guardar</span>
-              </button>
-              <GoBackButton label='Volver' route='/course-list/'/>
-            </div>
-          </div>
-      </form>
+                        </table>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4">
+                        <button type='submit' 
+                            className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-white gap-2'>
+                            <SaveIcon/>
+                            Guardar
+                        </button>
+                        <GoBackButton label='Volver' route='/course-list/'/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     )
-  }
+}

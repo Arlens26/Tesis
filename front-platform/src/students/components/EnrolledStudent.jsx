@@ -173,147 +173,138 @@ export function EnrolledStudent() {
     }
 
     return(
-        <div className='grid gap-4'>
-        <h1 className="text-xl">Matrícula estudiantes</h1>
-        <label className="text-sm">Periodo académico:</label>
-        <select 
-            id="academic_period" 
-            name='academic_periods' 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={(e) => setSelectedPeriodId(e.target.value)}
-        >
-            <option disabled>Seleccione un periodo académico</option>
-            {sortedAcademicPeriods &&
-                sortedAcademicPeriods.map((detail) => (
-                <option
-                    key={`set_academic_period_${detail.period.id}`}
-                    value={detail.period.id}
-                >
-                    {`${detail.period.year}-${detail.period.semester}`}
-                </option>
-            ))}
-        </select>
-        
-        <label className="text-sm">Curso programado:</label>
-        <select 
-            id="scheduled_course" 
-            name='scheduled_courses' 
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={handleScheduledCourseChange}
-        >
-            <option disabled>Seleccione el curso programado</option>
-            {filteredByAcademicPeriod &&
-                filteredByAcademicPeriod.map((detail) => (
-                <option
-                    key={`set_scheduled_course_${detail.id}`}
-                    value={detail.id}
-                >
-                    {`${detail.group} - ${detail.course.name}`}
-                </option>
-            ))}
-        </select>
-        
-        <label className="text-sm">Profesor:</label>
-        <input type="text" placeholder='' name='name_course' value={professorName} disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-        
-        {/*<div className='p-4'>*/}
-            {/*filteredByAcademicPeriod.map((detail) => (
-                <div key={`activityGrade_${detail.id}`}>
-                    <span>Academic period selected: {selectedPeriodId} - </span>
-                    <span>Scheduled course selected: {selectedScheduledCourseId}</span>
-                </div>
-            ))*/}
-            {/*
-                allScheduledCourse.map((item, index) => (
-                    <div key={index}>
-                        <span>Grupo: {item.group}</span>
-                        <span> - Curso: {item.course.name}</span>
-                        <span> - Profesor: {item.professor.first_name}</span>
+        <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+            {/* Título y subtítulo */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-primary mb-2">Matrícula de Estudiantes</h1>
+                <p className="text-gray-600">Carga masiva de estudiantes desde archivo Excel</p>
+            </div>
+
+            <div className="grid gap-6">
+                {/* Filtros */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Periodo académico:</label>
+                        <select 
+                            id="academic_period" 
+                            name='academic_periods' 
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onChange={(e) => setSelectedPeriodId(e.target.value)}
+                        >
+                            <option disabled>Seleccione un periodo académico</option>
+                            {sortedAcademicPeriods &&
+                                sortedAcademicPeriods.map((detail) => (
+                                <option
+                                    key={`set_academic_period_${detail.period.id}`}
+                                    value={detail.period.id}
+                                >
+                                    {`${detail.period.year}-${detail.period.semester}`}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                ))
-            */}
-        {/*</div>*/}
-        
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Cargar el archivo
-        </label>
-        <input onChange={handleFileChange} 
-        accept='.xlsx .xls'
-        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" 
-        id="file_input" type="file"/>
-        
-        <div className="grid gap-4 mt-4">
-            <h2 className="text-lg font-bold">Lista de Estudiantes</h2>
-            {students.length > 0 ? (
-                <>
-                    {/*<ul className="list-disc pl-5">
-                        {students.map((student, index) => (
-                            <li key={index}>
-                                {student.first_name} {student.last_name} - ID: {student.identification} - Email: {student.email} - Código programa: {student.code_schedule} - Código: {student.code} - Contraseña: {student.password}
-                            </li>
-                        ))}
-                    </ul>*/}
                     
-
-<div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-                <th scope="col" className="px-6 py-3">
-                    Estudiante
-                </th>
-                <th scope="col" className="px-6 py-3">
-                    Identificación
-                </th>
-                <th scope="col" className="px-6 py-3">
-                    Email
-                </th>
-                <th scope="col" className="px-6 py-3">
-                    Código programa
-                </th>
-                <th scope="col" className="px-6 py-3">
-                    Código
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {students.map((student, index) => (
-                <>
-                <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        {student.first_name} {student.last_name}
-                    </th>
-                    <td className="px-6 py-4">
-                        {student.identification}
-                    </td>
-                    <td className="px-6 py-4">
-                        {student.email}
-                    </td>
-                    <td className="px-6 py-4">
-                        {student.code_schedule}
-                    </td>
-                    <td className="px-6 py-4">
-                        {student.code}
-                    </td>
-                </tr>
-                </>
-            ))}
-        </tbody>
-    </table>
-</div>
-
-                </>
-            ) : (
-                <p>No hay estudiantes para mostrar.</p>
-            )}
-        </div>
-        <div className='flex justify-end gap-2'>
-            <button onClick={createStudentEnrolledData} type='submit' 
-                className='bg-btn-create opacity-80 w-fit px-20 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
-                <SaveIcon/>
-                <span className="ml-1">Guardar</span>
-            </button>
-        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Curso programado:</label>
+                        <select 
+                            id="scheduled_course" 
+                            name='scheduled_courses' 
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onChange={handleScheduledCourseChange}
+                        >
+                            <option disabled>Seleccione el curso programado</option>
+                            {filteredByAcademicPeriod &&
+                                filteredByAcademicPeriod.map((detail) => (
+                                <option
+                                    key={`set_scheduled_course_${detail.id}`}
+                                    value={detail.id}
+                                >
+                                    {`${detail.group} - ${detail.course.name}`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Profesor:</label>
+                        <input type="text" placeholder='' name='name_course' value={professorName} disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+                    </div>
+                </div>
+                
+                {/* Carga de archivo */}
+                <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Cargar archivo Excel
+                    </label>
+                    <input onChange={handleFileChange} 
+                    accept='.xlsx .xls'
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" 
+                    id="file_input" type="file"/>
+                </div>
+                
+                {/* Lista de estudiantes */}
+                <div className="grid gap-4">
+                    <h2 className="text-lg font-semibold text-gray-800">Lista de Estudiantes</h2>
+                    {students.length > 0 ? (
+                        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3">
+                                            Estudiante
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Identificación
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Email
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Código programa
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Código
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {students.map((student, index) => (
+                                        <tr key={index} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                {student.first_name} {student.last_name}
+                                            </th>
+                                            <td className="px-6 py-4">
+                                                {student.identification}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {student.email}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {student.code_schedule}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {student.code}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            No hay estudiantes para mostrar. Cargue un archivo Excel para continuar.
+                        </div>
+                    )}
+                </div>
+            </div>
+            
+            <div className='flex justify-end gap-2 mt-6'>
+                <button onClick={createStudentEnrolledData} type='submit' 
+                    className='bg-btn-create opacity-80 w-fit px-20 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+                    <SaveIcon/>
+                    <span className="ml-1">Guardar</span>
+                </button>
+            </div>
         </div>
     )
 }

@@ -68,51 +68,117 @@ export function ScheduledCourse(){
     }
     
     return (
-        <div className="flex justify-center">
-            <form className="flex flex-col gap-4 max-w-2xl w-full p-0" onSubmit={handleSubmit}>
-                <h1 className="text-xl">Programación curso</h1>
-                <label className="text-sm">Versión evaluación</label>
-                <input 
-                    type="text" 
-                    placeholder="" 
-                    name="version" 
-                    value={versionId} 
-                    disabled 
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
-                <label className="text-sm">Nombre del curso</label>
-                <input type="text" placeholder='' name='name_course' value={courseName} disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-                <label className="text-sm">Código del curso</label>
-                <input type="text" placeholder='' name='code_course' value={courseCode} disabled className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-                <label className="text-sm">Periodo académico</label>
-                <select id="period_id" name='period' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option disabled>Periodo académico</option>
-                    {periods && periods.map(period => (
-                        <option key={period.id} value={`${period.year}-${period.semester}`}>
-                            {`${period.year}-${period.semester}`}
-                        </option>
-                    ))}
-                </select>
-                <label className="text-sm">Grupo</label>
-                <input type="text" placeholder='Grupo' name='group' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-                <label className="text-sm">Profesor</label>
-                <select id="professors" name='professor_id' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    <option disabled>Profesores</option>
-                    {professors && professors.map(professor => (
-                            <option key={professor.id} value={professor.id}>
-                            {`${professor.first_name} ${professor.last_name}`}
-                            </option>
-                    ))}
-                </select>
-                <div className="flex justify-end gap-2">
-                    <button type='submit' 
-                        className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-slate-100'>
+        <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-primary">Programar Curso</h1>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold mb-4">Información del Curso Programado</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="version" className="block text-sm font-medium text-gray-700 mb-1">
+                                Versión evaluación
+                            </label>
+                            <input 
+                                type="text" 
+                                id="version"
+                                name="version" 
+                                value={versionId} 
+                                disabled 
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="name_course" className="block text-sm font-medium text-gray-700 mb-1">
+                                Nombre del curso
+                            </label>
+                            <input 
+                                type="text" 
+                                id="name_course"
+                                name='name_course' 
+                                value={courseName} 
+                                disabled 
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="code_course" className="block text-sm font-medium text-gray-700 mb-1">
+                            Código del curso
+                        </label>
+                        <input 
+                            type="text" 
+                            id="code_course"
+                            name='code_course' 
+                            value={courseCode} 
+                            disabled 
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="period_id" className="block text-sm font-medium text-gray-700 mb-1">
+                            Periodo académico
+                        </label>
+                        <select 
+                            id="period_id" 
+                            name='period' 
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        >
+                            <option disabled>Periodo académico</option>
+                            {periods && periods.map(period => (
+                                <option key={period.id} value={`${period.year}-${period.semester}`}>
+                                    {`${period.year}-${period.semester}`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="group" className="block text-sm font-medium text-gray-700 mb-1">
+                            Grupo
+                        </label>
+                        <input 
+                            type="text" 
+                            id="group"
+                            placeholder='Grupo' 
+                            name='group' 
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="professors" className="block text-sm font-medium text-gray-700 mb-1">
+                            Profesor
+                        </label>
+                        <select 
+                            id="professors" 
+                            name='professor_id' 
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        >
+                            <option disabled>Profesores</option>
+                            {professors && professors.map(professor => (
+                                <option key={professor.id} value={professor.id}>
+                                    {`${professor.first_name} ${professor.last_name}`}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4">
+                        <button type='submit' 
+                            className='bg-btn-create opacity-80 w-fit px-4 py-1 rounded-lg flex items-center hover:opacity-100 text-white gap-2'>
                             <SaveIcon/>
-                            <span className="ml-1">Guardar</span>
-                    </button>
-                    <GoBackButton label='Volver' route='/course-list/'/> 
-                </div>
-            </form>
+                            Guardar
+                        </button>
+                        <GoBackButton label='Volver' route='/course-list/'/> 
+                    </div>
+                </form>
+            </div>
         </div>
     )
 }

@@ -1,9 +1,11 @@
 import { useContext, useState } from "react"
 import { AuthContext } from "../auth/context/user"
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 export function useEvaluationVersionDetail(){
     
-    const EVALUATION_VERSION_DETAIL_BY_VERSION_ENDPOINT = `http://127.0.0.1:8000/courses/all/evaluation-version-detail/get_details_by_evaluation_version/?evaluation_version_id=`
+    const EVALUATION_VERSION_DETAIL_BY_VERSION_ENDPOINT = `${BASE_URL}/courses/all/evaluation-version-detail/get_details_by_evaluation_version/?evaluation_version_id=`
     const { user } = useContext(AuthContext)
     const [EvaluationVersionDetails, setEvaluationVersionDetails] = useState([])
     console.log('Evaluation version details: ', EvaluationVersionDetails)

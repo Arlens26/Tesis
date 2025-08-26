@@ -36,7 +36,7 @@ export function useEnrolledStudent() {
     }
 
     const updateGradeDetail = (gradeId, data) => {
-        return updateGradeDetailFetch(gradeId, data)
+        return updateGradeDetailFetch(gradeId, data, user.token)
             .then(() => console.log('Calificación actualizada exitosamente'))
             .catch(error => console.error(error))
     }

@@ -46,10 +46,11 @@ export const getGradeDetailFetch = (token) => {
         })
 }
 
-export const updateGradeDetailFetch = (gradeId, data) => {
+export const updateGradeDetailFetch = (gradeId, data, token) => {
     return fetch(`${GRADE_DETAIL_LEARNING_OUTCOME}${gradeId}/`, {
         method: 'PUT',
         headers: {
+            'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
